@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 from omnik import DataLogger
 
 def main(args):
