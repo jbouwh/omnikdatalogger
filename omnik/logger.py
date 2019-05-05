@@ -37,7 +37,7 @@ class DataLogger(object):
       line = match.group(0)
       _json = self.transform(re.findall('"([^"]*)"', line))
 
-      return json.dumps(_json, indent=2)
+      print(json.dumps(_json, indent=2))
 
     except Exception as e:
       logger.error('Oooops ... {0}: {1}'.format(type(e).__name__, str(e)))
