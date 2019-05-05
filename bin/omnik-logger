@@ -6,7 +6,7 @@ from omnik import DataLogger
 def main(args):
   url = "http://{0}:{1}/js/status.js".format(args.host, args.port)
   clazz = DataLogger(url=url, username=args.user, password=args.password)
-  clazz.process()
+  print(clazz.process())
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
