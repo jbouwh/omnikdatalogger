@@ -1,4 +1,5 @@
 # omnik-data-logger
+> WORK IN PROGRESS ...
 
 This is a very simple interface to get data from an Omnik inverter.
 
