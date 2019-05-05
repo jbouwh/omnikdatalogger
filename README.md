@@ -3,8 +3,10 @@
 This is a very simple interface to get data from an Omnik inverter.
 
 ## Installation
+
+Install using the following command:
 ```
-$ pip install omnik-data-logger
+$ pip install --user git+https://github.com/paprins/omnik-data-logger.git
 ```
 
 ## Help
