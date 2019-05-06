@@ -5,15 +5,16 @@ from omnik import DataLogger
 
 def main(args):
   url = "http://{0}:{1}/js/status.js".format(args.host, args.port)
-  clazz = DataLogger(url=url, username=args.user, password=args.password)
-  clazz.process()
+  clazz = DataLogger(url=url, username=args.user, password=args.password, debug=args.debug)
+  clazz.process(args)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('--host', required=True, help='Omnik IP')
+  parser.add_argument('--host', required=True, help='Omnik inverter ip address')
   parser.add_argument('--port', default='80', help='Port')
   parser.add_argument('-u', '--user', default='admin', help='Username')
   parser.add_argument('-p', '--password', default='admin', help='Password')
+  parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
 
   args = parser.parse_args()
   main(args)
