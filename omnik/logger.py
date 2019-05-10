@@ -12,14 +12,42 @@ from requests.auth import HTTPBasicAuth
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger('omnik')
 
-class DataLogger(object):
+class DataLoggerEth(object):
+  def __init__(self, url, debug):
+    if debug:
+      logger.setLevel(logging.DEBUG)
+
+    logger.debug('-> Connecting to {}'.format(url))
+    try:
+      res = requests.get(url)
+
+      logger.debug('OK') if res.status_code == 200 else logger.debug('NOK: {}'.format(res.status_code))
+
+      res.raise_for_status()
+      self.raw = res.text
+    except requests.exceptions.HTTPError as e:
+      logger.error('Unable to get data. [{0}]: {1}'.format(type(e).__name__, str(e)))
+      raise e
+
+  def process(self, args):
+    try:
+      _json = json.loads(self.raw)
+
+      logger.info(json.dumps(_json, indent=2))
+    except Exception as e:
+      logger.error(e, exc_info=True)
+    
+class DataLoggerWifi(object):
   def __init__(self, url, username, password, debug):
     if debug:
       logger.setLevel(logging.DEBUG)
 
     logger.debug('-> Connecting to {}'.format(url))
     try:
-      res = requests.get(url, auth=HTTPBasicAuth(username, password))
+      if network == 'wifi' :
+        res = requests.get(url, auth=HTTPBasicAuth(username, password))
+      else:
+        res = requests.get(url)
 
       logger.debug('OK') if res.status_code == 200 else logger.debug('NOK: {}'.format(res.status_code))
 
