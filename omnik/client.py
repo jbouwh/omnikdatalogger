@@ -9,7 +9,6 @@ import json
 import requests
 from requests.auth import HTTPBasicAuth
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger('omnik')
 
 class DataLoggerEth(object):
