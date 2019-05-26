@@ -9,51 +9,57 @@ import json
 import requests
 from requests.auth import HTTPBasicAuth
 
-logger = logging.getLogger('omnik')
-
 class DataLoggerEth(object):
-  def __init__(self, url, debug):
+  def __init__(self, logger, config, debug=False):
+    self.logger = logger
+    self.config = config
+    self.url = "http://{0}:{1}/status.json?CMD=inv_query".format(self.config.get('default', 'host'), self.config.get('default', 'port', fallback=80))
+
     if debug:
       logger.setLevel(logging.DEBUG)
 
-    logger.debug('-> Connecting to {}'.format(url))
+    self.logger.debug('-> Connecting to {}'.format(self.url))
     try:
-      res = requests.get(url)
+      res = requests.get(self.url)
 
-      logger.debug('OK') if res.status_code == 200 else logger.debug('NOK: {}'.format(res.status_code))
+      self.logger.debug('OK') if res.status_code == 200 else logger.debug('NOK: {}'.format(res.status_code))
 
       res.raise_for_status()
       self.raw = res.text
     except requests.exceptions.HTTPError as e:
-      logger.error('Unable to get data. [{0}]: {1}'.format(type(e).__name__, str(e)))
+      self.logger.error('Unable to get data. [{0}]: {1}'.format(type(e).__name__, str(e)))
       raise e
 
-  def process(self, args):
+  def get(self, **args):
     try:
       _json = json.loads(self.raw)
 
-      logger.info(json.dumps(_json, indent=2))
+      # self.logger.info(json.dumps(_json, indent=2))
+
+      return _json
     except Exception as e:
-      logger.error(e, exc_info=True)
+      self.logger.error(e, exc_info=True)
     
 class DataLoggerWifi(object):
-  def __init__(self, url, username, password, debug):
+  # def __init__(self, url, username, password, debug):
+  def __init__(self, logger, config, debug=False):
+    self.logger = logger
+    self.config = config
+    self.url = "http://{0}:{1}/js/status.js".format(self.config.get('default', 'host'), self.config.get('default', 'port', fallback=80))
+
     if debug:
-      logger.setLevel(logging.DEBUG)
+      self.logger.setLevel(logging.DEBUG)
 
-    logger.debug('-> Connecting to {}'.format(url))
+    self.logger.debug('-> Connecting to {}'.format(self.url))
     try:
-      if network == 'wifi' :
-        res = requests.get(url, auth=HTTPBasicAuth(username, password))
-      else:
-        res = requests.get(url)
+      res = requests.get(self.url, auth=HTTPBasicAuth(username, password))
 
-      logger.debug('OK') if res.status_code == 200 else logger.debug('NOK: {}'.format(res.status_code))
+      self.logger.debug('OK') if res.status_code == 200 else logger.debug('NOK: {}'.format(res.status_code))
 
       res.raise_for_status()
       self.raw = res.text
     except requests.exceptions.HTTPError as e:
-      logger.error('Unable to get data. [{0}]: {1}'.format(type(e).__name__, str(e)))
+      self.logger.error('Unable to get data. [{0}]: {1}'.format(type(e).__name__, str(e)))
       raise e
 
   def transform(self, data):
@@ -83,12 +89,14 @@ class DataLoggerWifi(object):
       line = match.group(0)
       _json = self.correct(self.transform(re.findall('"([^"]*)"', line)))
 
+      
+
       # trigger plugins here
       # for plugin in plugins:
       #   plugin.process_message(_json)
 
-      logger.info(json.dumps(_json, indent=2))
+      self.logger.info(json.dumps(_json, indent=2))
 
     except Exception as e:
-      logger.error('Oooops ... {0}: {1}'.format(type(e).__name__, str(e)))
+      self.logger.error('Oooops ... {0}: {1}'.format(type(e).__name__, str(e)))
       raise e

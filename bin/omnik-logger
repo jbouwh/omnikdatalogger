@@ -4,17 +4,13 @@ import os
 import argparse
 import configparser
 
-from omnik import DataLoggerWifi, DataLoggerEth
+# from omnik import DataLoggerWifi, DataLoggerEth
+
+from omnik import DataLogger
 
 def main(c, debug):
-  if c.get('default', 'network') == 'wifi':
-    url = "http://{0}:{1}/js/status.js".format(c.get('default', 'host'), c.get('default', 'port', fallback=80))
-    clazz = DataLoggerWifi(url=url, username=c.get('default','user', fallback='admin'), password=c.get('default', 'password', fallback='admin'), debug=debug)
-    clazz.process(c)
-  else:
-    url = "http://{0}:{1}/status.json?CMD=inv_query".format(c.get('default', 'host'), c.get('default', 'port', fallback=80))
-    clazz = DataLoggerEth(url=url, debug=debug)
-    clazz.process(c)
+  clazz = DataLogger(c, debug)
+  clazz.process()
 
 if __name__ == '__main__':
   base_dir = os.path.dirname(os.path.realpath(__file__))
@@ -26,7 +22,7 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   if args.config:
-    c = configparser.ConfigParser()
+    c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
     c.read([args.config], encoding='utf-8')
 
   main(c, args.debug)

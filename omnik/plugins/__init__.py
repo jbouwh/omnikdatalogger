@@ -1,9 +1,16 @@
-class Plugin(object):
-  """
-  Base class
-  """
-  def __init__(self)
-    self.description = 'UNKNOWN'
+class PluginMount(type):
+  def __init__(cls, name, bases, attrs):
+    super(PluginMount, cls).__init__(name)
+    if not hasattr(cls, 'plugins'):
+      cls.plugins = []
+    else:
+      cls.register_plugin(cls) # Called when a plugin class is imported
 
-  def process_message(self, **args):
-    raise NotImplementedError
+  def register_plugin(cls, plugin):
+    cls.plugins.append(plugin())
+
+class Plugin(object):
+  __metaclass__ = PluginMount
+  
+  config = None
+  logger = None

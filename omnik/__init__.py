@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 
-from .client import DataLoggerWifi, DataLoggerEth
+from .datalogger import DataLogger
 
 logging.basicConfig(stream=sys.stdout, level=os.environ.get('LOGLEVEL', logging.INFO))
 
