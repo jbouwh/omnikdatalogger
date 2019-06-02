@@ -1,3 +1,5 @@
+from cachetools import TTLCache
+
 class PluginMount(type):
   def __init__(cls, name, bases, attrs):
     super(PluginMount, cls).__init__(name)
@@ -14,3 +16,11 @@ class Plugin(object):
   
   config = None
   logger = None
+
+class CachedPlugin(object):
+  __metaclass__ = PluginMount
+  
+  config = None
+  logger = None
+
+  cache = TTLCache(maxsize=1, ttl=300)

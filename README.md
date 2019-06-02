@@ -93,4 +93,48 @@ INFO:omnik:{
 ## Plugins
 Working on a couple of plugins to export values to [PVOutput](https://www.pvoutput.org/), and maybe some more targets.
 
+## OpenWeatherMap
+
+```
+{
+	"coord": {
+		"lon": 51.88,
+		"lat": 4.22
+	},
+	"weather": [{
+		"id": 804,
+		"main": "Clouds",
+		"description": "overcast clouds",
+		"icon": "04d"
+	}],
+	"base": "stations",
+	"main": {
+		"temp": 28.84,
+		"pressure": 1009.43,
+		"humidity": 76,
+		"temp_min": 28.84,
+		"temp_max": 28.84,
+		"sea_level": 1009.43,
+		"grnd_level": 1009.31
+	},
+	"wind": {
+		"speed": 8.57,
+		"deg": 228.752
+	},
+	"clouds": {
+		"all": 100
+	},
+	"dt": 1559476548,
+	"sys": {
+		"message": 0.005,
+		"sunrise": 1559442005,
+		"sunset": 1559486462
+	},
+	"timezone": 10800,
+	"id": 0,
+	"name": "",
+	"cod": 200
+}
+```
+
 ~ the end
