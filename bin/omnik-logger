@@ -4,8 +4,6 @@ import os
 import argparse
 import configparser
 
-# from omnik import DataLoggerWifi, DataLoggerEth
-
 from omnik import DataLogger
 
 def main(c, debug):
@@ -13,13 +11,17 @@ def main(c, debug):
   clazz.process()
 
 if __name__ == '__main__':
-  base_dir = os.path.dirname(os.path.realpath(__file__))
-
+  home   = os.path.expanduser('~')
   parser = argparse.ArgumentParser()
-  parser.add_argument('--config', default='{}/../config.ini'.format(base_dir), help='Path to configuration file', metavar="FILE")
+  parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'), help='Path to configuration file', metavar="FILE")
   parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
 
   args = parser.parse_args()
+
+  if not os.path.isfile(args.config):
+    print("Could not configuration at '{}'".format(args.config))
+    parser.print_help()
+    os.sys.exit(1)
 
   if args.config:
     c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
