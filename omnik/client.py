@@ -98,5 +98,5 @@ class DataLoggerWifi(object):
       self.logger.info(json.dumps(_json, indent=2))
 
     except Exception as e:
-      self.logger.error('Oooops ... {0}: {1}'.format(type(e).__name__, str(e)))
+      self.logger.error(e, exc_info=True)
       raise e

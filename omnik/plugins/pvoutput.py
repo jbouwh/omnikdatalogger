@@ -39,44 +39,47 @@ class PVOutput(CachedPlugin):
     """
     Send data to pvoutput
     """
-    now = datetime.utcnow()
+    try:
+	    now = datetime.utcnow()
+	
+	    self.logger.info('Uploading to PVOutput')
+	
+	    msg = args['msg']
+	
+	    _json = json.dumps(msg, indent=2)
+	
+	    self.logger.info('> Processing message: {}'.format(_json))
+	
+	    # See: https://pvoutput.org/help.html
+	
+	    # v3 = Energy Consumed
+	    # v4 = Power Consumed
+	    # v6 = Voltage
+	    # c1 = Cumulative (0/1)
+	    # n = Net Flag (0/1)
+	
+	    data = {
+	        'key': self.config.get('pvoutput', 'api_key'),
+	        'sid': self.config.get('pvoutput', 'sys_id'),
+	        'd': now.strftime('%Y%m%d'),
+	        't': now.strftime('%H:%M'),
+	        'v1': msg['i_eall'],
+	        'v2': float(msg['i_eday']) * 100
+	    }
+	
+	    if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
+	      weather = self.get_weather()
+	
+	      self.logger.info('> got {}'.format(json.dumps(weather, indent=2)))
+	
+	      data['v5'] = str(weather['main']['temp'])
+	  
+	    url = "http://pvoutput.org/service/r2/addstatus.jsp"
+	
+	    self.logger.info(json.dumps(data, indent=2))
 
-    self.logger.info('Uploading to PVOutput')
-
-    msg = args['msg']
-
-    _json = json.dumps(msg, indent=2)
-
-    self.logger.info('> Processing message: {}'.format(_json))
-
-    # See: https://pvoutput.org/help.html
-
-    # v3 = Energy Consumed
-    # v4 = Power Consumed
-    # v6 = Voltage
-    # c1 = Cumulative (0/1)
-    # n = Net Flag (0/1)
-
-    data = {
-        'key': self.config.get('pvoutput', 'api_key'),
-        'sid': self.config.get('pvoutput', 'sys_id'),
-        'd': now.strftime('%Y%m%d'),
-        't': now.strftime('%H:%M'),
-        'v1': msg['i_eall'],
-        'v2': float(msg['i_eday']) * 100
-    }
-
-    if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
-      weather = self.get_weather()
-
-      self.logger.info('> got {}'.format(json.dumps(weather, indent=2)))
-
-      data['v5'] = str(weather['main']['temp'])
-  
-    url = "http://pvoutput.org/service/r2/addstatus.jsp"
-
-    self.logger.info(json.dumps(data, indent=2))
-
+	except Exception as e:
+		self.logger.error(e, exc_info=True)
     
 
     
