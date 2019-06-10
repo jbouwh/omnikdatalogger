@@ -40,11 +40,13 @@ class pvoutput(Plugin):
     """
     now = datetime.utcnow()
 
-    self.logger.info('Uploading to PVOutput')
-
     msg = args['msg']
 
-    _json = json.dumps(msg, indent=2)
+    self.logger.info(json.dumps(msg, indent=2))
+
+    if not self.config.has_option('pvoutput', 'sys_id') or not self.config.has_option('pvoutput', 'api_key'):
+      self.logger.warn('[{}] No api_key and/or sys_id found in configuration'.format(__name__))
+      return
 
     headers = {
       "X-Pvoutput-Apikey": self.config.get('pvoutput', 'api_key'),
@@ -54,21 +56,11 @@ class pvoutput(Plugin):
     }
 
     # See: https://pvoutput.org/help.html
-
-    # v3 = Energy Consumed
-    # v4 = Power Consumed
-    # v6 = Voltage
-    # c1 = Cumulative (0/1)
-    # n = Net Flag (0/1)
-
-    # 'key': self.config.get('pvoutput', 'api_key'),
-    # 'sid': self.config.get('pvoutput', 'sys_id'),
-
     data = {
         'd': now.strftime('%Y%m%d'),
         't': now.strftime('%H:%M'),
-        'v1': msg['i_eall'],
-        'v2': float(msg['i_eday']) * 100
+        'v1': str(float(msg['i_eday']) * 1000),
+        'v2': str(msg['i_pow_n'])
     }
 
     if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
@@ -76,16 +68,12 @@ class pvoutput(Plugin):
 
       data['v5'] = str(weather['main']['temp'])
 
-    self.logger.info(json.dumps(data, indent=2))
-
-    self.logger.info(json.dumps(headers, indent=2))
-
     encoded = urllib.parse.urlencode(data)
 
-    self.logger.info(encoded)
+    self.logger.info(json.dumps(data, indent=2))
 
-    result = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
-    self.logger.info(result)
+    # result = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
+    # self.logger.info(result)
 
 
 
