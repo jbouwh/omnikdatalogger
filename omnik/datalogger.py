@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from backports.configparser import NoOptionError
-from plugins import Plugin
+from .plugins import Plugin
 
 from .client import DataLoggerEth, DataLoggerWifi
 
