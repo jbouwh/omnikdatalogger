@@ -29,7 +29,6 @@ class DataLogger(object):
       Plugin.config = config
 
       for plugin in self.plugins:
-        logger.info('> Loading plugin ' + plugin)
         __import__(plugin)
 
     except NoOptionError:
@@ -39,7 +38,7 @@ class DataLogger(object):
     msg = self.client.get()
 
     for plugin in Plugin.plugins:
-      plugin.process_message(msg=msg)
+      plugin.process(msg=msg)
 
   @staticmethod
   def __expand_path(path):

@@ -1,6 +1,8 @@
 # omnik-data-logger
 > WORK IN PROGRESS ...
 
+This is a Python3 based PV data logger with plugin support, specifically build for the Omniksol-5k-TL2.
+
 > **UPDATE**: i recently replaced my WiFi card with the [Omniksol TL2 Ethernet kit](https://webshop.ecotecworld.nl/inverter/omniksol/omniksol-tl2-ethernet-kit.html). As a result, the inverter is behaving differently with regard to fetching data. It has become a bit easier to fetch PV data using the following command:
 > ```
 > http http://10.0.1.169/status.json?CMD=inv_query

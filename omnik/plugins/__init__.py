@@ -1,26 +1,19 @@
 from cachetools import TTLCache
 
-class PluginMount(type):
+class BasePlugin(type):
   def __init__(cls, name, bases, attrs):
-    super(PluginMount, cls).__init__(name)
+    super(BasePlugin, cls).__init__(name)
     if not hasattr(cls, 'plugins'):
       cls.plugins = []
     else:
-      cls.register_plugin(cls) # Called when a plugin class is imported
+      cls.register(cls) # Called when a plugin class is imported
 
-  def register_plugin(cls, plugin):
+  def register(cls, plugin):
     cls.plugins.append(plugin())
 
-class Plugin(object):
-  __metaclass__ = PluginMount
+class Plugin(object, metaclass=BasePlugin):
   
   config = None
   logger = None
 
-class CachedPlugin(object):
-  __metaclass__ = PluginMount
-  
-  config = None
-  logger = None
-
-  cache = TTLCache(maxsize=1, ttl=300)
+  cache  = TTLCache(maxsize=1, ttl=300)
