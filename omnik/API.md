@@ -2,7 +2,7 @@
 
 
 ## user/account_validate
-> Replace `USERNAME` and `PASSWORD`. The `appid` and `appkey` parameter seem to represent the Web UI as a trusted application.
+> Replace `USERNAME` and `PASSWORD`. The `appid` and `appkey` parameters represent the Android (~ and iOS?) application (hardcoded in source).
 
 ```
 http -v POST https://api.omnikportal.com/v1/user/account_validate user_email==USERNAME user_password==PASSWORD user_type==1 uid:-1 appid:10038 appkey:Ox7yu3Eivicheinguth9ef9kohngo9oo 'Content-Type: application/x-www-form-urlencoded'
@@ -82,3 +82,36 @@ http -v GET https://api.omnikportal.com/v1/plant/data plant_id==100893 uid:10414
 ```
 
 ===
+
+The following URLs have been found:
+
+```
+AccessTokenUrl = "https://api.omnikportal.com/v1/user/account_validate";
+AddDataLogger = "https://api.omnikportal.com/v1/device/datalogger/add";
+AddPlantUrl = "https://api.omnikportal.com/v1/plant/add";
+AreasUrl = "https://api.omnikportal.com/v1/plant/areas";
+C_User_ListUrl = "https://api.omnikportal.com/v1/user/c_user_list";
+DOWNLOAD = "https://play.google.com/store/apps/details?id=com.jialeinfo.omniksolar";
+DataLoggerDeleteUrl = "https://api.omnikportal.com/v1/device/datalogger/delete";
+DataLoggerListUrl = "https://api.omnikportal.com/v1/device/datalogger/list";
+DataLoggerModifyUrl = "https://api.omnikportal.com/v1/device/datalogger/modify";
+DataLoggerSimUrl = "https://api.omnikportal.com/v1/device/datalogger/sim";
+DeletePlantUrl = "https://api.omnikportal.com/v1/plant/delete";
+DeviceListUrl = "https://api.omnikportal.com/v1/device/list";
+DtailsUrl = "https://api.omnikportal.com/v1/plant/details";
+HistoryEnergyUrl = "https://api.omnikportal.com/v1/plant/energy";
+InverterAlarmModifyUrl = "https://api.omnikportal.com/v1/device/inverter/alarm_modify";
+InverterAlarmUrl = "https://api.omnikportal.com/v1/device/inverter/alarm";
+InverterDataUrl = "https://api.omnikportal.com/v1/device/inverter/data";
+ListUrl = "https://api.omnikportal.com/v1/plant/list";
+ModifyPlantUrl = "https://api.omnikportal.com/v1/plant/modify";
+ModifyUrl = "https://api.omnikportal.com/v1/user/c_user_list";
+PlantDataUrl = "https://api.omnikportal.com/v1/plant/data";
+RegisterUrl = "https://api.omnikportal.com/v1/user/b_user_register";
+StatisticUrl = "https://api.omnikportal.com/v1/plant/statistic";
+TodayPowerUrl = "https://api.omnikportal.com/v1/plant/power";
+UsageUrl = "https://api.omnikportal.com/v1/user/account_validate";
+VersionUrl = "https://api.omnikportal.com/v1/version/current";
+eUrl = "https://api.omnikportal.com/v1";
+userLogin = "https://api.omnikportal.com/v1/user/account_validate";
+```
