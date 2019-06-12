@@ -15,6 +15,7 @@ class pvoutput(Plugin):
   def get_weather(self):
     try:
       if 'weather' not in self.cache:
+        self.logger.debug('[cache miss] Fetching weather data')
         url = "https://{endpoint}/data/2.5/weather?lon={lon}&lat={lat}&units={units}&APPID={api_key}".format(
           endpoint = self.config.get('openweathermap', 'endpoint'),
           lat      = self.config.get('openweathermap', 'lat'),
@@ -25,13 +26,9 @@ class pvoutput(Plugin):
 
         res = requests.get(url)
 
-        self.logger.debug('OK') if res.status_code == 200 else self.logger.debug('NOK: {}'.format(res.status_code))
-
         res.raise_for_status()
 
-        self.cache['weather'] = res.json()
-      else:
-        self.logger.debug('[HIT] Got cached weather data')
+        self.cache['weather'] = res.json()        
 
       return self.cache['weather']
 
@@ -50,7 +47,7 @@ class pvoutput(Plugin):
     self.logger.debug(json.dumps(msg, indent=2))
 
     if not self.config.has_option('pvoutput', 'sys_id') or not self.config.has_option('pvoutput', 'api_key'):
-      self.logger.warn('[{}] No api_key and/or sys_id found in configuration'.format(__name__))
+      self.logger.error('[{}] No api_key and/or sys_id found in configuration'.format(__name__))
       return
 
     headers = {
@@ -77,9 +74,9 @@ class pvoutput(Plugin):
 
     self.logger.debug(json.dumps(data, indent=2))
 
-    r = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
+    # r = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
     
-    r.raise_for_status()
+    # r.raise_for_status()
 
 
 

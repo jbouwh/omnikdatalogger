@@ -3,17 +3,40 @@
 import os
 import argparse
 import configparser
+import time
 
-from omnik import DataLogger
+from omnik import DataLogger, RepeatedJob
 
-def main(c, debug):
+def main(c, debug, every=None):
   clazz = DataLogger(c, debug)
-  clazz.process()
+
+  if every:
+    # running repeatedly, every X seconds
+    print('> running every {} second(s). Press CTRL-C to stop.'.format(every))
+    rt = RepeatedJob(every, clazz.process)
+    try:
+      while True:
+        # FIXME: add check for kill switch ... this does _not_ work
+        # if 'OMNIK_KILL_SWITCH' in os.environ:
+        #   print('> found kill switch: stopping all threads')
+        #   rt.stop()
+        #   os.sys.exit(1)
+        # time.sleep(5)
+        pass
+    except KeyboardInterrupt:
+      print('> stopping all threads')
+      rt.stop()
+    
+  else:
+    # running only once
+    clazz.process()
 
 if __name__ == '__main__':
   home   = os.path.expanduser('~')
   parser = argparse.ArgumentParser()
+  
   parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'), help='Path to configuration file', metavar="FILE")
+  parser.add_argument('--every', type=int, help='Execute every n seconds')
   parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
 
   args = parser.parse_args()
@@ -27,4 +50,4 @@ if __name__ == '__main__':
     c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
     c.read([args.config], encoding='utf-8')
 
-  main(c, args.debug)
+  main(c, args.debug, args.every)

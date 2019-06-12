@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+from datetime import datetime
 
 from .plugins import Plugin
 
@@ -48,8 +49,10 @@ class DataLogger(object):
       data = self.client.getPlantData(plant['plant_id'])
 
       for plugin in Plugin.plugins:
-        logger.info('About to trigger plugin {}'.format(getattr(plugin, 'description')))
+        logger.debug("About to trigger plugin '{}'.".format(getattr(plugin, 'name')))
         plugin.process(msg=data)
+
+    logger.info('done @ {}'.format(datetime.now().isoformat()))
 
   @staticmethod
   def __expand_path(path):
@@ -59,7 +62,6 @@ class DataLogger(object):
           path: file path
       Returns: absolute path to file
       """
-      logger.debug(path)
       if os.path.isabs(path):
           return path
       else:
