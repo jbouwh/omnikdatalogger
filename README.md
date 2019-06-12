@@ -50,7 +50,7 @@ Just run `omnik-logger` ... that's it ... for now.
 
 You need to schedule this
 
-# Tickes
+# Tickets
 
 - [x] Create client that connects to `omnik-portal` and fetches data.
 - [x] Add CLI interface. 
