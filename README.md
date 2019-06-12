@@ -46,27 +46,18 @@ units = metric
 
 ## Run
 
-```
-$ omnik-logger
-```
+Just run `omnik-logger` ... that's it ... for now.
 
-This results in:
+You need to schedule this
 
-```
-INFO:omnik:{
-  "inverter_sn": "NLBN50201894N038",
-  "fw_v_main": "V5.27Build261",
-  "fw_v_slave": "V5.43Build182",
-  "inverter_model": "omnik5000tl2",
-  "rated_power_w": "5000",
-  "current_power_w": "493",
-  "yield_today_kwh": 0.55,
-  "yield_total_kwh": 68.2,
-  "alerts": "",
-  "last_updated": "1",
-  "empty": ""
-}
-```
+# Tickes
+
+- [x] Create client that connects to `omnik-portal` and fetches data.
+- [x] Add CLI interface. 
+- [x] Add (flexible) support for plugins that can `process` this data.
+- [ ] Add `Dockerfile` to build a `docker` image + include script that triggers `omnik-logger` every `X` minutes.
+- [ ] Add `docker-compose.yml` to combine `omnik-data-logger` with, for example, `influxdb` container.
+- [ ] Combine `omnik` data with `P1` data to enrich PVOutput data
 
 ## Plugins
 Working on a couple of plugins to customize processing of the omnik-portal data:
