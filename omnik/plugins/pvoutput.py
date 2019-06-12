@@ -7,6 +7,11 @@ from omnik.plugins import Plugin
 
 class pvoutput(Plugin):
 
+  def __init__(self):
+    super().__init__()
+    self.name = 'pvoutput'
+    self.description = 'Write output to PVOutput'
+
   def get_weather(self):
     try:
       if 'weather' not in self.cache:
@@ -26,7 +31,7 @@ class pvoutput(Plugin):
 
         self.cache['weather'] = res.json()
       else:
-        self.logger.info('[HIT] Got cached weather data')
+        self.logger.debug('[HIT] Got cached weather data')
 
       return self.cache['weather']
 
@@ -38,11 +43,11 @@ class pvoutput(Plugin):
     """
     Send data to pvoutput
     """
-    now = datetime.utcnow()
+    now = datetime.now()
 
     msg = args['msg']
 
-    self.logger.info(json.dumps(msg, indent=2))
+    self.logger.debug(json.dumps(msg, indent=2))
 
     if not self.config.has_option('pvoutput', 'sys_id') or not self.config.has_option('pvoutput', 'api_key'):
       self.logger.warn('[{}] No api_key and/or sys_id found in configuration'.format(__name__))
@@ -59,8 +64,8 @@ class pvoutput(Plugin):
     data = {
         'd': now.strftime('%Y%m%d'),
         't': now.strftime('%H:%M'),
-        'v1': str(float(msg['i_eday']) * 1000),
-        'v2': str(msg['i_pow_n'])
+        'v1': str(msg['today_energy']),
+        'v2': str(float(msg['current_power']) * 1000)
     }
 
     if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
@@ -70,10 +75,11 @@ class pvoutput(Plugin):
 
     encoded = urllib.parse.urlencode(data)
 
-    self.logger.info(json.dumps(data, indent=2))
+    self.logger.debug(json.dumps(data, indent=2))
 
-    # result = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
-    # self.logger.info(result)
+    r = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
+    
+    r.raise_for_status()
 
 
 

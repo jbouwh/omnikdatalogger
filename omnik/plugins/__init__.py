@@ -1,5 +1,6 @@
 from cachetools import TTLCache
 
+# TODO: Create Abstract Base Class
 class BasePlugin(type):
   def __init__(cls, name, bases, attrs):
     super(BasePlugin, cls).__init__(name)

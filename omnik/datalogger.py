@@ -1,27 +1,36 @@
 import os
 import sys
 import logging
-from backports.configparser import NoOptionError
+
 from .plugins import Plugin
 
-from .client import DataLoggerEth, DataLoggerWifi
+from .client import OmnikPortalClient
 
 logger = logging.getLogger(__name__)
 
 class DataLogger(object):
+
   def __init__(self, config, debug=False):
     self.config = config
     self.plugins = []
 
-    try:
-      # First, init client
-      if self.config.get('default', 'network') == 'wifi':
-        self.client = DataLoggerWifi(logger, self.config, debug)
-      else:
-        self.client = DataLoggerEth(logger, self.config, debug)
+    if not self.config.has_option('omnikportal', 'username') or not self.config.has_option('omnikportal', 'password'):
+      logger.error('No username/password for omnikportal found')
+      sys.exit(1)
 
-      # Now, init plugins
-      self.plugins = self.config.getlist('plugins', 'output')
+    if debug:
+      logger.setLevel(logging.DEBUG)
+
+    self.client = OmnikPortalClient(
+      logger = logger,
+      username = self.config.get('omnikportal', 'username'),
+      password = self.config.get('omnikportal', 'password'),
+    )
+    self.client.initialize()
+
+    self.plugins = self.config.getlist('plugins', 'output', fallback=[])
+
+    if len(self.plugins) > 0:
 
       sys.path.append(self.__expand_path('plugins'))
 
@@ -31,14 +40,16 @@ class DataLogger(object):
       for plugin in self.plugins:
         __import__(plugin)
 
-    except NoOptionError:
-      logger.warn('No plugins found (continue without)')
-
   def process(self):
-    msg = self.client.get()
 
-    for plugin in Plugin.plugins:
-      plugin.process(msg=msg)
+    plants = self.client.getPlants()
+
+    for plant in plants:
+      data = self.client.getPlantData(plant['plant_id'])
+
+      for plugin in Plugin.plugins:
+        logger.info('About to trigger plugin {}'.format(getattr(plugin, 'description')))
+        plugin.process(msg=data)
 
   @staticmethod
   def __expand_path(path):
