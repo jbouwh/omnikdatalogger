@@ -20,7 +20,6 @@ with open('requirements.txt') as f:
 
 setup(
     name="omnik-data-logger",
-    packages = ['omnik-data-logger'],
     version=get_version('omnik'),
     license="gpl-3.0",
     author="Pascal Prins",
@@ -34,7 +33,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Topic :: Home Automation',
         'Programming Language :: Python :: 3.7',
-        "License :: OSI Approved :: GNU GENERAL PUBLIC LICENSE V3 (GPLV3)",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
     install_requires = required,
