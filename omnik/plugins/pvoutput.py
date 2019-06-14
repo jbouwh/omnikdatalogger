@@ -74,9 +74,9 @@ class pvoutput(Plugin):
 
     self.logger.debug(json.dumps(data, indent=2))
 
-    # r = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
+    r = requests.post("http://pvoutput.org/service/r2/addstatus.jsp", data=encoded, headers=headers)
     
-    # r.raise_for_status()
+    r.raise_for_status()
 
 
 
