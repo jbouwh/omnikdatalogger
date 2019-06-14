@@ -61,7 +61,7 @@ class pvoutput(Plugin):
     data = {
         'd': now.strftime('%Y%m%d'),
         't': now.strftime('%H:%M'),
-        'v1': str(msg['today_energy']),
+        'v1': str(float(msg['today_energy']) * 1000),
         'v2': str(float(msg['current_power']) * 1000)
     }
 
