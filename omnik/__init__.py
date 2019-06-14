@@ -8,7 +8,7 @@ from .datalogger import DataLogger
 
 logging.basicConfig(stream=sys.stdout, level=os.environ.get('LOGLEVEL', logging.INFO))
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 class RepeatedJob(object):
   def __init__(self, interval, function, *args, **kwargs):
