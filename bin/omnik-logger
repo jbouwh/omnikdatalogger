@@ -21,8 +21,7 @@ def main(c, debug, every=None):
         #   print('> found kill switch: stopping all threads')
         #   rt.stop()
         #   os.sys.exit(1)
-        # time.sleep(5)
-        pass
+        time.sleep(0.5)
     except KeyboardInterrupt:
       print('> stopping all threads')
       rt.stop()
