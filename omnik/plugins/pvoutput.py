@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import pytz
 
 import urllib.parse
 import requests
@@ -11,6 +12,8 @@ class pvoutput(Plugin):
     super().__init__()
     self.name = 'pvoutput'
     self.description = 'Write output to PVOutput'
+    tz = self.config.get('default', 'timezone', fallback='Europe/Amsterdam')
+    self.timezone = pytz.timezone(tz)
 
   def get_weather(self):
     try:
@@ -40,7 +43,7 @@ class pvoutput(Plugin):
     """
     Send data to pvoutput
     """
-    now = datetime.now()
+    now = self.timezone.normalize(self.timezone.fromutc(datetime.utcnow()))
 
     msg = args['msg']
 

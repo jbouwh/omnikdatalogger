@@ -27,6 +27,9 @@ optional arguments:
 This data logger needs a configuration file. By default, it look for a config file called `~/.omnik/config.ini`. You can override this path by using the `--config` parameter.
 
 ```
+[default]
+timezone = Europe/Amsterdam
+
 [omnikportal]
 username = john.doe@example.com
 password = S3cret!
