@@ -53,10 +53,27 @@ PS: `openweathermap` is currently only used when `use_temperature = true`.
 
 Just run `omnik-logger` ... that's it ... for now.
 
-## Sceduled Run
+## Scheduled Run
 
 You've got your default options to schedule this logger, but I included a `systemd` service file to run this as a service on Linux.
 >**PS**: I'm using `Ubuntu 18.04 LTS`
+
+First, install this thing (~ using Python 3 !!!)
+> If you don't have `Python3.x` installed, do that first (~ don't forget to install `python3-pip` as well)
+
+```
+$ pip3 install omnik-data-logger
+
+# check if properly installed
+$ omnik-logger -h
+usage: omnik-logger [-h] [--config FILE] [--every EVERY] [-d]
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --config FILE  Path to configuration file
+  --every EVERY  Execute every n seconds
+  -d, --debug    Debug mode
+```
 
 Copy `scripts/omnik-data-logger.service` to `/lib/systemd/system/omnik-data-logger.service`
 
