@@ -49,18 +49,43 @@ units = metric
 
 PS: `openweathermap` is currently only used when `use_temperature = true`. 
 
-## Run
+## Manual Run
 
 Just run `omnik-logger` ... that's it ... for now.
 
-You just need to schedule this.
+## Sceduled Run
 
+You've got your default options to schedule this logger, but I included a `systemd` service file to run this as a service on Linux.
+>**PS**: I'm using `Ubuntu 18.04 LTS`
+
+Copy `scripts/omnik-data-logger.service` to `/lib/systemd/system/omnik-data-logger.service`
+
+Next, enable and start service:
+
+```
+$ systemd enable omnik-data-logger
+Created symlink /etc/systemd/system/multi-user.target.wants/omnik-data-logger.service → /lib/systemd/system/omnik-data-logger.service.
+$ systemd start omnik-data-logger
+```
+
+Check if `omnik-data-logger.service` is running correctly:
+
+```
+$ systemd status omnik-data-logger
+● omnik-data-logger.service - Omnik Data Logger service
+   Loaded: loaded (/lib/systemd/system/omnik-data-logger.service; enabled; vendor preset: enabled)
+   Active: active (running) since Tue 2019-06-18 06:55:08 UTC; 4min 36s ago
+ Main PID: 2445 (python3)
+    Tasks: 2 (limit: 4915)
+   CGroup: /system.slice/omnik-data-logger.service
+           └─2445 /usr/bin/python3 /usr/local/bin/omnik-logger --config /etc/omnik/config.ini --every 300
+```
 
 ## Plugins
 Working on a couple of plugins to customize processing of the omnik-portal data:
 
 * `pvoutput` ~ write data to [PVOutput](https://www.pvoutput.org)
-* `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database (work in progress)
+* `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database (**WORK IN PROGRESS**)
 * ...
 
 ~ the end
