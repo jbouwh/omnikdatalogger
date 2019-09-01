@@ -2,6 +2,7 @@ import os
 import re
 from setuptools import setup, find_packages
 
+
 def get_version(package):
     """
     Return package version as listed in `__version__` in `__init__.py`.
@@ -10,6 +11,7 @@ def get_version(package):
     with open(path, 'rb') as f:
         init_py = f.read().decode('utf-8')
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -31,7 +33,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/paprins/omnik-data-logger",
-    packages = find_packages(),
+    packages=find_packages(),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Home Automation',
@@ -39,6 +41,6 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    install_requires = install_requires,
+    install_requires=install_requires,
     scripts=['bin/omnik-logger'],
 )
