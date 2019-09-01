@@ -2,3 +2,7 @@ configparser==3.7.4
 requests==2.21.0
 cachetools==3.1.1
 pytz==2019.1
+
+# Testing and linting
+pytest>=5.1.2
+flake8>=3.7.8
