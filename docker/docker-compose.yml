@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  omnik:
+    build: .
+    image: omnik-data-logger:latest
+    volumes:
+      - "./config.ini:/root/.omnik/config.ini"
+    command:
+      - --debug
+    logging:
+      driver: json-file
+      
