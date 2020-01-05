@@ -108,4 +108,8 @@ Working on a couple of plugins to customize processing of the omnik-portal data:
 * `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database (**WORK IN PROGRESS**)
 * ...
 
+## BONUS: Docker
+
+Instructions on how to use the `omnik-data-logger` with `Docker` can be found [here](./docker/README.md)
+
 ~ the end
