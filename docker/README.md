@@ -35,7 +35,8 @@ $ docker-compose -f /path/to/docker-compose.yml up -d
 
 If you're fortunate to have a Synology Plus Series NAS, you can use the following steps to run the `Docker` container on your NAS.
 
-Before you continue creating the `Docker` container, first, copy a `config.ini` to your NAS.
+Before you continue creating the `Docker` container, first, copy a `config.ini` to your NAS. It can be _any_ directory ... does _not_ have to resemble my setup.
+
 ![](./img/dsm-filestation-config-ini.png)
 
 The `config.ini` should look something like this:
