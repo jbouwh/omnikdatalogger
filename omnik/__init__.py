@@ -6,7 +6,7 @@ from threading import Timer
 logging.basicConfig(stream=sys.stdout,
                     level=os.environ.get('LOGLEVEL', logging.INFO))
 
-__version__ = '0.0.8'
+__version__ = '1.0.0'
 
 
 class RepeatedJob(object):

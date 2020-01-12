@@ -5,14 +5,15 @@ import argparse
 import configparser
 import time
 
-from omnik import DataLogger, RepeatedJob
+from omnik import RepeatedJob
+from omnik.datalogger import DataLogger
 
 def main(c, debug, every=None):
   clazz = DataLogger(c, debug)
 
   if every:
     # running repeatedly, every X seconds
-    print('> running every {} second(s). Press CTRL-C to stop.'.format(every))
+    print(f'> running every {every} second(s). Press CTRL-C to stop.')
     rt = RepeatedJob(every, clazz.process)
     try:
       while True:

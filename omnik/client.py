@@ -38,7 +38,7 @@ class OmnikPortalClient(object):
         self.password = password
 
     def initialize(self):
-        url = '{0}/user/account_validate'.format(self.base_url)
+        url = f'{self.base_url}/user/account_validate'
 
         body = {
             'user_email': self.username,
@@ -52,14 +52,14 @@ class OmnikPortalClient(object):
         self.user_id = data['data']['c_user_id']
 
     def getPlants(self):
-        url = '{0}/plant/list'.format(self.base_url)
+        url = '{self.base_url}/plant/list'
 
         data = self._api_request(url, 'GET', None)
 
         return data['data'].get('plants', [])
 
     def getPlantData(self, plant_id):
-        url = '{0}/plant/data?plant_id={1}'.format(self.base_url, plant_id)
+        url = f'{self.base_url}/plant/data?plant_id={plant_id}'
 
         data = self._api_request(url, 'GET', None)
 

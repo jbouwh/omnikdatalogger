@@ -49,11 +49,10 @@ class DataLogger(object):
             data = self.client.getPlantData(plant['plant_id'])
 
             for plugin in Plugin.plugins:
-                logger.debug("About to trigger plugin '{}'.".format(
-                    getattr(plugin, 'name')))
+                logger.debug(f"About to trigger plugin '{getattr(plugin, 'name')}'.")
                 plugin.process(msg=data)
 
-        logger.info('done @ {}'.format(datetime.now().isoformat()))
+        logger.debug(f'done @ {datetime.now().isoformat()}')
 
     @staticmethod
     def __expand_path(path):
