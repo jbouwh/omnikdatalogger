@@ -9,27 +9,28 @@ Further support has been added for MQTT and is can now be integrated with Home A
 TODO
 
 Get the source using
-git clone https://gihub.com/....
+git clone https://gihub.com/omnik-data-logger
 
 ## Help
 
 ```
-usage: omnik-logger [-h] [--config FILE] [--every EVERY] [-d]
+usage: python3 omniklogger.py [-h] [--config FILE] [--interval n] [-d]
 
 optional arguments:
   -h, --help     show this help message and exit
   --config FILE  path to configuration file
-  --every EVERY  execute every n seconds
+  --interval n  execute every n seconds
   -d, --debug    debug mode
 ```
 
 ## Configuration
 The application can be configured using:
-    -   Commandline (limited options)
-    -   Configuration file (config.ini)
-    -   apps.yaml configuration file (with AppDaemon)
+-   Commandline (limited options)
+-   Configuration file (config.ini)
+-   apps.yaml configuration file (with AppDaemon)
 ### Configuration (config.ini)
-> Example configuration
+
+Example configuration
 
 When using the datalogger using the commandline this data logger will need a configuration file. By default, it looks for a config file at `~/.omnik/config.ini`. You can override this path by using the `--config` parameter.
 
