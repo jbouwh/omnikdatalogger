@@ -1,4 +1,6 @@
 from cachetools import TTLCache
+from ha_logger import hybridlogger
+
 
 # TODO: Create Abstract Base Class
 
@@ -19,5 +21,6 @@ class Plugin(object, metaclass=BasePlugin):
 
     config = None
     logger = None
+    hass_api = None
 
     cache = TTLCache(maxsize=1, ttl=300)

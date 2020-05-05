@@ -20,11 +20,11 @@ install_requires = [
     'configparser>=3.7.4',
     'requests>=2.21.0',
     'cachetools>=3.1.1',
-    'pytz==2019.1'
+    'pytz>=2019.1'
 ]
 
 setup(
-    name="omnik-data-logger",
+    name="omnikdatalogger",
     version=get_version('omnik'),
     license="gpl-3.0",
     author="Pascal Prins",
@@ -32,7 +32,7 @@ setup(
     description="Omnik Data Logger",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/paprins/omnik-data-logger",
+    url="https://github.com/jbouwh/omnikdatalogger",
     packages=find_packages(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -42,5 +42,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    scripts=['bin/omnik-logger'],
+    scripts=['omniklogger.py'],
 )
