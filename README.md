@@ -37,6 +37,8 @@ When using the datalogger using the commandline this data logger will need a con
 ```
 [default]
 timezone = Europe/Amsterdam
+city = Amsterdam
+interval = 360
 
 [omnikportal]
 username = john.doe@example.com
@@ -58,6 +60,25 @@ lat = 51.8819023
 units = metric
 
 [mqtt]
+#mqtt integration with 
+#override for name field from omnik portal
+discovery_prefix = homeassistant
+host = homeassistant.local
+port = 1883
+client_name_prefix = ha-mqtt-omniklogger
+username = mqttusername
+password = mqttpassword
+device_name = Omvormer
+append_plant_id = false
+
+#Entities name override
+current_power_name = Vermogen
+total_energy_name = Gegenereerd totaal
+today_enery_name = Gegenereerd vandaag
+monthly_energy_name = Gegenereerd deze maand
+yearly_energy_name = Gegenereerd dit jaar
+income_name = Terugverdiend
+last_update_time_name = Laatste statusupdate
 ```
 
 PS: `openweathermap` is currently only used when `use_temperature = true`. 
@@ -123,7 +144,7 @@ Example of apps.yaml:
 ```
 # Instance name
 _The instance name is omnik_datalogger, this can be changed. Multiple instances are supported._
-*omnik_datalogger:*
+omnik_datalogger:
 # General options
   module: omniklogger
   class: HA_OmnikDataLogger
@@ -168,12 +189,12 @@ _The instance name is omnik_datalogger, this can be changed. Multiple instances 
     last_update_time_name: Last status update
 ```
 ## Configuration options (required, optional and defaults)
-As mentioned command line and AppDaemon configuration override settings the config.ini (if used).
+As mentioned command line and AppDaemon configuration override settings the `config.ini` (if used).
 
-_required*_: Should be configured either in apps.yaml or config.ini configuration file.
+arguments markerd with _required*_ must be configured either in the `apps.yaml` or `config.ini` configuration file.
 
 
-### General settings - *apps.yaml* only configuration options
+### General settings - `apps.yaml` only configuration options
 
 module:
     (string)(required)
@@ -189,7 +210,7 @@ config:
     a sample config.ini template file is can be found at /config/appdaemon/apps/omnikdatalogger/config.ini
     Default value: _(none)_
 
-### General settings *apps.yaml* and *config.ini* configuration options
+### General settings `apps.yaml` and `config.ini` configuration options
 
 timezone:
     (string)(optional)
@@ -204,14 +225,14 @@ interval:
     The number of seconds of the onterval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
     Default value: _360_
 
-### Enable plugins under _plugins:_ in *apps.yaml* _[plugins]_ in *config.ini*
+### Enable plugins under `plugins:` in `apps.yaml` or `[plugins]` in `config.ini`
 output:
     (list)(optional)
     A comma separated list of string specifying the name(s) of the output plugins to be used.
     Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
     Default value: _(none)_
 
-### MQTT plugin settings
+### MQTT plugin
 You can use the the official add-on 'Mosquito broker' for the MQTT integration in HomeAssistant
 Make sure you configure an account that has access to the MQTT service.
 To integrate with HomeAssistant make sure a username/password combination is added to the Mosquito config like:
@@ -223,7 +244,7 @@ logins:
 ```
 Restart Mosquito after changing the config.
 
-#### MQTT settings under _mqtt:_ in *apps.yaml* or _[mqtt]_ *config.ini* configuration options
+#### MQTT settings under `mqtt:` in `apps.yaml` or `[mqtt]` in `config.ini` configuration options
 
 discovery_prefix:
     (string)(optional)
@@ -289,7 +310,7 @@ last_update_time_name:
     Default value: _(Last update)_
 
 
-## PVoutput plugin settings under _pvoutput:_ in *apps.yaml* or _[pvoutput]_ *config.ini* configuration options
+## PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
 
 TODO HOWTO make API keys
 
@@ -308,7 +329,7 @@ use_temperature:
     when set to true the temperature obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
     Default value: _false_
 
-## OpenWeatherMap settings under _openweathermap:_ in *apps.yaml* or _[openweathermap]_ *config.ini* configuration 
+## OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true)_
 
 Visit https://openweathermap.org/price to obtain a (free) api key. The weather is cached with een TTL of 300 seconds.
