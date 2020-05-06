@@ -3,7 +3,7 @@ Description=Omnik Data Logger service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --every 360
+ExecStart=/usr/bin/python3 /usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --interval 360
 
 [Install]
 WantedBy=multi-user.target

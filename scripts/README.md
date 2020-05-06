@@ -2,25 +2,25 @@
 
 > For `systemd` only!
 
-Copy `omnik-data-logger.service` to `/lib/systemd/system/omnik-data-logger.service`
+Copy `omnikdatalogger.service` to `/lib/systemd/system/omnikdatalogger.service`
 
 Next, enable and start service:
 
 ```
-$ systemd enable omnik-data-logger
-Created symlink /etc/systemd/system/multi-user.target.wants/omnik-data-logger.service → /lib/systemd/system/omnik-data-logger.service.
-$ systemd start omnik-data-logger
+$ systemd enable omnikdatalogger
+Created symlink /etc/systemd/system/multi-user.target.wants/omnikdatalogger.service → /lib/systemd/system/omnikdatalogger.service.
+$ systemd start omnikdatalogger
 ```
 
-Check if `omnik-data-logger.service` is running correctly:
+Check if `omnikdatalogger.service` is running correctly:
 
 ```
-$ systemd status omnik-data-logger
-● omnik-data-logger.service - Omnik Data Logger service
-   Loaded: loaded (/lib/systemd/system/omnik-data-logger.service; enabled; vendor preset: enabled)
+$ systemd status omnikdatalogger
+● omnikdatalogger.service - Omnik Data Logger service
+   Loaded: loaded (/lib/systemd/system/omnikdatalogger.service; enabled; vendor preset: enabled)
    Active: active (running) since Tue 2019-06-18 06:55:08 UTC; 4min 36s ago
  Main PID: 2445 (python3)
     Tasks: 2 (limit: 4915)
-   CGroup: /system.slice/omnik-data-logger.service
-           └─2445 /usr/bin/python3 /usr/local/bin/omnik-logger --config /etc/omnik/config.ini --every 300
+   CGroup: /system.slice/omnikdatalogger.service
+           └─2445 /usr/bin/python3 /usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --interval 360
 ```
