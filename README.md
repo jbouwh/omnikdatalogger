@@ -194,7 +194,7 @@ As mentioned command line and AppDaemon configuration override settings the `con
 arguments markerd with _required*_ must be configured either in the `apps.yaml` or `config.ini` configuration file.
 
 
-### General settings - `apps.yaml` only configuration options
+### General settings - `apps.yaml` 'only' configuration options
 
 module:
     (string)(required)
