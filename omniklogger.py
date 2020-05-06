@@ -52,11 +52,9 @@ class ha_ConfigParser(configparser.ConfigParser):
         return retval
 
     def getboolean(self, section:str, option:str, fallback=None, **kwargs):
-        try:
-            retval = str(super().get(section, option, fallback=fallback, **kwargs)).lower() in ['true', '1', 't', 'y', 'yes', 'j', 'ja']
-        except:
-            retval = fallback
-        return retval
+        truelist=['true', '1', 't', 'y', 'yes', 'j', 'ja']
+        valstr=str(self.get(section, option, fallback, **kwargs)).lower()
+        return (valstr in truelist)
 
     def getlist(self, section:str, option:str, fallback=[], **kwargs):
         if str.lower(section) == 'default':

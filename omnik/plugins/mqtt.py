@@ -93,9 +93,8 @@ class mqtt(Plugin):
         value_pl={}
         attr_pl={}
         plant_appendix=""
-        if self.config.has_option('mqtt', 'append_plant_id'):
-            if str(self.config.get('mqtt', 'append_plant_id', 'false')).lower() == 'true':
-                plant_appendix= f" [{msg['plant_id']}]"
+        if self.config.getboolean('mqtt', 'append_plant_id', False):
+            plant_appendix= f" [{msg['plant_id']}]"
         model="Omnik data logger"
         main_topic = f"{self.discovery_prefix}/sensor/omnik_{msg['plant_id']}"
         state_topic = f"{main_topic}/state"
