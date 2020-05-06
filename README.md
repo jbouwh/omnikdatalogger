@@ -9,7 +9,7 @@ Further support has been added for MQTT and is can now be integrated with Home A
 TODO
 
 Get the source using
-git clone https://gihub.com/omnik-data-logger
+git clone https://gihub.com/jbouwh/omnik-data-logger
 
 ## Help
 
