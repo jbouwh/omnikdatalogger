@@ -45,12 +45,20 @@ class ha_ConfigParser(configparser.ConfigParser):
             if str(section) in self.ha_args:
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
-        return super().get(section, option, fallback=fallback, **kwargs)
+        try:
+            retval=super().get(section, option, fallback=fallback, **kwargs)
+        except:
+            retval=fallback
+        return retval
 
     def getboolean(self, section:str, option:str, fallback=None, **kwargs):
-        return str(super().get(section, option, fallback=fallback, **kwargs)).lower() in ['true', '1', 't', 'y', 'yes', 'j', 'ja']
+        try:
+            retval = str(super().get(section, option, fallback=fallback, **kwargs)).lower() in ['true', '1', 't', 'y', 'yes', 'j', 'ja']
+        except:
+            retval = fallback
+        return retval
 
-    def getlist(self, section:str, option:str, fallback=None, **kwargs):
+    def getlist(self, section:str, option:str, fallback=[], **kwargs):
         if str.lower(section) == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
@@ -58,7 +66,12 @@ class ha_ConfigParser(configparser.ConfigParser):
             if str(section) in self.ha_args:
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
-        return super().getlist(section, option, fallback=fallback, **kwargs)
+        try:
+            retval = super().getlist(section, option, fallback=fallback, **kwargs)
+        except:
+            retval=fallback
+            pass
+        return retval
 
 
 
@@ -73,14 +86,17 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
     def initialize(self, *args, **kwargs):
         hybridlogger.ha_log(logger, self, "INFO", f"Starting Omnik datalogger...")
         hybridlogger.ha_log(logger, self, "DEBUG", f"Arguments from AppDaemon config (self.args): {self.args}")
-        c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=self.args)
         if 'config' in self.args:
+            c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=self.args)
             self.configfile=self.args['config']
             try:
                 c.read(self.configfile, encoding='utf-8')
                 hybridlogger.ha_log(logger, self, "INFO", f"Using configuration from '{self.configfile}'.")
             except Exception as e:
                 hybridlogger.ha_log(logger, self, "ERROR", f"Error reading 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
+        else:
+            c = ha_ConfigParser(ha_args=self.args)
+
         self.interval=int(c.get('default', 'interval', 360))
         self.clazz = DataLogger(c, hass_api=self)
         # running repeatedly, every X seconds
