@@ -158,9 +158,10 @@ omnik_datalogger:
     password: some_password
     base_url: https://www.omnikportal.com/
 # Plugins for data logging (output)
-  output_plugins:
-    - pvoutput
-    - mqtt
+  plugins:
+    output:
+      - pvoutput
+      - mqtt
 # PVoutput plugin configuration options
   pvoutput:
     sys_id: 12345
@@ -247,87 +248,86 @@ Restart Mosquito after changing the config.
 #### MQTT settings under `mqtt:` in `apps.yaml` or `[mqtt]` in `config.ini` configuration options
 
 discovery_prefix:
-    (string)(optional)
-    The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
-    Default value: _homeassistant_
+-   (string)(optional)
+    -   The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
+    -   Default value: _homeassistant_
 
 device_name:
-    (string)(optional)
-    Overrides the name of the plant in the omnik portal.
-    Default value: _(the name of the plant in the omnik portal)_
+-   (string)(optional)
+    -   Overrides the name of the plant in the omnik portal.
+    -   Default value: _(the name of the plant in the omnik portal)_
 
 append_plant_id:
-    (bool)(optional)
-    When a device_name is specified the plant id can be added to the name te be able to identify the plant.
-    Default value: _false_
+-   (bool)(optional)
+    -   When a device_name is specified the plant id can be added to the name te be able to identify the plant.
+    -   Default value: _false_
 
 host:
-    (string)(optional)
-    hostname or fqdn of the MQTT server for publishing.
-    Default value: _localhost_
+-   (string)(optional)
+    -   hostname or fqdn of the MQTT server for publishing.
+    -   Default value: _localhost_
 
 port:
-    (int)(optional)
-    MQTT port to be used. 
-    Default value: _1883_
+-   (int)(optional)
+    -   MQTT port to be used. 
+    -   Default value: _1883_
 
 client_name_prefix:
-    (string)(optional)
-    defines a profix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
-    Default value: _ha-mqtt-omniklogger_
+-   (string)(optional)
+    -   defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
+    -   Default value: _ha-mqtt-omniklogger_
 
 username:
-    (string)(required*)
-    the mqtt username used for authentication
-    Default value: _(none)_
+-   (string)(required*)
+    -   the mqtt username used for authentication
+    -   Default value: _(none)_
 
 password: 
-    (string)(required*)
-    the mqtt password used for authentication
-    Default value: _(none)_
+-   (string)(required*)
+    -   the mqtt password used for authentication
+    -   Default value: _(none)_
 
 #### Renaming entities
 _For every solar plant, 4 entities are added to the mqtt auto discovery. The default name can be configured._
 
 current_power_name:
-    (string)(optional)
-    Name override for the entity that indicates the current power in Watt the solar plant is producing.
-    Default value: _(Current power)_
+-   (string)(optional)
+    -   Name override for the entity that indicates the current power in Watt the solar plant is producing.
+    -   Default value: _(Current power)_
 
 total_energy_name:
-    (string)(optional)
-    Name override for the entity that indicates total energy in kWh the solar plant has generated since installation.
-    Default value: _(Energy total)_
+-   (string)(optional)
+    -   Name override for the entity that indicates total energy in kWh the solar plant has generated since installation.
+    -   Default value: _(Energy total)_
 
 income_name:
-    (string)(optional)
-    Name override for the entity that indicates total income for the solar plant since installation. De default unit is €, and can be customized in Home Assistant. The income is calculated at the omnik portal based on the settings in the portal.
-    Default value: _(Income)_
+-   (string)(optional)
+    -   Name override for the entity that indicates total income for the solar plant since installation. De default unit is €, and can be customized in Home Assistant. The income is calculated at the omnik portal based on the settings in the portal.
+    -   Default value: _(Income)_
 
 last_update_time_name:
-    (string)(optional)
-    Name override for the entity that is a timestamp total of the last update of the solar plant.
-    Default value: _(Last update)_
-
+-   (string)(optional)
+    -   Name override for the entity that is a timestamp total of the last update of the solar plant.
+    -   Default value: _(Last update)_
 
 ## PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
 
 TODO HOWTO make API keys
 
 sys_id:
-    (string)(required*)
-    Your unique system id, generated when creating an account at pvoutput.org.
-    Default value: _(none)_
+-   (string)(required*)
+    -   Your unique system id, generated when creating an account at pvoutput.org.
+    -   Default value: _(none)_
     
 api_key:
-    (string)(required*)
-    unique access key generated at pvoutput.org
-    Default value: _(none)_
+-   (string)(required*)
+    -   unique access key generated at pvoutput.org
+    -   Default value: _(none)_
 
 use_temperature:
-    (bool)(optional)
-    when set to true the temperature obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
-    Default value: _false_
+-   (bool)(optional)
+    -   when set to true the temperature obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
+    -   Default value: _false_
 
 ## OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true)_
@@ -335,29 +335,29 @@ _(used by *PVoutput* plugin if *use_temperature* is true)_
 Visit https://openweathermap.org/price to obtain a (free) api key. The weather is cached with een TTL of 300 seconds.
 
 api_key:
-    (string)(required*)
-    unique access key generated at openweathermap.org
-    Default value: _(none)_
+-   (string)(required*)
+    -   unique access key generated at openweathermap.org
+    -   Default value: _(none)_
     
 endpoint:
-    (string)(optional)
-    fqdn of the API endpoint.
-    Default value: _api.openweathermap.org_
+-   (string)(optional)
+    -   fqdn of the API endpoint.
+    -   Default value: _api.openweathermap.org_
 
 lon:
-    (float)(required*)
-    longitude for the weather location
-    Default value: _(none)_
+-   (float)(required*)
+    -   longitude for the weather location
+    -   Default value: _(none)_
 
 lat:
-    (float)(required*)
-    latitude for the weather location
-    Default value: _(none)_
+-   (float)(required*)
+    -   latitude for the weather location
+    -   Default value: _(none)_
 
 units:
-    (string)(optional)
-    Can be _metric_ (for deg. Celsius) or _imperial_ (for deg. Fahrenheit)
-    Default value: _metric_
+-   (string)(optional)
+    -   Can be _metric_ (for deg. Celsius) or _imperial_ (for deg. Fahrenheit)
+    -   Default value: _metric_
 
 ## Scheduled Run (commandline or using systemd)
 
@@ -424,7 +424,7 @@ Working on a couple of plugins to customize processing of the omnik-portal data:
 
 * `pvoutput` ~ write data to [PVOutput](https://www.pvoutput.org)
 * `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database (**WORK IN PROGRESS**)
-* `mqtt`
+* `mqtt` ~ write data to a [MQTT] 
 
 ## BONUS: Docker
 
