@@ -94,9 +94,6 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
                 hybridlogger.ha_log(logger, self, "ERROR", f"Error reading 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
-        plugins = c.getlist('plugins', 'output', fallback=[])
-        hybridlogger.ha_log(logger, self, "INFO", f"Plugins enabled: {plugins}.")
-
         self.interval=int(c.get('default', 'interval', 360))
         self.clazz = DataLogger(c, hass_api=self)
         # running repeatedly, every X seconds

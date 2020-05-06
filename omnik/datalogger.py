@@ -49,6 +49,10 @@ class DataLogger(object):
         )
 
         self.plugins = self.config.getlist('plugins', 'output', fallback=[])
+        if len(self.plugins) > 0:
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Plugins enabled: {self.plugins}.")
+        else:
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"No output plugins configured! Monitoring only. No output!")
 
         if len(self.plugins) > 0:
 
