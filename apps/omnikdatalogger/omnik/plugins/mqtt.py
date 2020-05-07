@@ -74,16 +74,12 @@ class mqtt(Plugin):
 
     def mqtt_on_connect(client, userdata, flags, rc):
         if rc==0:
-            self.mqtt_connected=True
-            hybridlogger.ha_log(self.logger, self.hass_api, "INFO","MQTT connected")
+            hybridlogger.ha_log(logger, hass_api, "INFO","MQTT connected")
             #subscribe listening (not used)
-        else:
-            mqtt_connected=False
 
     def mqtt_on_disconnect(client, userdata, flags, rc):
         if rc==0:
-            hybridlogger.ha_log(self.logger, self.hass_api, "INFO","MQTT disconnected")
-            self.mqtt_connected=False
+            hybridlogger.ha_log(logger, hass_api, "INFO","MQTT disconnected")
 
     def process(self, **args):
         """
