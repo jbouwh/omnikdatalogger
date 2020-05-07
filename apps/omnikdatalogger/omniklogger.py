@@ -5,29 +5,28 @@ import argparse
 import configparser
 import time
 import logging
-from ha_logger import hybridlogger
-import requests
 import appdaemon.plugins.hass.hassapi as hass
-
-logger = logging.getLogger(__name__)
-
-
+from ha_logger import hybridlogger
 from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
 
-#customize config parser with dict based lookup for AppDaemon and command line options
-#has_option and get function have been adapted
+logger = logging.getLogger(__name__)
+
+# customize config parser with dict based lookup for AppDaemon and command line options
+# has_option and get function have been adapted
 ha_args={}
 
+
 class ha_ConfigParser(configparser.ConfigParser):
-    def __init__(self, ha_args:dict=None, *args, **kwargs):
+
+    def __init__(self, ha_args: dict = None, *args, **kwargs):
         if ha_args is None:
             self.ha_args={}
         else:
             self.ha_args=ha_args
         super().__init__(*args, **kwargs) 
 
-    def has_option(self, section:str, option:str):
+    def has_option(self, section: str, option: str):
         if str.lower(section) == 'default':
             if option in self.ha_args:
                 return True
@@ -37,7 +36,7 @@ class ha_ConfigParser(configparser.ConfigParser):
                     return True
         return super().has_option(section, option)
 
-    def get(self, section:str, option:str, fallback=None, **kwargs):        
+    def get(self, section:str, option:str, fallback = None, **kwargs):        
         if str.lower(section) == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
@@ -46,17 +45,17 @@ class ha_ConfigParser(configparser.ConfigParser):
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
         try:
-            retval=super().get(section, option, fallback=fallback, **kwargs)
+            retval=super().get(section, option, fallback = fallback, **kwargs)
         except:
             retval=fallback
         return retval
 
-    def getboolean(self, section:str, option:str, fallback=None, **kwargs):
-        truelist=['true', '1', 't', 'y', 'yes', 'j', 'ja']
-        valstr=str(self.get(section, option, fallback, **kwargs)).lower()
+    def getboolean(self, section:str, option:str, fallback = None, **kwargs):
+        truelist = ['true', '1', 't', 'y', 'yes', 'j', 'ja']
+        valstr = str(self.get(section, option, fallback, **kwargs)).lower()
         return (valstr in truelist)
 
-    def getlist(self, section:str, option:str, fallback=[], **kwargs):
+    def getlist(self, section: str, option: str, fallback = [], **kwargs):
         if str.lower(section) == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
@@ -66,18 +65,14 @@ class ha_ConfigParser(configparser.ConfigParser):
                     return self.ha_args[section].get(option, fallback)
         try:
             retval = super().getlist(section, option, fallback=fallback, **kwargs)
-        except:
+        except Exception:
             retval=fallback
             pass
         return retval
 
 
+# Initialization class for AppDaemon (homeassistant)
 
-# TODO getboolean, getlist
-# s.lower() in ['true', '1', 't', 'y', 'yes', 'j', 'ja']
-
-
-# Initializaion class for AppDaemon (homeassistant)
 class HA_OmnikDataLogger(hass.Hass): #hass.Hass
 
 
@@ -91,10 +86,11 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
                 c.read(self.configfile, encoding='utf-8')
                 hybridlogger.ha_log(logger, self, "INFO", f"Using configuration from '{self.configfile}'.")
             except Exception as e:
-                hybridlogger.ha_log(logger, self, "ERROR", f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
+                hybridlogger.ha_log(logger, self,
+                                    "ERROR", f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
-        self.interval=int(c.get('default', 'interval', 360))
+        self.interval = int(c.get('default', 'interval', 360))
         self.clazz = DataLogger(c, hass_api=self)
         # running repeatedly, every X seconds
         hybridlogger.ha_log(logger, self, "INFO", f"Daemon interval {self.interval} seconds.")
@@ -105,8 +101,9 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
         hybridlogger.ha_log(logger, self, "INFO", f"Daemon was stopped.")
         self.rt.stop()
 
+
 # Initialisation form commandline
-def main(c:ha_ConfigParser, hass_api=None):
+def main(c: ha_ConfigParser, hass_api = None):
     if c.get('default','debug', False): 
         logger.setLevel(logging.DEBUG)
     clazz = DataLogger(c, hass_api=hass_api)
@@ -118,14 +115,9 @@ def main(c:ha_ConfigParser, hass_api=None):
         if hass_api:
             hass_api.rt = rt
         else:
-            # loop is only for commandline execution
+            # loop is for commandline execution only
             try:
                 while True:
-                    # FIXME: add check for kill switch ... this does _not_ work
-                    # if 'OMNIK_KILL_SWITCH' in os.environ:
-                    #   print('> found kill switch: stopping all threads')
-                    #   rt.stop()
-                    #   os.sys.exit(1)
                     time.sleep(0.5)
             except KeyboardInterrupt:
                 hybridlogger.ha_log(logger, hass_api, "INFO", '> stopping all threads')
