@@ -7,43 +7,42 @@ import requests
 import pytz
 import daylight
 import appdaemon.plugins.hass.hassapi as hass
-
-
 from .plugins import Plugin
-
 from .client import OmnikPortalClient
 
 logger = logging.getLogger(__name__)
 
 plant_update = {}
 
+
 class DataLogger(object):
+
     def __init__(self, config, hass_api=None):
-        #defaults to UTC now() - every interval
+        # Defaults to UTC now() - every interval
         self.config = config
-        self.every = int(self.config.get('default','interval'))
+        self.every = int(self.config.get('default', 'interval'))
         self.plugins = []
-        self.hass_api=hass_api
-        self.logger=logger
-        #make shure we check for a recent update first
-        self.last_update_time = datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(hours=1)
+        self.hass_api = hass_api
+        self.logger = logger
+        # Make sure we check for a recent update first
+        self.last_update_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
 
         if not self.config.has_option('omnikportal', 'username') or not self.config.has_option('omnikportal', 'password'):
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",'No username/password for omnikportal found')
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", 'No username/password for omnikportal found')
             sys.exit(1)
         self.city = self.config.get('default', 'city', fallback='Amsterdam')
         try:
-            self.dl=daylight.daylight(self.city)
+            self.dl = daylight.daylight(self.city)
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",f"City '{self.city}' not recognized. Error: {e}")
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"City '{self.city}' not recognized. Error: {e}")
             sys.exit(1)
-        
-        if self.config.get('default','debug', fallback=False):
+
+        if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
 
         self.client = OmnikPortalClient(
-            logger=self.logger,
-            hass_api=self.hass_api,
+            logger = self.logger,
+            hass_api = self.hass_api,
             username=self.config.get('omnikportal', 'username'),
             password=self.config.get('omnikportal', 'password'),
         )
@@ -74,19 +73,24 @@ class DataLogger(object):
             #Logged on
             self.omnik_api_level=1
         except requests.exceptions.RequestException as err:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Request error during account validation omnik portal: {err}")
+            hybridlogger.ha_log(self.logger, self.hass_api, \
+                "WARNING",f"Request error during account validation omnik portal: {err}")
         except requests.exceptions.HTTPError as errh:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"HTTP error during account validation omnik portal: {errh}")
+            hybridlogger.ha_log(self.logger, self.hass_api, \
+                "WARNING",f"HTTP error during account validation omnik portal: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Connection error during account validation omnik portal: {errc}")
+            hybridlogger.ha_log(self.logger, self.hass_api, \
+                "WARNING",f"Connection error during account validation omnik portal: {errc}")
         except requests.exceptions.Timeout as errt:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Timeout error during account validation omnik portal: {errt}")  
+            hybridlogger.ha_log(self.logger, self.hass_api, \
+                "WARNING",f"Timeout error during account validation omnik portal: {errt}")  
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",e)
 
     def process(self):
         if not self.dl.sun_shine():
-            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"No sunshine postponing till down next dawn {self.dl.next_dawn}.")
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", \
+                f"No sunshine postponing till down next dawn {self.dl.next_dawn}.")
             #Send 0 Watt update
             sundown=True
             retval=self.dl.next_dawn+datetime.timedelta(minutes=10)
