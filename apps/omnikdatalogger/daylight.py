@@ -72,5 +72,5 @@ def main():
     print('Sun down   :', dl.sun_down())
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
