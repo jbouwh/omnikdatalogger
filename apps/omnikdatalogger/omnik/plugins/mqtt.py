@@ -120,7 +120,7 @@ class mqtt(Plugin):
     def _config_payload(self, msg, topics):
         # Get device payload
         device_pl = self._device_payload(msg)
-        # Fill config_pl dict        
+        # Fill config_pl dict
         config_pl = {}
         # current_power
         config_pl['current_power'] = {
@@ -208,7 +208,8 @@ class mqtt(Plugin):
                                     f"Publishing config {json.dumps(config_pl[entity])} \
                                     to {topics['config'][entity]} failed!")
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing config for entity {entity}: {e}")
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                f"Unhandled error publishing config for entity {entity}: {e}")
 
     def _publish_attributes(self, topics, attr_pl):
         try:
@@ -247,7 +248,7 @@ class mqtt(Plugin):
 
         # Set report time in local timezone
         msg['reporttime'] = datetime.strptime(f"{msg['last_update_time']} UTC+0000",
-                                       '%Y-%m-%dT%H:%M:%SZ %Z%z').astimezone(self.timezone)
+                                             '%Y-%m-%dT%H:%M:%SZ %Z%z').astimezone(self.timezone)
         # Get topics
         topics = self._topics(msg)
 
