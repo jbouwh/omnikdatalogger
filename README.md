@@ -1,4 +1,4 @@
-# omnik-data-logger
+# omnikdatalogger
 
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the firstgeneration inverter Omniksol-3K-TL as well. This datalogger uses the [omnikportal](https://www.omnikportal.com/) to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots, hangs or returns seemingly random data.
 I have adapted this project and tried it in combination with my Omniksol-3k-TL. This datalogger cannot be accessed directly, so using the portal was the way to go.
@@ -34,7 +34,7 @@ Example configuration
 
 When using the datalogger using the commandline this data logger will need a configuration file. By default, it looks for a config file at `~/.omnik/config.ini`. You can override this path by using the `--config` parameter.
 
-```
+```ini
 [default]
 timezone = Europe/Amsterdam
 city = Amsterdam
@@ -91,7 +91,7 @@ AppDaemon4 can be installed within the HomeAssistant environment using the Add-o
 An alternative is appdaemon with pip. See: https://pypi.org/project/appdaemon/
 
 When AppDaemon is used with Home Assistant the following base configuration could be used:
-```
+```yaml
 system_packages: []
 python_packages:
   - cachetools
@@ -104,7 +104,8 @@ The basescript omniklogger.py holds a class HA_OmnikDataLogger that implements a
 See for more information and documentation about AppDaemon: https://appdaemon.readthedocs.io/en/latest/APPGUIDE.html
 
 The configfile /config/appdaemon/appdaemon.yaml needs a minimal configuration. Further it is possible to define the location for your logfiles. And example configuration is:
-```
+
+```yaml
 secrets: /config/secrets.yaml
 appdaemon:
   latitude: 0.0
@@ -141,9 +142,8 @@ This configuration is placed in the file: /config/appdaemon/apps/apps.yaml
 The configuration in apps.yaml is mandantory to the config.ini file if that is used, so it is possible to split the configuration.
 Example of apps.yaml:
 
-```
-# Instance name
-_The instance name is omnik_datalogger, this can be changed. Multiple instances are supported._
+```yaml
+# The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
 omnik_datalogger:
 # General options
   module: omniklogger
@@ -196,49 +196,31 @@ arguments markerd with _required*_ must be configured either in the `apps.yaml` 
 
 
 ### General settings - `apps.yaml` 'only' configuration options
-
-module:
-    (string)(required)
-    must be the name of the base script 'omniklogger'. A path should not be configured. AppDaemon wil find the module automatically.
-    Default value: _(none)_
-class:
-    (string)(required)
-    must be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be 'HA_OmnikDataLogger'.
-    Default value: _(none)_
-config:
-    (string)(optional)
-    file path to the config.ini configuration file. The use of a config file is required when using the command line
-    a sample config.ini template file is can be found at /config/appdaemon/apps/omnikdatalogger/config.ini
-    Default value: _(none)_
+key | optional | type | default | description
+-- | --| -- | -- | --
+`module` | False | string | _(none)_ | Must be the name of the base script 'omniklogger'. A path should not be configured. AppDaemon wil find the module automatically.
+`class` | False | string | _(none)_ | Must be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
+`config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required when using the command line. A sample config.ini template file is can be found at /config/appdaemon/apps/omnikdatalogger/config.ini
 
 ### General settings `apps.yaml` and `config.ini` configuration options
 
-timezone:
-    (string)(optional)
-    Time zone string recognizable by the pytz python module to enable logging in local time (pvoutput plugin). E.g. _Europe/Amsterdam_
-    Default value: _Europe/Amsterdam_
-city:
-    (string)(optional)
-    City name recognizable by the Astral python module. Based on this city the data logiing is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
-    Default value: _Amsterdam_
-interval:
-    (string)(optional)
-    The number of seconds of the onterval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
-    Default value: _360_
-
+key | optional | type | default | description
+-- | --| -- | -- | --
+`timezone` | True | string | `Europe/Amsterdam` | Time zone string recognizable by the pytz python module to enable logging in local time (pvoutput plugin). E.g. _Europe/Amsterdam_
+`city` | True | string | `Amsterdam` | City name recognizable by the Astral python module. Based on this city the data logiing is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
+`interval` | True | integer | `360` | The number of seconds of the onterval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
+    
 ### Enable plugins under `plugins:` in `apps.yaml` or `[plugins]` in `config.ini`
-output:
-    (list)(optional)
-    A comma separated list of string specifying the name(s) of the output plugins to be used.
-    Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
-    Default value: _(none)_
+key | optional | type | default | description
+-- | --| -- | -- | --
+`output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
 
 ### MQTT plugin
 You can use the the official add-on 'Mosquito broker' for the MQTT integration in HomeAssistant
 Make sure you configure an account that has access to the MQTT service.
 To integrate with HomeAssistant make sure a username/password combination is added to the Mosquito config like:
 The datalogger uses the paho.mqtt.client for connnecting to the MQTT broker.
-```
+```yaml
 logins:
   - username: mymqttuser
     password: mysecretpassword
@@ -397,27 +379,31 @@ Then copy the modified script path to `/lib/systemd/system/omnik-data-logger.ser
 Next, enable and start service:
 
 ```
-$ systemd enable omnik-data-logger
-Created symlink /etc/systemd/system/multi-user.target.wants/omnik-data-logger.service → /lib/systemd/system/omnik-data-logger.service.
-$ systemd start omnik-data-logger
+$ systemd enable omnikdatalogger
+Created symlink /etc/systemd/system/multi-user.target.wants/omnikdatalogger.service → /lib/systemd/system/omnikdatalogger.service.
+$ systemd start omnikdatalogger
 ```
 
-Check if `omnik-data-logger.service` is running correctly:
+Check if `omnikdatalogger.service` is running correctly:
 
 ```
-$ systemd status omnik-data-logger
-● omnik-data-logger.service - Omnik Data Logger service
+$ systemd status omnikdatalogger
+● omnikdatalogger.service - Omnik Data Logger service
    Loaded: loaded (/lib/systemd/system/omnikdatalogger.service; enabled; vendor preset: enabled)
    Active: active (running) since Tue 2019-06-18 06:55:08 UTC; 4min 36s ago
  Main PID: 2445 (python3)
     Tasks: 2 (limit: 4915)
-   CGroup: /system.slice/omnik-data-logger.service
+   CGroup: /system.slice/omnikdatalogger.service
            └─2445 /usr/bin/python3 /usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --interval 300
 ```
 
 ## Manual Run
 
 Just run `python3 omniklogger.py`.
+
+## P1 DSRM (Dutch Smart Meter) integration (Work-in-progress)
+
+I have plans to integrate measurements done on the P1 port of the DUTCH Smart Meter.
 
 ## Plugins
 Working on a couple of plugins to customize processing of the omnik-portal data:
