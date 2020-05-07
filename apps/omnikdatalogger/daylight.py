@@ -8,26 +8,33 @@ global default_city_name
 default_timezone = 'CET'
 default_city_name = 'Amsterdam'
 
+
 class daylight(object):
 
-    def __init__(self,city_name=default_city_name, date=datetime.date.today()):
+
+    def __init__(self, city_name=default_city_name, date=datetime.date.today()):
         self._a = Astral()
         self._a.solar_depression = 'civil'
         self._city = self._a[city_name]
         self.timezone = self._city.timezone
         self.sun = self._city.sun(date=date)
+
     @property
     def dawn(self):
         return self.sun['dawn']
+
     @property
     def sunrise(self):
         return self.sun['sunrise']
+
     @property
     def noon(self):
         return self.sun['noon']
+
     @property
     def sunset(self):
         return self.sun['sunset']
+
     @property
     def dusk(self):
         return self.sun['dusk']
@@ -66,4 +73,3 @@ def main():
     
 if __name__=="__main__":
     main()
-
