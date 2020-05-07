@@ -131,7 +131,7 @@ class DataLogger(object):
                 data['current_power'] = 0.0
             # Get the actual report time from the omnik portal
             newreporttime = datetime.datetime.strptime(data['last_update_time'],
-                                    '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.timezone('UTC'))
+                            '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.timezone('UTC'))
             # Only proces updates that occured after we started or start a single measurement (TODO)
             if (newreporttime > self.plant_update[plant] or not self.every or self.sundown):
                 hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
@@ -189,7 +189,7 @@ class DataLogger(object):
             # return the last report time return value, but not when there is no sun
             self.sundown = False
             retval = self.last_update_time
-        
+
         # Check for login, if needed. Return None on failure
         if not self._logon():
             return None
@@ -209,7 +209,7 @@ class DataLogger(object):
                         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                                             f"Trigger plugin '{getattr(plugin, 'name')}'.")
                         plugin.process(msg=data)
-        
+
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f'Data logging processed')
         # Return the the time of the latest report received
