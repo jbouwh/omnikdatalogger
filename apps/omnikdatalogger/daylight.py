@@ -62,34 +62,34 @@ class daylight(object):
     @property
     def timezone(self):
         return self._timezone
-  
-    def sun_rising(self, time: datetime.datetime=None):
+
+    def sun_rising(self, time: datetime.datetime = None):
         if not time:
             time = datetime.datetime.now(self.timezone)
         self.sun = self._city.sun(date=time)
         return (time > self.sun['dawn']) and (time < self.sun['sunrise'])
-   
-    def sun_up(self, time: datetime.datetime=None):
+
+    def sun_up(self, time: datetime.datetime = None):
         if not time:
             time = datetime.datetime.now(self.timezone)
         self.sun = self._city.sun(date=time)
         return (time > self.sun['sunrise']) and (time < self.sun['sunset'])
 
-    def sun_shine(self, time: datetime.datetime=None):
+    def sun_shine(self, time: datetime.datetime = None):
         if not time:
-            time=datetime.datetime.now(self.timezone)
+            time = datetime.datetime.now(self.timezone)
         self.sun = self._city.sun(date=time)
         return (time > self.sun['dawn']) and (time < self.sun['dusk'])
 
-    def sun_setting(self, time: datetime.datetime=None):
+    def sun_setting(self, time: datetime.datetime = None):
         if not time:
             time = datetime.datetime.now(self.timezone)
         self.sun = self._city.sun(date=time)
         return (time > self.sun['sunset']) and (time < self.sun['dusk'])
 
-    def sun_down(self, time: datetime.datetime=None):
+    def sun_down(self, time: datetime.datetime = None):
         if not time:
-            time=datetime.datetime.now(self.timezone)
+            time = datetime.datetime.now(self.timezone)
         self.sun = self._city.sun(date=time)
         return (time < self.sun['dawn']) or (time > self.sun['dusk'])
 
