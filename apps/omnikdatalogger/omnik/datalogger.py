@@ -74,18 +74,18 @@ class DataLogger(object):
             self.omnik_api_level = 1
         except requests.exceptions.RequestException as err:
             hybridlogger.ha_log(self.logger, self.hass_api,
-                    "WARNING",f"Request error during account validation omnik portal: {err}")
+                                "WARNING", f"Request error during account validation omnik portal: {err}")
         except requests.exceptions.HTTPError as errh:
             hybridlogger.ha_log(self.logger, self.hass_api,
-                    "WARNING",f"HTTP error during account validation omnik portal: {errh}")
+                                "WARNING", f"HTTP error during account validation omnik portal: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            hybridlogger.ha_log(self.logger, self.hass_api, \
-                "WARNING",f"Connection error during account validation omnik portal: {errc}")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "WARNING", f"Connection error during account validation omnik portal: {errc}")
         except requests.exceptions.Timeout as errt:
-            hybridlogger.ha_log(self.logger, self.hass_api, \
-                "WARNING",f"Timeout error during account validation omnik portal: {errt}")  
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "WARNING", f"Timeout error during account validation omnik portal: {errt}")  
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",e)
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
 
     def process(self):
         if not self.dl.sun_shine():

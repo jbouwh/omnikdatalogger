@@ -60,7 +60,7 @@ class RepeatedJob(object):
                 datetime.timedelta(seconds=self.half_interval)
             self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.")
+                            f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.")
         self.start()
 
     # This function actual starts the timer
