@@ -83,7 +83,7 @@ class DataLogger(object):
                                 "WARNING", f"Connection error during account validation omnik portal: {errc}")
         except requests.exceptions.Timeout as errt:
             hybridlogger.ha_log(self.logger, self.hass_api,
-                                "WARNING", f"Timeout error during account validation omnik portal: {errt}")  
+                                "WARNING", f"Timeout error during account validation omnik portal: {errt}")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
 
@@ -149,10 +149,10 @@ class DataLogger(object):
                         self.last_update_time = newreporttime
                         # Update the last report time return value, but not when there is no sun
                         if not sundown:
-                            retval=self.last_update_time
+                            retval = self.last_update_time
                         # Store the plant_update time for each indiviual plant,
                         # update only if there is a new report available to avoid duplicates
-                        plant_update[plant]= newreporttime
+                        plant_update[plant] = newreporttime
                         data['plant_id'] = plant
                         for plugin in Plugin.plugins:
                             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
@@ -189,7 +189,7 @@ class DataLogger(object):
                     return None
 
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f'Data logging processed')
-        #Return the the time of the latest report received
+        # Return the the time of the latest report received
         return retval
 
     @staticmethod
