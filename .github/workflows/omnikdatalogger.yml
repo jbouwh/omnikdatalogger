@@ -1,4 +1,4 @@
-name: omnik-data-logger
+name: omnikdatalogger
 
 on:
   push:

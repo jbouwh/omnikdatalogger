@@ -345,10 +345,5 @@ Working on a couple of plugins to customize processing of the omnik-portal data:
 * `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database (**WORK IN PROGRESS**)
 * `mqtt` ~ write data to a [MQTT] 
 
-## BONUS: Docker
-
-Instructions on how to use the datalogger with `Docker` can be found [here](./docker/README.md)
-
-This documentation is inherrited from Pascal Prins's project and not checked
 
 ~ the end
