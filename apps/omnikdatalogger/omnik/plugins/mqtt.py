@@ -36,6 +36,8 @@ class mqtt(Plugin):
         self.mqtt_client = mqtt.Client(self.mqtt_client_name)
         self.mqtt_client.on_connect=self.mqtt_on_connect #bind call back function
         self.mqtt_client.on_disconnect=self.mqtt_on_disconnect #bind call back function
+        self.mqtt_client.logger = self.logger
+        self.mqtt_client.hass_api = self.hass_api
         #self.mqtt_client.on_message=mqtt_on_message
         self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
         self.mqtt_client.connect(self.mqtt_host, self.mqtt_port)
@@ -49,7 +51,7 @@ class mqtt(Plugin):
         if self.config.has_option('mqtt', 'device_name'):
             self.device_name = self.config.get('mqtt', 'device_name')
         else:
-            self.devicename=None
+            self.device_name=None
         # current_power
         if self.config.has_option('mqtt', 'current_power_name'):
             self.current_power_name = self.config.get('mqtt', 'current_power_name')
@@ -74,19 +76,19 @@ class mqtt(Plugin):
 
     def mqtt_on_connect(client, userdata, flags, rc):
         if rc==0:
-            hybridlogger.ha_log(logger, hass_api, "INFO","MQTT connected")
+            hybridlogger.ha_log(client.logger, client.hass_api, "INFO","MQTT connected")
             #subscribe listening (not used)
 
     def mqtt_on_disconnect(client, userdata, flags, rc):
         if rc==0:
-            hybridlogger.ha_log(logger, hass_api, "INFO","MQTT disconnected")
+            hybridlogger.ha_log(client.logger, client.hass_api, "INFO","MQTT disconnected")
 
     def process(self, **args):
         """
         Send data to homeassistant over mqtt
         """
         msg = args['msg']
-        if not self.devicename:
+        if not self.device_name:
             self.device_name = msg['name']
         value_pl={}
         attr_pl={}
