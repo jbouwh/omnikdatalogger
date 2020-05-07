@@ -40,7 +40,7 @@ class daylight(object):
 
     def sun_rising(self, time: datetime.datetime = datetime.datetime.now(tzlocal.get_localzone())):
         return (time > self.sun['dawn']) and (time < self.sun['sunrise'])
-   
+
     def sun_up(self, time: datetime.datetime = datetime.datetime.now(tzlocal.get_localzone())):
         return (time > self.sun['sunrise']) and (time < self.sun['sunset'])
 
@@ -50,9 +50,10 @@ class daylight(object):
     def sun_down(self, time: datetime.datetime = datetime.datetime.now(tzlocal.get_localzone())):
         return (time < self.sun['dawn']) or (time > self.sun['dusk'])
 
+
 def main():
-    dl=daylight('Amsterdam')
-    nu = datetime.datetime.now(tz = tzlocal.get_localzone())
+    dl = daylight('Amsterdam')
+    nu = datetime.datetime.now(tz=tzlocal.get_localzone())
     print('Now:     %s' % str(nu))
     print('Timezone:%s' % str(tzlocal.get_localzone()))
     print('Dawn:    %s' % str(dl.dawn))
@@ -69,6 +70,7 @@ def main():
     print('Sun up     :', dl.sun_up())
     print('Sun setting:', dl.sun_setting())
     print('Sun down   :', dl.sun_down())
-    
+
+
 if __name__=="__main__":
     main()
