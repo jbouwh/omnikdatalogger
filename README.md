@@ -333,6 +333,7 @@ $ systemd status omnikdatalogger
 ## Manual Run
 
 Just run `python3 omniklogger.py`.
+> By default omniklogger is searching for config file ~/.omnik/config.ini when executed from the command line
 
 ## P1 DSRM (Dutch Smart Meter) integration (Work-in-progress)
 
