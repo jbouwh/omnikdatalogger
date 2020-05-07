@@ -14,17 +14,17 @@ logger = logging.getLogger(__name__)
 
 # customize config parser with dict based lookup for AppDaemon and command line options
 # has_option and get function have been adapted
-ha_args={}
+ha_args = {}
 
 
 class ha_ConfigParser(configparser.ConfigParser):
 
     def __init__(self, ha_args: dict = None, *args, **kwargs):
         if ha_args is None:
-            self.ha_args={}
+            self.ha_args = {}
         else:
-            self.ha_args=ha_args
-        super().__init__(*args, **kwargs) 
+            self.ha_args = ha_args
+        super().__init__(*args, **kwargs)
 
     def has_option(self, section: str, option: str):
         if str.lower(section) == 'default':
@@ -36,7 +36,7 @@ class ha_ConfigParser(configparser.ConfigParser):
                     return True
         return super().has_option(section, option)
 
-    def get(self, section:str, option:str, fallback = None, **kwargs):        
+    def get(self, section: str, option: str, fallback=None, **kwargs):
         if str.lower(section) == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
@@ -45,17 +45,17 @@ class ha_ConfigParser(configparser.ConfigParser):
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
         try:
-            retval=super().get(section, option, fallback = fallback, **kwargs)
-        except:
-            retval=fallback
+            retval=super().get(section, option, fallback=fallback, **kwargs)
+        except Exception:
+            retval = fallback
         return retval
 
-    def getboolean(self, section:str, option:str, fallback = None, **kwargs):
+    def getboolean(self, section: str, option: str, fallback=None, **kwargs):
         truelist = ['true', '1', 't', 'y', 'yes', 'j', 'ja']
         valstr = str(self.get(section, option, fallback, **kwargs)).lower()
         return (valstr in truelist)
 
-    def getlist(self, section: str, option: str, fallback = [], **kwargs):
+    def getlist(self, section: str, option: str, fallback=[], **kwargs):
         if str.lower(section) == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
@@ -66,10 +66,9 @@ class ha_ConfigParser(configparser.ConfigParser):
         try:
             retval = super().getlist(section, option, fallback=fallback, **kwargs)
         except Exception:
-            retval=fallback
+            retval = fallback
             pass
         return retval
-
 
 # Initialization class for AppDaemon (homeassistant)
 
@@ -81,7 +80,7 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
         hybridlogger.ha_log(logger, self, "DEBUG", f"Arguments from AppDaemon config (self.args): {self.args}")
         if 'config' in self.args:
             c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=self.args)
-            self.configfile=self.args['config']
+            self.configfile = self.args['config']
             try:
                 c.read(self.configfile, encoding='utf-8')
                 hybridlogger.ha_log(logger, self, "INFO", f"Using configuration from '{self.configfile}'.")
@@ -94,7 +93,6 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
         self.clazz = DataLogger(c, hass_api=self)
         # running repeatedly, every X seconds
         hybridlogger.ha_log(logger, self, "INFO", f"Daemon interval {self.interval} seconds.")
-          
         self.rt = RepeatedJob(c, function=self.clazz.process, hass_api=self)
 
     def terminate(self):
