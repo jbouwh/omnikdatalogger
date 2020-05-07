@@ -12,6 +12,7 @@ from .client import OmnikPortalClient
 
 logger = logging.getLogger(__name__)
 
+
 class DataLogger(object):
 
     def __init__(self, config, hass_api=None):
@@ -130,16 +131,13 @@ class DataLogger(object):
                 data['current_power'] = 0.0
             # Get the actual report time from the omnik portal
             newreporttime = datetime.datetime.strptime(data['last_update_time'],
-                                                        '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.timezone('UTC'))
+                                    '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.timezone('UTC'))
             # Only proces updates that occured after we started or start a single measurement (TODO)
             if (newreporttime > self.plant_update[plant] or not self.every or self.sundown):
                 hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                     f"Update for plant {plant} update at UTC {newreporttime}")
                 # the newest plant_update time will be used as a baseline to program the timer
                 self.last_update_time = newreporttime
-                # Update the last report time return value, but not when there is no sun
-                if not self.sundown:
-                    retval = self.last_update_time
                 # Store the plant_update time for each indiviual plant,
                 # update only if there is a new report available to avoid duplicates
                 self.plant_update[plant] = newreporttime
@@ -188,6 +186,7 @@ class DataLogger(object):
             self.sundown = True
             retval = self.dl.next_dawn + datetime.timedelta(minutes=10)
         else:
+            # return the last report time return value, but not when there is no sun
             self.sundown = False
             retval = self.last_update_time
         
@@ -205,11 +204,13 @@ class DataLogger(object):
                 # Try getting a new update
                 data = self._fetch_update(plant)
                 if data:
+                    # Process for each plugin, but only when valid
                     for plugin in Plugin.plugins:
                         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                                             f"Trigger plugin '{getattr(plugin, 'name')}'.")
                         plugin.process(msg=data)
-
+        
+        # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f'Data logging processed')
         # Return the the time of the latest report received
         return retval
