@@ -89,8 +89,8 @@ class DataLogger(object):
 
     def process(self):
         if not self.dl.sun_shine():
-            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", \
-                f"No sunshine postponing till down next dawn {self.dl.next_dawn}.")
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
+                                f"No sunshine postponing till down next dawn {self.dl.next_dawn}.")
             # Send 0 Watt update
             sundown = True
             retval = self.dl.next_dawn + datetime.timedelta(minutes=10)
@@ -103,7 +103,7 @@ class DataLogger(object):
             if (self.omnik_api_level == 0):
                 return None
 
-        #caching of plant id's
+        # Caching of plant id's
         if (not plant_update or self.omnik_api_level == 1):
             try:
                 plants = self.client.getPlants(logger)
@@ -133,12 +133,12 @@ class DataLogger(object):
 
         if (self.omnik_api_level == 2):
             for plant in plant_update:
-                #TODO Try block
+                # Try getting a new update
                 try:
                     data = self.client.getPlantData(logger, plant)
                     if sundown:
                         data['current_power'] = 0.0
-                    # get the actual report time from the omnik portal
+                    # Get the actual report time from the omnik portal
                     newreporttime = datetime.datetime.strptime(data['last_update_time'],
                                                                '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.timezone('UTC'))
                     # Only proces updates that occured after we started or start a single measurement (TODO)
@@ -147,44 +147,45 @@ class DataLogger(object):
                                             f"Update for plant {plant} update at UTC {newreporttime}")
                         # the newest plant_update time will be used as a baseline to program the timer
                         self.last_update_time = newreporttime
-                        #update the last report time return value, but not when there is no sun
+                        # Update the last report time return value, but not when there is no sun
                         if not sundown:
                             retval=self.last_update_time
-                        #Store the plat_update time for each indiviual plant, update only if there is a new report available to avoid duplicates
+                        # Store the plant_update time for each indiviual plant,
+                        # update only if there is a new report available to avoid duplicates
                         plant_update[plant]= newreporttime
                         data['plant_id'] = plant
                         for plugin in Plugin.plugins:
                             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                                                 f"Trigger plugin '{getattr(plugin, 'name')}'.")
-                            #TODO pass config?
                             plugin.process(msg=data)
+
                     else:
                         hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                             f'No recent report update to process ... Last report at UTC {newreporttime}')
                 except requests.exceptions.RequestException as err:
                     hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Request error: {err}")
                     self.omnik_api_level = 1
-                    #Abort retry later
+                    # Abort retry later
                     return None
                 except requests.exceptions.HTTPError as errh:
                     hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"HTTP error: {errh}")
                     self.omnik_api_level = 1
-                    #Abort retry later
+                    # Abort retry later
                     return None
                 except requests.exceptions.ConnectionError as errc:
                     hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Connection error: {errc}")
                     self.omnik_api_level = 1
-                    #Abort retry later
+                    # Abort retry later
                     return None
                 except requests.exceptions.Timeout as errt:
-                    hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")  
+                    hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
                     self.omnik_api_level = 1
-                    #Abort retry later
+                    # Abort retry later
                     return None
                 except Exception as e:
                     hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
                     self.omnik_api_level = 1
-                    #Abort retry later
+                    # Abort retry later
                     return None
 
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f'Data logging processed')
