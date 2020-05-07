@@ -72,8 +72,7 @@ class ha_ConfigParser(configparser.ConfigParser):
 
 
 # Initialization class for AppDaemon (homeassistant)
-class HA_OmnikDataLogger(hass.Hass): #hass.Hass
-
+class HA_OmnikDataLogger(hass.Hass):
 
     def initialize(self, *args, **kwargs):
         hybridlogger.ha_log(logger, self, "INFO", f"Starting Omnik datalogger...")
@@ -102,10 +101,10 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
 
 # Initialisation form commandline
 def main(c: ha_ConfigParser, hass_api=None):
-    if c.get('default', 'debug', False): 
+    if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)
     clazz = DataLogger(c, hass_api=hass_api)
-    if c.has_option('default','interval'):
+    if c.has_option('default', 'interval'):
         # running repeatedly, every X seconds
         hybridlogger.ha_log(logger, hass_api, "INFO", f"Monitoring interval {c.get('default','interval')} seconds.")
         rt = RepeatedJob(c, function=clazz.process, hass_api=hass_api)
@@ -125,9 +124,9 @@ def main(c: ha_ConfigParser, hass_api=None):
 
 
 if __name__ == '__main__':
-    home   = os.path.expanduser('~')
+    home = os.path.expanduser('~')
     parser = argparse.ArgumentParser()
-  
+ 
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
                         help='Path to configuration file', metavar="FILE")
     parser.add_argument('--interval', type=int, help='Execute every n seconds')
