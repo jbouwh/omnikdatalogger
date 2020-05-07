@@ -45,7 +45,7 @@ class ha_ConfigParser(configparser.ConfigParser):
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
         try:
-            retval=super().get(section, option, fallback=fallback, **kwargs)
+            retval = super().get(section, option, fallback=fallback, **kwargs)
         except Exception:
             retval = fallback
         return retval
@@ -70,8 +70,8 @@ class ha_ConfigParser(configparser.ConfigParser):
             pass
         return retval
 
-# Initialization class for AppDaemon (homeassistant)
 
+# Initialization class for AppDaemon (homeassistant)
 class HA_OmnikDataLogger(hass.Hass): #hass.Hass
 
 
@@ -85,8 +85,8 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
                 c.read(self.configfile, encoding='utf-8')
                 hybridlogger.ha_log(logger, self, "INFO", f"Using configuration from '{self.configfile}'.")
             except Exception as e:
-                hybridlogger.ha_log(logger, self,
-                                    "ERROR", f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
+                hybridlogger.ha_log(logger, self, "ERROR",
+                                    f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
         self.interval = int(c.get('default', 'interval', 360))
@@ -101,14 +101,13 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
 
 
 # Initialisation form commandline
-def main(c: ha_ConfigParser, hass_api = None):
-    if c.get('default','debug', False): 
+def main(c: ha_ConfigParser, hass_api=None):
+    if c.get('default', 'debug', False): 
         logger.setLevel(logging.DEBUG)
     clazz = DataLogger(c, hass_api=hass_api)
     if c.has_option('default','interval'):
         # running repeatedly, every X seconds
         hybridlogger.ha_log(logger, hass_api, "INFO", f"Monitoring interval {c.get('default','interval')} seconds.")
-          
         rt = RepeatedJob(c, function=clazz.process, hass_api=hass_api)
         if hass_api:
             hass_api.rt = rt
@@ -119,16 +118,18 @@ def main(c: ha_ConfigParser, hass_api = None):
                     time.sleep(0.5)
             except KeyboardInterrupt:
                 hybridlogger.ha_log(logger, hass_api, "INFO", '> stopping all threads')
-                rt.stop()    
+                rt.stop()
     else:
         # running only once
         clazz.process()
+
 
 if __name__ == '__main__':
     home   = os.path.expanduser('~')
     parser = argparse.ArgumentParser()
   
-    parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'), help='Path to configuration file', metavar="FILE")
+    parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
+                        help='Path to configuration file', metavar="FILE")
     parser.add_argument('--interval', type=int, help='Execute every n seconds')
     parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
 
@@ -139,11 +140,11 @@ if __name__ == '__main__':
         parser.print_help()
         os.sys.exit(1)
     if args.config:
-        ha_args['config']=args.config
+        ha_args['config'] = args.config
         if args.debug:
-            ha_args['debug']=args.debug
+            ha_args['debug'] = args.debug
         if args.interval:
-            ha_args['interval']=args.interval
+            ha_args['interval'] = args.interval
         c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=ha_args)
         c.read([args.config], encoding='utf-8')
 
