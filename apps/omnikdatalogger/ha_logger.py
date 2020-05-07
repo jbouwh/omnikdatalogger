@@ -16,5 +16,3 @@ class hybridlogger:
                 logger.warning(f"W {datetime.datetime.now().isoformat()} {message}")
             elif level == "ERROR":
                 logger.error(f"E {datetime.datetime.now().isoformat()} {message}")
-
-
