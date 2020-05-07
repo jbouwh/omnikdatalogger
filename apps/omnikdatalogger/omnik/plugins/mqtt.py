@@ -248,7 +248,7 @@ class mqtt(Plugin):
 
         # Set report time in local timezone
         msg['reporttime'] = datetime.strptime(f"{msg['last_update_time']} UTC+0000",
-                                             '%Y-%m-%dT%H:%M:%SZ %Z%z').astimezone(self.timezone)
+                                              '%Y-%m-%dT%H:%M:%SZ %Z%z').astimezone(self.timezone)
         # Get topics
         topics = self._topics(msg)
 
@@ -260,7 +260,7 @@ class mqtt(Plugin):
         # publish attributes
         attr_pl = self._attribute_payload(msg)
         self._publish_attributes(topics, attr_pl)
-    
+
         # publish state
         value_pl = self._value_payload(msg)
         self._publish_state(topics, value_pl)
