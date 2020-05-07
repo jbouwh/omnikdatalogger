@@ -1,6 +1,5 @@
 import requests
 import urllib.parse
-import datetime
 from ha_logger import hybridlogger
 
 
@@ -33,14 +32,14 @@ class OmnikPortalClient(object):
         self.app_id = 10038
         self.app_key = 'Ox7yu3Eivicheinguth9ef9kohngo9oo'
         self.user_id = -1
-        self.hass_api= None
+        self.hass_api = None
 
         self.base_url = 'https://api.omnikportal.com/v1'
 
         self.username = username
         self.password = password
 
-    def initialize(self,logger):
+    def initialize(self, logger):
         url = f'{self.base_url}/user/account_validate'
 
         body = {
@@ -50,7 +49,7 @@ class OmnikPortalClient(object):
         }
 
         data = self._api_request(url, 'POST', body)
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",f"account validation: {data}")
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"account validation: {data}")
 
         # this is what `initialize` does ... setting the `user_id`
         self.user_id = data['data']['c_user_id']
@@ -59,7 +58,7 @@ class OmnikPortalClient(object):
         url = f'{self.base_url}/plant/list'
 
         data = self._api_request(url, 'GET', None)
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",f"plant list {data}")
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant list {data}")
 
         return data['data'].get('plants', [])
 
@@ -68,6 +67,6 @@ class OmnikPortalClient(object):
         url = f'{self.base_url}/plant/data?plant_id={plant_id}'
 
         data = self._api_request(url, 'GET', None)
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",f"plant data ({plant_id}) {data}")
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant data ({plant_id}) {data}")
 
         return data['data']

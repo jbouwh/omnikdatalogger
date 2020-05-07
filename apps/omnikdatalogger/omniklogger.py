@@ -126,7 +126,7 @@ def main(c: ha_ConfigParser, hass_api=None):
 if __name__ == '__main__':
     home = os.path.expanduser('~')
     parser = argparse.ArgumentParser()
- 
+
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
                         help='Path to configuration file', metavar="FILE")
     parser.add_argument('--interval', type=int, help='Execute every n seconds')
