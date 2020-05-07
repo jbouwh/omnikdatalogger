@@ -91,7 +91,7 @@ class HA_OmnikDataLogger(hass.Hass): #hass.Hass
                 c.read(self.configfile, encoding='utf-8')
                 hybridlogger.ha_log(logger, self, "INFO", f"Using configuration from '{self.configfile}'.")
             except Exception as e:
-                hybridlogger.ha_log(logger, self, "ERROR", f"Error reading 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
+                hybridlogger.ha_log(logger, self, "ERROR", f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
         self.interval=int(c.get('default', 'interval', 360))

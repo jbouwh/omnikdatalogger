@@ -4,7 +4,7 @@ import logging
 from ha_logger import hybridlogger
 
 import datetime
-from threading import Timer
+import threading
 
 logging.basicConfig(stream=sys.stdout,
                     level=os.environ.get('LOGLEVEL', logging.INFO))
@@ -12,6 +12,7 @@ logging.basicConfig(stream=sys.stdout,
 __version__ = '1.1.0'
 
 logger = logging.getLogger(__name__)
+
 
 class RepeatedJob(object):
     def __init__(self, c, function, hass_api, *args, **kwargs):
@@ -25,8 +26,13 @@ class RepeatedJob(object):
         self.function = function
         self.args = args
         self.kwargs = kwargs
-        #Try running for the first time
-        self._run()
+        #Trigger the RepeatedJob usting a short timer (1s) for the first time so the initialization can finish
+        self.calculated_interval=1
+        self.is_running=False
+        self.start()
+
+    def function_thread(self):
+        return self.function_thread
 
     # This handler function is fired when the timer has reached the interval
     def _run(self):
@@ -34,7 +40,7 @@ class RepeatedJob(object):
         #The function calls DataLogger.process()
         self.last_update_time = self.function(*self.args, **self.kwargs)
         #Calculate the new timer interval
-        if self.last_update_time :
+        if self.last_update_time:
             if self.last_update_time < datetime.datetime.now(datetime.timezone.utc):
                 #if last report time + 2x interval is less than the current time then increase
                 self.new_report_expected_at = self.last_update_time + datetime.timedelta(seconds=self.interval)
@@ -58,7 +64,7 @@ class RepeatedJob(object):
     def start(self):
         # starting actual timer
         if not self.is_running:
-            self._timer = Timer(self.calculated_interval, self._run)
+            self._timer = threading.Timer(self.calculated_interval, self._run)
             self._timer.daemon = True
             self._timer.start()
             self.is_running = True
