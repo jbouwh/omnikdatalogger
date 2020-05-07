@@ -20,19 +20,20 @@ install_requires = [
     'configparser>=3.7.4',
     'requests>=2.21.0',
     'cachetools>=3.1.1',
-    'pytz>=2019.1'
+    'pytz>=2019.1',
+    'paho-mqtt>=1.5.0'
 ]
 
 setup(
     name="omnikdatalogger",
     version=get_version('omnik'),
     license="gpl-3.0",
-    author="Pascal Prins",
-    author_email="pascal.prins@foobar-it.com",
+    author="Jan Bouwhuis",
+    author_email="jan@jbsoft.nl",
     description="Omnik Data Logger",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jbouwh/omnik-data-logger",
+    url="https://github.com/jbouwh/omnikdatalogger",
     packages=find_packages(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -42,5 +43,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    scripts=['omniklogger.py'],
+    scripts=['apps/omnikdatalogger/omniklogger.py'],
 )

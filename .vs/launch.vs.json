@@ -1,0 +1,16 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "python",
+      "interpreter": "(default)",
+      "interpreterArguments": "",
+      "scriptArguments": "",
+      "nativeDebug": false,
+      "webBrowserUrl": "",
+      "project": "apps\\omnikdatalogger\\omniklogger.py",
+      "name": "omniklogger.py"
+    }
+  ]
+}

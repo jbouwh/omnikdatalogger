@@ -198,8 +198,8 @@ Arguments marked with * must be configured either in the `apps.yaml` or `config.
 ### General settings - `apps.yaml` 'only' configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
-`module` | False | string | _(none)_ | Must be the name of the base script 'omniklogger'. A path should not be configured. AppDaemon wil find the module automatically.
-`class` | False | string | _(none)_ | Must be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
+`module` | False | string | _(none)_ | Should be the name of the base script `omniklogger`. A path should not be configured. AppDaemon wil find the module automatically.
+`class` | False | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
 `config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required when using the command line. A sample config.ini template file is can be found at /config/appdaemon/apps/omnikdatalogger/config.ini
 
 ### General settings `apps.yaml` and `config.ini` configuration options
@@ -282,8 +282,9 @@ First, install this thing (~ using Python 3.7+ !!!)
 > If you don't have `Python3.7+` installed, do that first (~ don't forget to install `python3-pip` as well)
 
 ```
-$ pip3 install omnikdatalogger
-
+#### Create a to download the scripts
+$ git clone https://github.com/jbouwh/omnikdatalogger
+> onmiklogger.py can be found in the `./apps` folder
 # check if properly installed
 $ omniklogger.py -h
 usage: omnik-logger [-h] [--config FILE] [--interval n] [-d]
