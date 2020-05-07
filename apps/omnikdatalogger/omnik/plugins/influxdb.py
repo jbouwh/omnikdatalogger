@@ -5,4 +5,4 @@ from ha_logger import hybridlogger
 class influxdb(Plugin):
 
     def process(self, **args):
-        self.logger.debug('Hello from influxdb')
+        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "Hello from influxdb")

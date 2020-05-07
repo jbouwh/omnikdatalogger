@@ -40,8 +40,8 @@ class pvoutput(Plugin):
             return self.cache['weather']
 
         except requests.exceptions.HTTPError as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",'Unable to get data. [{0}]: {1}'.format(
-                type(e).__name__, str(e)))
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", 'Unable to get data. [{0}]: {1}'.format(
+                                type(e).__name__, str(e)))
             raise e
 
     def process(self, **args):
@@ -51,14 +51,14 @@ class pvoutput(Plugin):
         try:
 
             msg = args['msg']
-            reporttime=datetime.strptime(f"{msg['last_update_time']} UTC+0000", '%Y-%m-%dT%H:%M:%SZ %Z%z').astimezone(self.timezone)
-            #now = self.timezone.normalize(self.timezone.fromutc(datetime.utcnow()))
+            reporttime = datetime.strptime(f"{msg['last_update_time']} UTC+0000",
+                                           '%Y-%m-%dT%H:%M:%SZ %Z%z').astimezone(self.timezone)
 
             self.logger.debug(json.dumps(msg, indent=2))
 
             if not self.config.has_option('pvoutput', 'sys_id') or not self.config.has_option('pvoutput', 'api_key'):
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                    f'[{__name__}] No api_key and/or sys_id found in configuration')
+                                    f'[{__name__}] No api_key and/or sys_id found in configuration')
                 return
 
             headers = {
@@ -92,14 +92,13 @@ class pvoutput(Plugin):
 
             r.raise_for_status()
 
-
         except requests.exceptions.RequestException as err:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Unhandled request error: {err}")
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Unhandled request error: {err}")
         except requests.exceptions.HTTPError as errh:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Http error: {errh}")
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Http error: {errh}")
         except requests.exceptions.ConnectionError as errc:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Connection error: {errc}")
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Connection error: {errc}")
         except requests.exceptions.Timeout as errt:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",f"Timeout error: {errt}")  
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",e)
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
