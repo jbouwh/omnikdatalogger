@@ -49,7 +49,7 @@ class mqtt(Plugin):
         if self.config.has_option('mqtt', 'device_name'):
             self.device_name = self.config.get('mqtt', 'device_name')
         else:
-            self.device_name = msg['name']
+            self.devicename=None
         # current_power
         if self.config.has_option('mqtt', 'current_power_name'):
             self.current_power_name = self.config.get('mqtt', 'current_power_name')
@@ -90,6 +90,8 @@ class mqtt(Plugin):
         Send data to homeassistant over mqtt
         """
         msg = args['msg']
+        if not self.devicename:
+            self.device_name = msg['name']
         value_pl={}
         attr_pl={}
         plant_appendix=""
