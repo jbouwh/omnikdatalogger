@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 from ha_logger import hybridlogger
 
-import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqttclient
 import uuid
 
 
@@ -14,13 +14,13 @@ class mqtt(Plugin):
 
     def __init__(self):
         super().__init__()
-        # self.name = 'mqtt'
+        self.name = 'mqtt'
         self.description = 'Write output to internal mqtt facility of Home Assistant'
         tz = self.config.get('default', 'timezone',
                              fallback='Europe/Amsterdam')
         self.timezone = pytz.timezone(tz)
 
-        self.mqtt_client_name=self.config.get('mqtt', 'client_name_prefix',
+        self.mqtt_client_name = self.config.get('mqtt', 'client_name_prefix',
                                               fallback='ha-mqtt-omniklogger') + "_" + uuid.uuid4().hex
         self.mqtt_host = self.config.get('mqtt', 'host', fallback='localhost')
         self.mqtt_port = int(self.config.get('mqtt', 'port', fallback='1833'))
@@ -32,9 +32,9 @@ class mqtt(Plugin):
             self.mqtt_password = self.config.get('mqtt', 'password')
 
         # mqtt setup
-        self.mqtt_client = mqtt.Client(self.mqtt_client_name)
-        self.mqtt_client.on_connect = self.mqtt_on_connect # bind call back function
-        self.mqtt_client.on_disconnect = self.mqtt_on_disconnect # bind call back function
+        self.mqtt_client = mqttclient.Client(self.mqtt_client_name)
+        self.mqtt_client.on_connect = self.mqtt_on_connect  # bind call back function
+        self.mqtt_client.on_disconnect = self.mqtt_on_disconnect  # bind call back function
         self.mqtt_client.logger = self.logger
         self.mqtt_client.hass_api = self.hass_api
         # self.mqtt_client.on_message=mqtt_on_message (not used)
@@ -93,7 +93,7 @@ class mqtt(Plugin):
         plant_appendix = ""
         if self.config.getboolean('mqtt', 'append_plant_id', False):
             plant_appendix = f" [{msg['plant_id']}]"
-        model="Omnik data logger"
+        model = "Omnik data logger"
         main_topic = f"{self.discovery_prefix}/sensor/omnik_{msg['plant_id']}"
         state_topic = f"{main_topic}/state"
         attr_topic = f"{main_topic}/attr"
@@ -103,8 +103,8 @@ class mqtt(Plugin):
         device_pl = {
             "identifiers": [f"omnik_{msg['plant_id']}"],
             "name": f"{self.device_name}{plant_appendix}",
-            "mdl" : model,
-            "mf" : 'Omnik'
+            "mdl": model,
+            "mf": 'Omnik'
             }
         attr_pl = {
             "current_power": int(float(msg['current_power']) * 1000),
@@ -128,7 +128,7 @@ class mqtt(Plugin):
             "dev_cla": "power",
             "ic": "mdi:chart-bell-curve",
             "unit_of_meas": "Watt",
-            "val_tpl":"{{(value_json.current_power)}}",
+            "val_tpl": "{{(value_json.current_power)}}",
             "dev": device_pl
             }
         value_pl["current_power"] = int(float(msg['current_power']) * 1000)
@@ -143,7 +143,7 @@ class mqtt(Plugin):
             "json_attr_t": "~/attr",
             "ic": "mdi:counter",
             "unit_of_meas": "kWh",
-            "val_tpl":"{{((value_json.total_energy)|round(1))}}",
+            "val_tpl": "{{((value_json.total_energy)|round(1))}}",
             "dev": device_pl
             }
         value_pl["total_energy"] = float(msg['total_energy'])
@@ -158,7 +158,7 @@ class mqtt(Plugin):
             "json_attr_t": "~/attr",
             "ic": "mdi:currency-eur",
             "unit_of_meas": "€",
-            "val_tpl":"{{((value_json.income)|round(2))}}",
+            "val_tpl": "{{((value_json.income)|round(2))}}",
             "dev": device_pl
             }
         value_pl["income"] = float(msg['income'])
@@ -183,45 +183,57 @@ class mqtt(Plugin):
             # current_power
             if self.mqtt_client.publish(current_power_config_topic, json.dumps(current_power_config_pl)):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing config {json.dumps(current_power_config_pl)} to {current_power_config_topic} successful.")
+                                    f"Publishing config {json.dumps(current_power_config_pl)} \
+                                    to {current_power_config_topic} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing config {json.dumps(current_power_config_pl)} to {current_power_config_topic} failed!")
+                                    f"Publishing config {json.dumps(current_power_config_pl)} \
+                                    to {current_power_config_topic} failed!")
             # total_energy
             if self.mqtt_client.publish(total_energy_config_topic, json.dumps(total_energy_config_pl)):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing config {json.dumps(total_energy_config_pl)} to {total_energy_config_topic} successful.")
+                                    f"Publishing config {json.dumps(total_energy_config_pl)} to \
+                                    {total_energy_config_topic} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing config {json.dumps(total_energy_config_pl)} to {total_energy_config_topic} failed!")
+                                    f"Publishing config {json.dumps(total_energy_config_pl)} to \
+                                    {total_energy_config_topic} failed!")
             # income
             if self.mqtt_client.publish(income_config_topic, json.dumps(income_config_pl)):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing config {json.dumps(income_config_pl)} to {income_config_topic} successful.")
+                                    f"Publishing config {json.dumps(income_config_pl)} to \
+                                    {income_config_topic} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing config {json.dumps(income_config_pl)} to {income_config_topic} failed!")
+                                    f"Publishing config {json.dumps(income_config_pl)} to \
+                                    {income_config_topic} failed!")
             # last_update_time
             if self.mqtt_client.publish(last_update_time_config_topic, json.dumps(last_update_time_config_pl)):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing config {json.dumps(last_update_time_config_pl)} to {last_update_time_config_topic} successful.")
+                                    f"Publishing config {json.dumps(last_update_time_config_pl)} to \
+                                    {last_update_time_config_topic} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing config {json.dumps(last_update_time_config_pl)} to {last_update_time_config_topic} failed!")
+                                    f"Publishing config {json.dumps(last_update_time_config_pl)} to \
+                                    {last_update_time_config_topic} failed!")
 
             # publish attributes
             if self.mqtt_client.publish(attr_topic,json.dumps(attr_pl)):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing attributes {json.dumps(attr_pl)} to {attr_topic} successful.")
+                                    f"Publishing attributes {json.dumps(attr_pl)} to \
+                                    {attr_topic} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing attributes {json.dumps(attr_pl)} to {attr_topic} failed!")
+                                    f"Publishing attributes {json.dumps(attr_pl)} to \
+                                    {attr_topic} failed!")
             # publish state
             if self.mqtt_client.publish(state_topic,json.dumps(value_pl)):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing state {json.dumps(value_pl)} to {state_topic} successful.")
+                                    f"Publishing state {json.dumps(value_pl)} to \
+                                    {state_topic} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing state {json.dumps(value_pl)} to {state_topic} failed!")
+                                    f"Publishing state {json.dumps(value_pl)} to \
+                                    {state_topic} failed!")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
