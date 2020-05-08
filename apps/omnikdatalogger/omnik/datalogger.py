@@ -122,7 +122,7 @@ class DataLogger(object):
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
                 self.omnik_api_level = 0
                 return False
-            return True
+        return True
 
     def _fetch_update(self, plant):
         try:
@@ -145,7 +145,7 @@ class DataLogger(object):
                 return data
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                    f'No recent report update to process ... Last report at UTC {newreporttime}')
+                                    f'No recent report update to process. Last report at UTC {newreporttime}')
                 return None
 
         except requests.exceptions.RequestException as err:
@@ -184,11 +184,11 @@ class DataLogger(object):
                                 f"No sunshine postponing till down next dawn {self.dl.next_dawn}.")
             # Send 0 Watt update
             self.sundown = True
-            retval = self.dl.next_dawn + datetime.timedelta(minutes=10)
+            next_report_at = self.dl.next_dawn + datetime.timedelta(minutes=10)
         else:
             # return the last report time return value, but not when there is no sun
             self.sundown = False
-            retval = self.last_update_time
+            next_report_at = self.last_update_time
 
         # Check for login, if needed. Return None on failure
         if not self._logon():
@@ -204,6 +204,9 @@ class DataLogger(object):
                 # Try getting a new update
                 data = self._fetch_update(plant)
                 if data:
+                    # A new last update time was set
+                    if self.plant_update[plant] > next_report_at:
+                        next_report_at = self.plant_update[plant]
                     # Process for each plugin, but only when valid
                     for plugin in Plugin.plugins:
                         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
@@ -213,7 +216,7 @@ class DataLogger(object):
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f'Data logging processed')
         # Return the the time of the latest report received
-        return retval
+        return next_report_at
 
     @staticmethod
     def __expand_path(path):
