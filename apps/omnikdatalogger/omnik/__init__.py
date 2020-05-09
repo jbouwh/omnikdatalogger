@@ -67,7 +67,7 @@ class RepeatedJob(object):
                 retry_interval *= 2
                 i -= 1
             # Increment retry counter maximal interval between retries is half_interval * 2 * 2 * 2 = 4 intervals
-            if self.retries <= 3:
+            if self.retries < 3:
                 self.retries += 1
             # Calculate new report time
             self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
