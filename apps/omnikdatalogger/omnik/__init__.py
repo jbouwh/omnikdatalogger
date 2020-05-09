@@ -26,6 +26,8 @@ class RepeatedJob(object):
         self.function = function
         self.args = args
         self.kwargs = kwargs
+        # Initialize retry counter
+        self.retries = 0
         # Trigger the RepeatedJob using a short timer (1s) for the first time so the initialization can finish
         self.calculated_interval = 1
         self.is_running = False
@@ -41,6 +43,8 @@ class RepeatedJob(object):
         self.last_update_time = self.function(*self.args, **self.kwargs)
         # Calculate the new timer interval
         if self.last_update_time:
+            # Reset retry counter
+            self.retries = 0
             if self.last_update_time < datetime.datetime.now(datetime.timezone.utc):
                 # If last report time + 2x interval is less than the current time then increase
                 self.new_report_expected_at = self.last_update_time + datetime.timedelta(seconds=self.interval)
@@ -55,9 +59,19 @@ class RepeatedJob(object):
                 self.new_report_expected_at = self.last_update_time
             self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
         else:
-            # An error occured retry in 2 minutes
-            self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
-                datetime.timedelta(seconds=self.half_interval)
+            # An error occured calculate retry interval
+            retry_interval = self.half_interval
+            i = self.retries
+            while i > 0:
+                # Double retry interval to avoid to much traffic
+                retry_interval *= 2
+                i -= 1
+            # Increment retry counter maximal interval between retries is half_interval * 2 * 2 * 2 = 4 intervals 
+            if self.retries <= 3:
+                self.retries += 1
+            # Calculate new report time
+            self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=retry_interval)
+
             self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                             f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.")
