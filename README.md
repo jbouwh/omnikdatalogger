@@ -1,5 +1,6 @@
 # omnikdatalogger
 ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the firstgeneration inverter Omniksol-3K-TL as well. This datalogger uses the [omnikportal](https://www.omnikportal.com/) to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots, hangs or returns seemingly random data.
 I have adapted this project and tried it in combination with my Omniksol-3k-TL. This datalogger cannot be accessed directly, so using the portal was the way to go.
 Further support has been added for MQTT and is can now be integrated with Home Assistent using the AppDaemon addon.
@@ -105,7 +106,7 @@ log_level: info
 ```
 The dependency for cachetools is the only 'hard' dependency. Please feel free to adjust the base log_level.
 
-When used with HACS the dependencies in [requirements.txt](https://github.com/jbouwh/omnikdatalogger/requirements.txt) will be installed automatically.
+When used with HACS the dependencies in [requirements.txt](https://github.com/jbouwh/omnikdatalogger/blob/master/requirements.txt) should be installed automatically.
 
 The basescript omniklogger.py holds a class HA_OmnikDataLogger that implements appdaemon.plugins.hass.hassapi
 See for more information and documentation about AppDaemon: https://appdaemon.readthedocs.io/en/latest/APPGUIDE.html
@@ -144,9 +145,8 @@ The base script is located at:
 
 Next step is to configure AppDaemon to load an instance of the datalogger. It is possible to make multiple instances if you have more omnik accounts.
 
-This configuration is placed in the file: /config/appdaemon/apps/apps.yaml
-The configuration in apps.yaml is mandantory to the config.ini file if that is used, so it is possible to split the configuration.
-Example of apps.yaml:
+This configuration is placed in the file: `/config/appdaemon/apps/apps.yaml`. The configuration in apps.yaml is mandantory to the config.ini file if that is used, so it is possible to split the configuration.
+#### Example of `apps.yaml`:
 
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
@@ -302,7 +302,6 @@ optional arguments:
   -d, --debug    Debug mode
 ```
 
-
 An example systemd script is available from `scripts/omnikdatalogger.service`. Copy it so you can customize it to your use.
 
 Check the folowing line in this file in the script.
@@ -349,8 +348,8 @@ I have plans to integrate measurements done on the P1 port of the DUTCH Smart Me
 Working on a couple of plugins to customize processing of the omnik-portal data:
 
 * `pvoutput` ~ write data to [PVOutput](https://www.pvoutput.org)
-* `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database (**WORK IN PROGRESS**)
 * `mqtt` ~ write data to a [MQTT] 
-
+* `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database ([Pascal Prins is working on this](https://github.com/paprins/omnik-data-logger))
+* `P1` ~ support for the the Dutch Smart Meter (***TODO***)
 
 ~ the end
