@@ -1,21 +1,28 @@
 # omnikdatalogger
-
 ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-
-
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the firstgeneration inverter Omniksol-3K-TL as well. This datalogger uses the [omnikportal](https://www.omnikportal.com/) to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots, hangs or returns seemingly random data.
 I have adapted this project and tried it in combination with my Omniksol-3k-TL. This datalogger cannot be accessed directly, so using the portal was the way to go.
 Further support has been added for MQTT and is can now be integrated with Home Assistent using the AppDaemon addon.
 
+## How can I use Omnik Data Logger
+You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system is connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
+The Home Assistant Integration requires a MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
+If you want to use the [pvoutput](https://pvoutput.org) plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) is needed).
+The omnik portal presents approximately updates every 300 seconds. The interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you wille nog miss any updates.
+
 ## Installation
+The application can be installed:
+-   Download from the Home Assistant Community Store [HACS](https://hacs.xyz/)
+-   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
+-   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`
 
-TODO
+## Configuration options
+The application can be configured using:
+-   Commandline (limited options)
+-   Configuration file (config.ini)
+-   apps.yaml configuration file (with AppDaemon) *(This applies tot HACS-users)*
 
-Get the source using
-git clone https://gihub.com/jbouwh/omnikdatalogger
-
-## Help
-
+### Use omniklogger from the command line
 ```
 usage: python3 omniklogger.py [-h] [--config FILE] [--interval n] [-d]
 
@@ -26,11 +33,6 @@ optional arguments:
   -d, --debug    debug mode
 ```
 
-## Configuration
-The application can be configured using:
--   Commandline (limited options)
--   Configuration file (config.ini)
--   apps.yaml configuration file (with AppDaemon)
 ### Configuration (config.ini)
 
 Example configuration
@@ -101,7 +103,9 @@ python_packages:
 init_commands: []
 log_level: info
 ```
-The dependency for cachetools is the only 'hard' dependency. Pleas feel free to adjust the base log_level.
+The dependency for cachetools is the only 'hard' dependency. Please feel free to adjust the base log_level.
+
+When used with HACS the dependencies in [requirements.txt](https://github.com/jbouwh/omnikdatalogger/requirements.txt) will be installed automatically.
 
 The basescript omniklogger.py holds a class HA_OmnikDataLogger that implements appdaemon.plugins.hass.hassapi
 See for more information and documentation about AppDaemon: https://appdaemon.readthedocs.io/en/latest/APPGUIDE.html
@@ -109,7 +113,6 @@ See for more information and documentation about AppDaemon: https://appdaemon.re
 The configfile /config/appdaemon/appdaemon.yaml needs a minimal configuration. Further it is possible to define the location for your logfiles. And example configuration is:
 
 ```yaml
-secrets: /config/secrets.yaml
 appdaemon:
   latitude: 0.0
   longitude: 0.0
