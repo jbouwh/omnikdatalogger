@@ -192,11 +192,17 @@ class DataLogger(object):
 
         # Check for login, if needed. Return None on failure
         if not self._logon():
-            return None
+            if self.sundown:
+                return next_report_at
+            else:
+                return None
 
         # Caching of plant id's, if needed. Return None on failure
         if not self._fetch_plants():
-            return None
+            if self.sundown:
+                return next_report_at
+            else:
+                return None
 
         # Process data reports for each plant
         if (self.omnik_api_level == 2):
