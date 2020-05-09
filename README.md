@@ -1,5 +1,6 @@
 # omnikdatalogger
 ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+![HACS Validation](https://github.com/jbouwh/omnikdatalogger/workflows/Validate/badge.svg)
 
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the firstgeneration inverter Omniksol-3K-TL as well. This datalogger uses the [omnikportal](https://www.omnikportal.com/) to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots, hangs or returns seemingly random data.
 I have adapted this project and tried it in combination with my Omniksol-3k-TL. This datalogger cannot be accessed directly, so using the portal was the way to go.
@@ -13,7 +14,10 @@ The omnik portal presents approximately updates every 300 seconds. The interval 
 
 ## Installation
 The application can be installed:
--   Download from the Home Assistant Community Store [HACS](https://hacs.xyz/)
+-   Install with the Home Assistant Community Store [HACS](https://hacs.xyz/).
+    -   Open the settings menu
+    -   Enter `https://github.com/jbouwh/omnikdatalogger` at `ADD CUSTOM REPOSITORY`
+    -   Select `AppDaemon` as _Category_
 -   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
 -   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`
 
