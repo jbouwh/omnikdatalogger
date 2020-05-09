@@ -66,12 +66,12 @@ class RepeatedJob(object):
                 # Double retry interval to avoid to much traffic
                 retry_interval *= 2
                 i -= 1
-            # Increment retry counter maximal interval between retries is half_interval * 2 * 2 * 2 = 4 intervals 
+            # Increment retry counter maximal interval between retries is half_interval * 2 * 2 * 2 = 4 intervals
             if self.retries <= 3:
                 self.retries += 1
             # Calculate new report time
-            self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=retry_interval)
-
+            self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
+                datetime.timedelta(seconds=retry_interval)
             self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                             f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.")
