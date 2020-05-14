@@ -75,7 +75,7 @@ class ha_ConfigParser(configparser.ConfigParser):
 class HA_OmnikDataLogger(hass.Hass):
 
     def initialize(self, *args, **kwargs):
-        hybridlogger.ha_log(logger, self, "INFO", f"Starting Omnik datalogger...")
+        hybridlogger.ha_log(logger, self, "INFO", "Starting Omnik datalogger...")
         hybridlogger.ha_log(logger, self, "DEBUG", f"Arguments from AppDaemon config (self.args): {self.args}")
         if 'config' in self.args:
             c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=self.args)
@@ -95,7 +95,7 @@ class HA_OmnikDataLogger(hass.Hass):
         self.rt = RepeatedJob(c, function=self.clazz.process, hass_api=self)
 
     def terminate(self):
-        hybridlogger.ha_log(logger, self, "INFO", f"Daemon was stopped.")
+        hybridlogger.ha_log(logger, self, "INFO", "Daemon was stopped.")
         self.rt.stop()
 
 

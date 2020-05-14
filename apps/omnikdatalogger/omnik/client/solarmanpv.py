@@ -2,23 +2,24 @@ import requests
 import urllib.parse
 from ha_logger import hybridlogger
 import hashlib
-import json
 import xml.etree.ElementTree as ET
 import datetime
 from omnik.client import Client
+
 
 class SolarmanPVClient(Client):
 
     def __init__(self):
         super().__init__()
-        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Client enabled: solarmanpvclient")
+        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "Client enabled: solarmanpvclient")
 
         # API Key
         self.api_key = self.config.get('solarmanpv', 'api_key', fallback='apitest')
         self.user_id = -1
         self.token = None
 
-        self.base_url = self.config.get('solarmanpv', 'base_url', fallback='http://www.solarmanpv.com:18000/SolarmanApi/serverapi/')
+        self.base_url = self.config.get('solarmanpv', 'base_url',
+                                        fallback='http://www.solarmanpv.com:18000/SolarmanApi/serverapi/')
 
         self.username = self.config.get('solarmanpv', 'username')
         self.password = self.config.get('solarmanpv', 'password')
@@ -39,7 +40,8 @@ class SolarmanPVClient(Client):
 
     def _api_request(self, url, method, body, encode=False):
         '''
-        This API mithod uses XML. When logging in a token is obtained. For each request is to be checked if the token is still valid.
+        This API mithod uses XML. When logging in a token is obtained.
+        For each request is to be checked if the token is still valid.
         '''
         headers = {
             'Content-type': 'application/x-www-form-urlencoded'
@@ -63,15 +65,14 @@ class SolarmanPVClient(Client):
 
         data = []
         for plant in self.config.getlist('solarmanpv', 'plant_id_list'):
-            data.append( {'plant_id': plant} )
+            data.append({'plant_id': plant})
 
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant list from config {data}")
 
         return data
-
  
     def xmlprop(self, xml, params, fallback=None):
-        paramlist=params
+        paramlist = params
         param = paramlist.pop(0)
         for el in xml:
             if param == el.tag:
@@ -89,12 +90,12 @@ class SolarmanPVClient(Client):
         xmldata = self._api_request(url, 'GET', None)
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant data ({plant_id}) {xmldata}")
         # Parsing the XML
-        xml=ET.fromstring(xmldata)
+        xml = ET.fromstring(xmldata)
 
         # Check if an error was returned
         if xml.tag != 'data':
             # log warning
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"No valid data received. Trying to renew token.")
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", "No valid data received. Trying to renew token.")
             # Get new token
             self.initialize(logger)
             # Retry the call
@@ -102,18 +103,20 @@ class SolarmanPVClient(Client):
             xmldata = self._api_request(url, 'GET', None)
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant data retry ({plant_id}) {xmldata}")
             # Parsing the XML
-            xml=ET.fromstring(xmldata)
+            xml = ET.fromstring(xmldata)
 
         if xml.tag == 'data':
             data['name'] = self.xmlprop(xml, ['name'])
-            data['income'] = float(self.xmlprop(xml, ['income','TotalIncome'], 0.0))
-            data['data_logger'] = self.xmlprop(xml, ['detail','WiFi','id'], '')
-            data['inverter'] = self.xmlprop(xml, ['detail','WiFi','inverter','SN'], '')
-            data['status'] = self.xmlprop(xml, ['detail','WiFi','inverter','status'], '')
-            data['current_power'] = float(self.xmlprop(xml, ['detail','WiFi','inverter','power'], 0.0))
-            data['today_energy'] = float(self.xmlprop(xml, ['detail','WiFi','inverter','etoday'], 0.0))
-            data['total_energy'] = float(self.xmlprop(xml, ['detail','WiFi','inverter','etotal'], 0.0))
-            data['last_update_time'] = datetime.datetime.utcfromtimestamp(float(self.xmlprop(xml, ['detail','WiFi','inverter','lastupdated'], datetime.datetime.now().timestamp()))).strftime('%Y-%m-%dT%H:%M:%SZ')
+            data['income'] = float(self.xmlprop(xml, ['income', 'TotalIncome'], 0.0))
+            data['data_logger'] = self.xmlprop(xml, ['detail', 'WiFi','id'], '')
+            data['inverter'] = self.xmlprop(xml, ['detail', 'WiFi','inverter','SN'], '')
+            data['status'] = self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'status'], '')
+            data['current_power'] = float(self.xmlprop(xml, ['detail', 'WiFi','inverter', 'power'], 0.0))
+            data['today_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etoday'], 0.0))
+            data['total_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etotal'], 0.0))
+            data['last_update_time'] = \
+                datetime.datetime.utcfromtimestamp(float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'lastupdated'],
+                                                   datetime.datetime.now().timestamp()))).strftime('%Y-%m-%dT%H:%M:%SZ')
             return data
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Cannot fetch data: {xmldata}")

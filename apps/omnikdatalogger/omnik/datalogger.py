@@ -50,7 +50,7 @@ class DataLogger(object):
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Plugins enabled: {self.plugins}.")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api,
-                                "WARNING", f"No output plugins configured! Monitoring only. No output!")
+                                "WARNING", "No output plugins configured! Monitoring only.")
         # Import output plugins
         if len(self.plugins) > 0:
             sys.path.append(self.__expand_path('plugins'))
