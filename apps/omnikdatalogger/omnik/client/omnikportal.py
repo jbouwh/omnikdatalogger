@@ -1,7 +1,7 @@
 import requests
 import urllib.parse
 from ha_logger import hybridlogger
-
+from omnik.client import Client
 
 class OmnikPortalClient(Client):
 
