@@ -45,7 +45,7 @@ class RepeatedJob(object):
         if self.last_update_time:
             # Reset retry counter
             self.retries = 0
-            if self.last_update_time < datetime.datetime.now(datetime.timezone.utc):
+            if self.last_update_time <= datetime.datetime.now(datetime.timezone.utc):
                 # If last report time + 2x interval is less than the current time then increase
                 self.new_report_expected_at = self.last_update_time + datetime.timedelta(seconds=self.interval)
                 # Check if we have at least 60 seconds for the next cycle
@@ -73,6 +73,9 @@ class RepeatedJob(object):
             self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
                 datetime.timedelta(seconds=retry_interval)
             self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
+        # Make sure we have at least 15 seconds on the time to prevent a deadlocked timer loop
+        if self.calculated_interval < 15:
+            self.calculated_interval = 15
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                             f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.")
         self.start()

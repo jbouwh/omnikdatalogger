@@ -8,7 +8,7 @@ import pytz
 import daylight
 
 from .plugins import Plugin
-from .client import OmnikPortalClient
+from .client import Client
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +26,6 @@ class DataLogger(object):
         # Make sure we check for a recent update first
         self.last_update_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
 
-        if not self.config.has_option('omnikportal', 'username') or not self.config.has_option('omnikportal', 'password'):
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", 'No username/password for omnikportal found')
-            sys.exit(1)
         self.city = self.config.get('default', 'city', fallback='Amsterdam')
         try:
             self.dl = daylight.daylight(self.city)
@@ -39,12 +36,14 @@ class DataLogger(object):
         if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
 
-        self.client = OmnikPortalClient(
-            logger=self.logger,
-            hass_api=self.hass_api,
-            username=self.config.get('omnikportal', 'username'),
-            password=self.config.get('omnikportal', 'password'),
-        )
+        self.client_module = self.config.get('default', 'client', 'solarmanpv')
+        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Initializing client : {self.client_module}.")
+        sys.path.append(self.__expand_path('client'))
+        Client.logger = self.logger
+        Client.config = config
+        Client.hass_api = hass_api
+        __import__(self.client_module)
+        self.client = Client.client[0]
 
         self.plugins = self.config.getlist('plugins', 'output', fallback=[])
         if len(self.plugins) > 0:
@@ -52,7 +51,7 @@ class DataLogger(object):
         else:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "WARNING", f"No output plugins configured! Monitoring only. No output!")
-
+        # Import output plugins
         if len(self.plugins) > 0:
             sys.path.append(self.__expand_path('plugins'))
 
@@ -150,27 +149,27 @@ class DataLogger(object):
 
         except requests.exceptions.RequestException as err:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Request error: {err}")
-            self.omnik_api_level = 1
+            self.omnik_api_level = 0
             # Abort retry later
             return None
         except requests.exceptions.HTTPError as errh:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"HTTP error: {errh}")
-            self.omnik_api_level = 1
+            self.omnik_api_level = 0
             # Abort retry later
             return None
         except requests.exceptions.ConnectionError as errc:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Connection error: {errc}")
-            self.omnik_api_level = 1
+            self.omnik_api_level = 0
             # Abort retry later
             return None
         except requests.exceptions.Timeout as errt:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
-            self.omnik_api_level = 1
+            self.omnik_api_level = 0
             # Abort retry later
             return None
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
-            self.omnik_api_level = 1
+            self.omnik_api_level = 0
             # Abort retry later
             return None
 

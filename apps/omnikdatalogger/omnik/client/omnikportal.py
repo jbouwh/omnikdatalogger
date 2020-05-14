@@ -3,7 +3,36 @@ import urllib.parse
 from ha_logger import hybridlogger
 
 
-class OmnikPortalClient(object):
+class OmnikPortalClient(Client):
+
+    def __init__(self):
+        super().__init__()
+        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Client enabled: omnikportalclient")
+
+        # API Key's
+        self.app_id = self.config.get('omnikportal', 'app_id', fallback='10038')
+        self.app_key = self.config.get('omnikportal', 'app_key', fallback='Ox7yu3Eivicheinguth9ef9kohngo9oo')
+        self.user_id = -1
+
+        self.base_url = self.config.get('omnikportal', 'base_url', fallback='https://api.omnikportal.com/v1')
+
+        self.username = self.config.get('omnikportal', 'username')
+        self.password = self.config.get('omnikportal', 'password')
+
+    def initialize(self, logger):
+        url = f'{self.base_url}/user/account_validate'
+
+        body = {
+            'user_email': self.username,
+            'user_password': self.password,
+            'user_type': 1
+        }
+
+        data = self._api_request(url, 'POST', body)
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"account validation: {data}")
+
+        # this is what `initialize` does ... setting the `user_id`
+        self.user_id = data['data']['c_user_id']
 
     def _api_request(self, url, method, body, encode=False):
         headers = {
@@ -26,33 +55,6 @@ class OmnikPortalClient(object):
         r.raise_for_status()
 
         return r.json()
-
-    def __init__(self, logger, username, password, hass_api=None):
-        self.logger = logger
-        self.app_id = 10038
-        self.app_key = 'Ox7yu3Eivicheinguth9ef9kohngo9oo'
-        self.user_id = -1
-        self.hass_api = None
-
-        self.base_url = 'https://api.omnikportal.com/v1'
-
-        self.username = username
-        self.password = password
-
-    def initialize(self, logger):
-        url = f'{self.base_url}/user/account_validate'
-
-        body = {
-            'user_email': self.username,
-            'user_password': self.password,
-            'user_type': 1
-        }
-
-        data = self._api_request(url, 'POST', body)
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"account validation: {data}")
-
-        # this is what `initialize` does ... setting the `user_id`
-        self.user_id = data['data']['c_user_id']
 
     def getPlants(self, logger):
         url = f'{self.base_url}/plant/list'

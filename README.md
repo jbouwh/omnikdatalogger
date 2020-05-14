@@ -7,9 +7,15 @@ I have adapted this project and tried it in combination with my Omniksol-3k-TL. 
 Further support has been added for MQTT and is can now be integrated with Home Assistent using the AppDaemon addon.
 
 ## How can I use Omnik Data Logger
-You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system is connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
-The Home Assistant Integration requires a MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
-If you want to use the [pvoutput](https://pvoutput.org) plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) is needed).
+You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
+Since some time omnikportal has hot been active any more, and it does not seem to come back any more. Luckyly there is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved!
+Since omnikportal stopped working the client needed to be updated to work with the SolarMAN API. The code has now a pluggable client module and two new modules wille be developed.
+The first new client module is the `solarmanpvclient`which replaces the old `omnikportalclient` which is now the default client and ready for use. The second module `localproxy` is in development (not ready yet) and will support local captured logging for datasystemens that do not support direct logging.
+My own PV system is of that type, so I can test with that easily. This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend
+This code will be based on is based on (https://github.com/Woutrrr/Omnik-Data-Logger) and (https://github.com/t3kpunk/Omniksol-PV-Logger). This feature will come later. There will be tutorial on how to capture the data in your local network.
+
+The Home Assistant output plugin Integration requires a MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
+If you want to use the [pvoutput](https://pvoutput.org) output plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) is needed).
 The omnik portal presents approximately updates every 300 seconds. The interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you wille nog miss any updates.
 
 ## Installation

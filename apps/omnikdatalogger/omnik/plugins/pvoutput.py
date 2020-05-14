@@ -73,9 +73,9 @@ class pvoutput(Plugin):
             data = {
                 'd': reporttime.strftime('%Y%m%d'),
                 't': reporttime.strftime('%H:%M'),
-                'v1': str(float(msg['total_energy']) * 1000),
+                'v1': str(float(msg['today_energy']) * 1000),
                 'v2': str(float(msg['current_power']) * 1000),
-                'c1': 1
+                'c1': 0
             }
 
             if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):

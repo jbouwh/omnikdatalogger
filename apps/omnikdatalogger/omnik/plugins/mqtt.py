@@ -61,11 +61,11 @@ class mqtt(Plugin):
             self.total_energy_name = self.config.get('mqtt', 'total_energy_name')
         else:
             self.total_energy_name = 'Energy total'
-        # income
-        if self.config.has_option('mqtt', 'income_name'):
-            self.income_name = self.config.get('mqtt', 'income_name')
+        # today_energy
+        if self.config.has_option('mqtt', 'today_energy_name'):
+            self.today_energy_name = self.config.get('mqtt', 'today_energy_name')
         else:
-            self.income_name = 'Income'
+            self.today_energy_name = 'Energy today'
         # last_update_time
         if self.config.has_option('mqtt', 'last_update_time_name'):
             self.last_update_time_name = self.config.get('mqtt', 'last_update_time_name')
@@ -89,7 +89,7 @@ class mqtt(Plugin):
         topics['config'] = {}
         topics['config']['current_power'] = f"{topics['main']}/{msg['plant_id']}_current_power/config"
         topics['config']['total_energy'] = f"{topics['main']}/{msg['plant_id']}_total_energy/config"
-        topics['config']['income'] = f"{topics['main']}/{msg['plant_id']}_income/config"
+        topics['config']['today_energy'] = f"{topics['main']}/{msg['plant_id']}_today_energy/config"
         topics['config']['last_update_time'] = f"{topics['main']}/{msg['plant_id']}_last_update_time/config"
         return topics
 
@@ -135,6 +135,7 @@ class mqtt(Plugin):
             "val_tpl": "{{(value_json.current_power)}}",
             "dev": device_pl
             }
+
         # total_energy
         config_pl['total_energy'] = {
             "~": f"{topics['main']}",
@@ -148,16 +149,16 @@ class mqtt(Plugin):
             "dev": device_pl
             }
 
-        # income
-        config_pl['income'] = {
+        # today_energy
+        config_pl['today_energy'] = {
             "~": f"{topics['main']}",
-            "uniq_id": f"{msg['plant_id']}_income",
-            "name": f"{self.income_name}",
+            "uniq_id": f"{msg['plant_id']}_today_energy",
+            "name": f"{self.today_energy_name}",
             "stat_t": "~/state",
             "json_attr_t": "~/attr",
-            "ic": "mdi:currency-eur",
-            "unit_of_meas": "€",
-            "val_tpl": "{{((value_json.income)|round(2))}}",
+            "ic": "mdi:counter",
+            "unit_of_meas": "kWh",
+            "val_tpl": "{{((value_json.today_energy)|round(2))}}",
             "dev": device_pl
             }
 
@@ -180,17 +181,14 @@ class mqtt(Plugin):
         value_pl["last_update_time"] = float(datetime.timestamp(msg['reporttime']))
         value_pl["current_power"] = int(float(msg['current_power']) * 1000)
         value_pl["total_energy"] = float(msg['total_energy'])
-        value_pl["income"] = float(msg['income'])
+        value_pl["today_energy"] = float(msg['today_energy'])
+        # value_pl["income"] = float(msg['income'])
         return value_pl
 
     def _attribute_payload(self, msg):
         attr_pl = {
-            "current_power": int(float(msg['current_power']) * 1000),
-            "today_energy": float(msg['today_energy']),
-            "monthly_energy": float(msg['monthly_energy']),
-            "yearly_energy": float(msg['yearly_energy']),
-            "peak_power_actual": float(msg['peak_power_actual']),
-            "efficiency": float(msg['efficiency']),
+            "data_logger": msg['data_logger'],
+            "inverter": msg['inverter'],
             "plant_id": int(msg['plant_id']),
             "last_update": f"{msg['reporttime'].strftime('%Y-%m-%d')} {msg['reporttime'].strftime('%H:%M:%S')}"
             }
@@ -252,14 +250,14 @@ class mqtt(Plugin):
         # Get topics
         topics = self._topics(msg)
 
+        # publish attributes
+        attr_pl = self._attribute_payload(msg)
+        self._publish_attributes(topics, attr_pl)
+
         # Publish config
         config_pl = self._config_payload(msg, topics)
         for entity in config_pl:
             self._publish_config(topics, config_pl, entity)
-
-        # publish attributes
-        attr_pl = self._attribute_payload(msg)
-        self._publish_attributes(topics, attr_pl)
 
         # publish state
         value_pl = self._value_payload(msg)
