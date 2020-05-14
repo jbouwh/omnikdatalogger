@@ -1,10 +1,17 @@
 # omnikdatalogger
-Code parsing ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-HACS AppDaemon ![Validation](https://github.com/jbouwh/omnikdatalogger/workflows/Validate/badge.svg)
+*Code parsing:* ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+*HACS AppDaemon:* ![Validation](https://github.com/jbouwh/omnikdatalogger/workflows/Validate/badge.svg)
 
-The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the firstgeneration inverter Omniksol-3K-TL as well. This datalogger uses the [omnikportal](https://www.omnikportal.com/) to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots, hangs or returns seemingly random data.
-I have adapted this project and tried it in combination with my Omniksol-3k-TL. This datalogger cannot be accessed directly, so using the portal was the way to go.
+## Introduction
+The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the
+firstgeneration inverter Omniksol-3K-TL as well.
+This datalogger can use data collected at the [omnikportal](https://www.omnikportal.com/) or at [solarmanpv](https://www.solarmanpv.com/portal)
+to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots,
+hangs or returns seemingly random data.
+I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
 Further support has been added for MQTT and is can now be integrated with Home Assistent using the AppDaemon addon.
+The comming version will support the processing of intercepted data on your local network. I wil provide a guide to explain the steps. This wil give an independent datalogging,
+but will also disable the data collection in the cloud. I am investigating a method that still will deliver the logged data to the omnik portla while interception.
 
 ## How can I use Omnik Data Logger
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
