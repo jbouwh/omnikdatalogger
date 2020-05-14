@@ -10,7 +10,7 @@ Further support has been added for MQTT and is can now be integrated with Home A
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
 Since some time omnikportal has hot been active any more, and it does not seem to come back any more. Luckyly there is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved!
 Since omnikportal stopped working the client needed to be updated to work with the SolarMAN API. The code has now a pluggable client module and two new modules wille be developed.
-The first new client module is the `solarmanpvclient`which replaces the old `omnikportalclient` which is now the default client and ready for use. The second module `localproxy` is in development (not ready yet) and will support local captured logging for datasystemens that do not support direct logging.
+The first new client module is the `solarmanpv` client which replaces the old `omnikportal` client (code still available). `solarmanpv` is now the default client and ready for use. Make sure to update your configuration. The second module `localproxy` is in development (not ready yet) and will support local captured logging for datasystemens that do not support direct logging.
 My own PV system is of that type, so I can test with that easily. This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend
 This code will be based on is based on (https://github.com/Woutrrr/Omnik-Data-Logger) and (https://github.com/t3kpunk/Omniksol-PV-Logger). This feature will come later. There will be tutorial on how to capture the data in your local network.
 
@@ -55,10 +55,19 @@ When using the datalogger using the commandline this data logger will need a con
 timezone = Europe/Amsterdam
 city = Amsterdam
 interval = 360
+client = solarmanpv
 
 [omnikportal]
 username = john.doe@example.com
 password = S3cret!
+
+[solarmanpv]
+username = john.doe@example.com
+password = S3cret!
+
+# Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
+# Multiple numbers can be supplied like 123,124
+plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc 
 
 [plugins]
 output=pvoutput,mqtt
@@ -168,11 +177,19 @@ omnik_datalogger:
   timezone: Europe/Amsterdam
   city: Amsterdam
   interval: 360
+  client: solarmanpv
+# SolarmanPV portal options
+  solarmanpv:
+    username: john.doe@example.com
+    password: some_password
+    plant_id_list:
+      - 123
+
 # Omnik portal options
   omnikportal:
     username: john.doe@example.com
     password: some_password
-    base_url: https://www.omnikportal.com/
+    base_url: https://api.omnikportal.com/v1
 # Plugins for data logging (output)
   plugins:
     output:
@@ -218,18 +235,35 @@ key | optional | type | default | description
 `class` | False | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
 `config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required when using the command line. A sample config.ini template file is can be found at /config/appdaemon/apps/omnikdatalogger/config.ini
 
-### General settings `apps.yaml` and `config.ini` configuration options
-
+### General settings `apps.yaml` or `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `timezone` | True | string | `Europe/Amsterdam` | Time zone string recognizable by the pytz python module to enable logging in local time (pvoutput plugin). E.g. _Europe/Amsterdam_
 `city` | True | string | `Amsterdam` | City name recognizable by the Astral python module. Based on this city the data logiing is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
 `interval` | True | integer | `360` | The number of seconds of the onterval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
+
+### SolarmanPV client settings under `solarmanpv` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
+`password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
+`plant_id_list` |  False | list | _(empty list)_ | A (comma separated) or yaml list of strings specifying the plant_id(s) or pid's of of your plants.
+`api_key` | True | string | _(apitest)_ | The API key used to access your data. The default key might work for you as well.
+`base_url` | True | string | _(http://www.solarmanpv.com:18000/SolarmanApi/serverapi)_ | The API URL used to access your data. The default url might work for you as well.
+
+### OmnikPortal client settings under `omnikportal` in `apps.yaml` or `[omnikportal]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
+`password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
+`app_id ` | True | string | _(10038)_ | The APP_ID used to access your data. The default value might work for you as well.
+`app_key` | True | string | _(Ox7yu3Eivicheinguth9ef9kohngo9oo)_ | The API key to access your data 
+`base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data. The default url might work for you as well.
     
 ### Enable plugins under `plugins:` in `apps.yaml` or `[plugins]` in `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
+`output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of strings specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
 
 ### MQTT plugin
 You can use the the official add-on 'Mosquito broker' for the MQTT integration in HomeAssistant
