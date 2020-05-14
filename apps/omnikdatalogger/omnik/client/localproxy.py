@@ -23,5 +23,5 @@ class LocalProxy(Client):
 
         data = {}
 
-        return None
+        return data
 

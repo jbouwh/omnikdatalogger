@@ -3,11 +3,12 @@ import urllib.parse
 from ha_logger import hybridlogger
 from omnik.client import Client
 
+
 class OmnikPortalClient(Client):
 
     def __init__(self):
         super().__init__()
-        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Client enabled: omnikportalclient")
+        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "Client enabled: omnikportalclient")
 
         # API Key's
         self.app_id = self.config.get('omnikportal', 'app_id', fallback='10038')

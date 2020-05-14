@@ -70,7 +70,7 @@ class SolarmanPVClient(Client):
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant list from config {data}")
 
         return data
- 
+
     def xmlprop(self, xml, params, fallback=None):
         paramlist = params
         param = paramlist.pop(0)
@@ -108,10 +108,10 @@ class SolarmanPVClient(Client):
         if xml.tag == 'data':
             data['name'] = self.xmlprop(xml, ['name'])
             data['income'] = float(self.xmlprop(xml, ['income', 'TotalIncome'], 0.0))
-            data['data_logger'] = self.xmlprop(xml, ['detail', 'WiFi','id'], '')
-            data['inverter'] = self.xmlprop(xml, ['detail', 'WiFi','inverter','SN'], '')
+            data['data_logger'] = self.xmlprop(xml, ['detail', 'WiFi', 'id'], '')
+            data['inverter'] = self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'SN'], '')
             data['status'] = self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'status'], '')
-            data['current_power'] = float(self.xmlprop(xml, ['detail', 'WiFi','inverter', 'power'], 0.0))
+            data['current_power'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'power'], 0.0))
             data['today_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etoday'], 0.0))
             data['total_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etotal'], 0.0))
             data['last_update_time'] = \

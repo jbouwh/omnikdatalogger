@@ -173,27 +173,36 @@ class DataLogger(object):
             # Abort retry later
             return None
 
+    def _output_update(self, data):
+        # Process for each plugin, but only when valid
+        for plugin in Plugin.plugins:
+            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                f"Trigger plugin '{getattr(plugin, 'name')}'.")
+            plugin.process(msg=data)
+
     def process(self):
         # Returns the date time of the last update (time behind) or a time in te future when postposing updates.
         # Returns None when an error occurs
 
         # Sunshine check
-        if not self.dl.sun_shine():
+        self.sundown = not self.dl.sun_shine()
+        if self.sundown:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                 f"No sunshine postponing till down next dawn {self.dl.next_dawn}.")
             # Send 0 Watt update
-            self.sundown = True
             next_report_at = self.dl.next_dawn + datetime.timedelta(minutes=10)
         else:
             # return the last report time return value, but not when there is no sun
-            self.sundown = False
             next_report_at = self.last_update_time
 
         # Check for login, if needed. Return None on failure
         if not self._logon():
+            # Logon failed
             if self.sundown:
+                # Sun is down, skip this measurement and wait till dawn
                 return next_report_at
             else:
+                # Skip this measurement, retry later
                 return None
 
         # Caching of plant id's, if needed. Return None on failure
@@ -212,14 +221,12 @@ class DataLogger(object):
                     # A new last update time was set
                     if self.plant_update[plant] > next_report_at:
                         next_report_at = self.plant_update[plant]
-                    # Process for each plugin, but only when valid
-                    for plugin in Plugin.plugins:
-                        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                            f"Trigger plugin '{getattr(plugin, 'name')}'.")
-                        plugin.process(msg=data)
+                    # export the data to the output plugins
+                    self._output_update(data)
 
         # Finish datalogging process
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f'Data logging processed')
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Data logging processed')
+
         # Return the the time of the latest report received
         return next_report_at
 
