@@ -178,7 +178,7 @@ class DataLogger(object):
         # provide a default value if it is not available
         if data:
             if field not in data:
-                data['field'] = fallback
+                data[field] = fallback
 
     def _validate_client_data(self, data):
         # Insert defaults for missing fields

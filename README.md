@@ -15,7 +15,7 @@ but will also disable the data collection in the cloud. I am investigating a met
 
 ## How can I use Omnik Data Logger
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
-Since some time omnikportal has hot been active any more, and it does not seem to come back any more. Luckyly there is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved!
+Since the omnikportal is having outages many times, an laternative will be welcome. There is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved!
 Since omnikportal stopped working the client needed to be updated to work with the SolarMAN API. The code has now a pluggable client module and two new modules wille be developed.
 The first new client module is the `solarmanpv` client which replaces the old `omnikportal` client (code still available). `solarmanpv` is now the default client and ready for use. Make sure to update your configuration. The second module `localproxy` is in development (not ready yet) and will support local captured logging for datasystemens that do not support direct logging.
 My own PV system is of that type, so I can test with that easily. This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend
@@ -62,6 +62,8 @@ When using the datalogger using the commandline this data logger will need a con
 timezone = Europe/Amsterdam
 city = Amsterdam
 interval = 360
+
+# valid clients are omnikportal, solarmanpv (site possible not active). solarmanpv is the default now
 client = solarmanpv
 
 [omnikportal]
