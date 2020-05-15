@@ -249,7 +249,8 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `timezone` | True | string | `Europe/Amsterdam` | Time zone string recognizable by the pytz python module to enable logging in local time (pvoutput plugin). E.g. _Europe/Amsterdam_
 `city` | True | string | `Amsterdam` | City name recognizable by the Astral python module. Based on this city the data logiing is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
-`interval` | True | integer | `360` | The number of seconds of the onterval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
+`interval` | True | integer | `360` | The number of seconds of the interval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
+`client` | True | string | `solarmanpv` | Name of the client that will be used to fetch the data. Valid choices are `solarmanpv` and `omnikportal`.
 
 ### SolarmanPV client settings under `solarmanpv` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
 key | optional | type | default | description
@@ -306,7 +307,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `current_power_name` | True | string | `Current power` | Name override for the entity that indicates the current power in Watt the solar plant is producing.
 `total_energy_name` | True | string | `Energy total` | Name override for the entity that indicates total energy in kWh the solar plant has generated since installation.
-`income_name` | True | string | `Income` | Name override for the entity that indicates total income for the solar plant since installation. De default unit is €, and can be customized in Home Assistant. The income is calculated at the omnik portal based on the settings in the portal.
+`today_energy_name` | True | string | `Energy today` | Name override for the entity that indicates total energy in kWh the solar plant has generated this day.
 `last_update_time_name` | True | string | `Last update` | Name override for the entity that is a timestamp total of the last update of the solar plant.
 
 ## PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
