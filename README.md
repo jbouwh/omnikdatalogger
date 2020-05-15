@@ -109,9 +109,6 @@ append_plant_id = false
 current_power_name = Vermogen
 total_energy_name = Gegenereerd totaal
 today_enery_name = Gegenereerd vandaag
-monthly_energy_name = Gegenereerd deze maand
-yearly_energy_name = Gegenereerd dit jaar
-income_name = Terugverdiend
 last_update_time_name = Laatste statusupdate
 ```
 
@@ -228,7 +225,7 @@ omnik_datalogger:
     append_plant_id: false
     current_power_name: Current power
     total_energy_name: Generated total
-    income_name: Earned
+    todat_energy_name: Generated today
     last_update_time_name: Last status update
 ```
 ## Configuration options (required, optional and defaults)
@@ -403,7 +400,6 @@ Working on a couple of plugins to customize processing of the omnik-portal data:
 
 * `pvoutput` ~ write data to [PVOutput](https://www.pvoutput.org)
 * `mqtt` ~ write data to a [MQTT] 
-* `influxdb` ~ write data to a [InfluxDB](https://www.influxdata.com/) time series database ([Pascal Prins is working on this](https://github.com/paprins/omnik-data-logger))
 * `P1` ~ support for the the Dutch Smart Meter (***TODO***)
 
 ~ the end
