@@ -74,7 +74,8 @@ password = S3cret!
 username = john.doe@example.com
 password = S3cret!
 
-# Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
+# Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal
+# and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
 # Multiple numbers can be supplied like 123,124
 plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc 
 
@@ -89,8 +90,8 @@ use_temperature = true
 [openweathermap]
 api_key = <YOUR API KEY>
 endpoint = api.openweathermap.org
-lon = 4.2232362
-lat = 51.8819023
+lon = 4.0000000
+lat = 50.1234567
 units = metric
 
 [mqtt]
