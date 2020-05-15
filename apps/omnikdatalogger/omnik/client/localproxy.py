@@ -24,4 +24,3 @@ class LocalProxy(Client):
         data = {}
 
         return data
-

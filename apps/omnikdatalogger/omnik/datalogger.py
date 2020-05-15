@@ -177,7 +177,7 @@ class DataLogger(object):
         # validate existance of field in dict
         # provide a default value if it is not available
         if data:
-            if not field in data:
+            if field not in data:
                 data['field'] = fallback
 
     def _validate_client_data(self, data):
