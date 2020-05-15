@@ -173,7 +173,21 @@ class DataLogger(object):
             # Abort retry later
             return None
 
+    def _validate_field(self, data, field, fallback):
+        # validate existance of field in dict
+        # provide a default value if it is not available
+        if data:
+            if not field in data:
+                data['field'] = fallback
+
+    def _validate_client_data(self, data):
+        # Insert defaults for missing fields
+        self._validate_field(data, 'inverter', 'n/a')
+        return data
+
     def _output_update(self, data):
+        # Insert dummy data for fields that have not been supplied by the client
+        data = self._validate_client_data(data)
         # Process for each plugin, but only when valid
         for plugin in Plugin.plugins:
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",

@@ -71,5 +71,5 @@ class OmnikPortalClient(Client):
 
         data = self._api_request(url, 'GET', None)
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant data ({plant_id}) {data}")
-
+        
         return data['data']

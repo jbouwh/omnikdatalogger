@@ -187,7 +187,6 @@ class mqtt(Plugin):
 
     def _attribute_payload(self, msg):
         attr_pl = {
-            "data_logger": msg['data_logger'],
             "inverter": msg['inverter'],
             "plant_id": int(msg['plant_id']),
             "last_update": f"{msg['reporttime'].strftime('%Y-%m-%d')} {msg['reporttime'].strftime('%H:%M:%S')}"
