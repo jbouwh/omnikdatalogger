@@ -135,7 +135,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not os.path.isfile(args.config):
-        print("Unable to find config at '{}'".format(args.config))
+        logging.critical("Unable to find config at '{}'".format(args.config))
         parser.print_help()
         os.sys.exit(1)
     if args.config:

@@ -36,7 +36,7 @@ class DataLogger(object):
         if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
 
-        self.client_module = self.config.get('default', 'client', 'solarmanpv')
+        self.client_module = self.config.get('default', 'client', 'omnikportal')
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Initializing client : {self.client_module}.")
         sys.path.append(self.__expand_path('client'))
         Client.logger = self.logger
@@ -46,13 +46,13 @@ class DataLogger(object):
         self.client = Client.client[0]
 
         self.plugins = self.config.getlist('plugins', 'output', fallback=[])
-        if len(self.plugins) > 0:
+        if self.plugins[0]:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Plugins enabled: {self.plugins}.")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "WARNING", "No output plugins configured! Monitoring only.")
         # Import output plugins
-        if len(self.plugins) > 0:
+        if self.plugins[0]:
             sys.path.append(self.__expand_path('plugins'))
 
             Plugin.logger = self.logger
@@ -180,14 +180,15 @@ class DataLogger(object):
             if field not in data:
                 data[field] = fallback
 
-    def _validate_client_data(self, data):
+    def _validate_client_data(self, plant, data):
         # Insert defaults for missing fields
-        self._validate_field(data, 'inverter', 'n/a')
+        # data['data']['plant_id']
+        self._validate_field(data, 'inverter', self.config.get('plants', str(plant), 'n/a'))
         return data
 
-    def _output_update(self, data):
+    def _output_update(self, plant, data):
         # Insert dummy data for fields that have not been supplied by the client
-        data = self._validate_client_data(data)
+        data = self._validate_client_data(plant, data)
         # Process for each plugin, but only when valid
         for plugin in Plugin.plugins:
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
@@ -236,7 +237,7 @@ class DataLogger(object):
                     if self.plant_update[plant] > next_report_at:
                         next_report_at = self.plant_update[plant]
                     # export the data to the output plugins
-                    self._output_update(data)
+                    self._output_update(plant, data)
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Data logging processed')

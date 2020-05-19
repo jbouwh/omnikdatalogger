@@ -72,25 +72,25 @@ class mqtt(Plugin):
         else:
             self.last_update_time_name = 'Last update'
 
-    def _mqtt_on_connect(client, userdata, flags, rc):
+    def _mqtt_on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            hybridlogger.ha_log(client.logger, client.hass_api, "INFO", "MQTT connected")
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT connected")
             # subscribe listening (not used)
 
     def _mqtt_on_disconnect(client, userdata, flags, rc):
         if rc == 0:
-            hybridlogger.ha_log(client.logger, client.hass_api, "INFO", "MQTT disconnected")
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
 
     def _topics(self, msg):
         topics = {}
-        topics['main'] = f"{self.discovery_prefix}/sensor/omnik_{msg['plant_id']}"
+        topics['main'] = f"{self.discovery_prefix}/sensor/{self.device_name}_{msg['plant_id']}"
         topics['state'] = f"{topics['main']}/state"
         topics['attr'] = f"{topics['main']}/attr"
         topics['config'] = {}
-        topics['config']['current_power'] = f"{topics['main']}/{msg['plant_id']}_current_power/config"
-        topics['config']['total_energy'] = f"{topics['main']}/{msg['plant_id']}_total_energy/config"
-        topics['config']['today_energy'] = f"{topics['main']}/{msg['plant_id']}_today_energy/config"
-        topics['config']['last_update_time'] = f"{topics['main']}/{msg['plant_id']}_last_update_time/config"
+        topics['config']['current_power'] = f"{topics['main']}/current_power/config"
+        topics['config']['total_energy'] = f"{topics['main']}/total_energy/config"
+        topics['config']['today_energy'] = f"{topics['main']}/today_energy/config"
+        topics['config']['last_update_time'] = f"{topics['main']}/last_update_time/config"
         return topics
 
     def _device_payload(self, msg):
