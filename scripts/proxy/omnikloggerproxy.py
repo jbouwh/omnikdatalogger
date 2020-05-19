@@ -37,7 +37,7 @@ def signal_handler(signal, frame):
 class ProxyServer(threading.Thread):
 
     def __init__(self, args=[], kwargs={}):
-        self.stopsignal=0
+        self.stopsignal = 0
         self.sockwait = threading.Event()
 
         threading.Thread.__init__(self)
@@ -104,7 +104,13 @@ class ProxyServer(threading.Thread):
 
         # Bind the socket to the address given on the command line
         self.server_address = (args.listenaddress, args.listenport)
-        self.sock.bind(self.server_address)
+        try:
+            self.sock.bind(self.server_address)
+        except Exception as e:
+            logging.critical('Not able to open socket for listeing, exiting! Error: {0}'.format(e))
+            self.cancel()
+            return
+
         logging.info('starting up on %s port %s' % self.sock.getsockname())
         # Accept max 1 connection
         self.sock.listen(1)
@@ -342,7 +348,7 @@ def main(args):
     proxy=ProxyServer(args)
     proxy.start()
     try:
-        while not stopflag:
+        while not (proxy.stopsignal or stopflag):
             proxy.join(1)
     except KeyboardInterrupt:
         pass
