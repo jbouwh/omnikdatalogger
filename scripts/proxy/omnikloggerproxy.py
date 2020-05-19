@@ -183,7 +183,7 @@ class tcpforward(threading.Thread):
             logging.info('{0} Forwarding to omnik logger "{1}"'.format(datetime.datetime.now(), args.omniklogger))
             self.forwardsock.sendall(self.data)
             logging.info('Forwarding succesful.')
-        except socket.timeout:
+        except socket.timeout as e:
             logging.warning("Timeout error forwarding: {0}".format(e))
         except Exception as e:
             logging.warning("Error forwarding: {0}".format(e))

@@ -11,6 +11,6 @@
     "\\scripts",
     "\\scripts\\proxy"
   ],
-  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\plugins\\influxdb.py",
+  "SelectedNode": "\\apps\\omnikdatalogger\\omniklogger.py",
   "PreviewInSolutionExplorer": false
 }

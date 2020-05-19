@@ -77,7 +77,7 @@ class mqtt(Plugin):
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT connected")
             # subscribe listening (not used)
 
-    def _mqtt_on_disconnect(client, userdata, flags, rc):
+    def _mqtt_on_disconnect(self, client, userdata, flags, rc):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
 
