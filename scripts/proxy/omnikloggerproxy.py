@@ -1,4 +1,15 @@
-#! /usr/bin/python3
+#! /usr/bin/env python
+#
+# This script can be used to intercept and forward the inverter log messages.
+# The script has been tested with python versions 2.7 and 3.8
+# The data can be forwarded to MQTT to process using omnikdatalogger with the halogger client.
+# To intercept on your local network:
+# Route 176.58.117.69/32 to the device that runs this logger and listen at port 10004
+# On the device NAT the poblic address to the private address (e.g. 192.168.x.x ) using iptables:
+# iptables -t nat -A PREROUTING -p tcp -d 176.58.117.69 --dport 10004 -j DNAT --to-destination 192.168.x.x:10004
+# iptables -t nat -A OUTPUT -p tcp -d 176.58.117.69 -j DNAT --to-destination 192.168.x.x
+#
+
 import socket
 import argparse
 import configparser
@@ -10,15 +21,12 @@ import os
 import paho.mqtt.client as mqttclient
 import uuid
 import logging
-import threading
-
 import datetime
-# import pytz
 
-listenaddress = b'127.0.0.1'                        # <<<< change this to your ip address >>>>
+listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
-omnikloggerpublicaddress = b'176.58.117.69'         # There is no need to change this if this proxy
-                                                   # should direct log your data to the Omnik/SolarmanPV servers
+# There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
+omnikloggerpublicaddress = b'176.58.117.69'        # There is no need to change this if this proxy
 omnikloggerdestport = 10004                        # This is the port the omnik/SolarmanPV datalogger server listens to
 STATUS_ON = 'ON'
 STATUS_OFF = 'OFF'
@@ -28,11 +36,12 @@ INVERTER_MAX_IDLE_TIME = 30
 global stopflag
 
 
-#Generic signal handler
+# Generic signal handler
 def signal_handler(signal, frame):
     global stopflag
     logging.debug("Signal {:0d} received. Setting stopflag.".format(signal))
     stopflag = True
+
 
 class ProxyServer(threading.Thread):
 
@@ -55,31 +64,30 @@ class ProxyServer(threading.Thread):
         self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
         self.statustimer.start()
 
-
     def check_status(self):
         for serial in self.lastupdate:
             if self.lastupdate[serial] + datetime.timedelta(minutes=INVERTER_MAX_IDLE_TIME) < datetime.datetime.now():
                 self.status[serial] = STATUS_OFF
-                self.mqttfw.mqttforward(json.dumps(str(base64.b64encode(b'')).encode('UTF-8')), 
-                                    serial, self.status[serial])
+                self.mqttfw.mqttforward(json.dumps(str(base64.b64encode(b'')).encode('UTF-8')),
+                                        serial, self.status[serial])
         # Restart timer
         self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
         self.statustimer.start()
 
-
     def cancel(self):
-        self.stopsignal=1
+        # Stop the loop
+        self.stopsignal = 1
         try:
             self.statustimer.cancel()
-        except:
-            pass
+        except Exception as e:
+            logging.debug('Cannot stop status timer. Error: {0}'.format(e))
         try:
             # Work-a-round to close listening socket
-            socket.socket(socket.AF_INET, 
-                  socket.SOCK_STREAM).connect(self.server_address)
+            socket.socket(socket.AF_INET,
+                          socket.SOCK_STREAM).connect(self.server_address)
             self.sock.close()
-        except:
-            pass
+        except Exception as e:
+            logging.debug('No open listening socket to close. Error: {0}'.format(e))
         if self.mqttfw:
             self.mqttfw.close()
         self.sockwait.clear()
@@ -88,13 +96,12 @@ class ProxyServer(threading.Thread):
         # Wait for connection
         try:
             self.connection, self.client_address = self.sock.accept()
-            #connection, client_address = self.sock.accept()
             if not self.stopsignal:
                 logging.debug('client connected: {0}'.format(self.client_address))
                 # Process received data
                 self.data = self.connection.recv(1024)
-        except:
-            pass
+        except Exception as e:
+            logging.debug('Unable to receive message. Error: {0}'.format(e))
         self.sockwait.set()
 
     def run(self):
@@ -114,7 +121,8 @@ class ProxyServer(threading.Thread):
         logging.info('starting up on %s port %s' % self.sock.getsockname())
         # Accept max 1 connection
         self.sock.listen(1)
-        #main loop
+
+        # Main loop
         while not self.stopsignal:
             logging.debug('waiting for a connection')
 
@@ -130,7 +138,7 @@ class ProxyServer(threading.Thread):
             # The following call will block the thead
             self.sockwait.wait()
             if self.connection:
-                if self.data and len(self.data)==128:
+                if self.data and len(self.data) == 128:
                     rawserial = str(self.data[15:31].decode())
                     # obj dLog transforms de raw data from the photovoltaic Systems converter
                     valid = False
@@ -145,8 +153,8 @@ class ProxyServer(threading.Thread):
                         if self.connection:
                             try:
                                 self.connection.sendall(b'')
-                            except:
-                                pass
+                            except Exception as e:
+                                logging.debug('Unabled to reply to log request: {0}'.format(e))
                             # give replay if connection is not closed yet
                     else:
                         logging.warning("Received incorrect data, ignoring connection!")
@@ -155,15 +163,15 @@ class ProxyServer(threading.Thread):
                     try:
                         self.connection.close()
                         logging.debug('connection closed')
-                    except:
-                        pass
+                    except Exception as e:
+                        logging.debug('closing connection failed: {0}'.format(e))
 
     def forwardstate(self, serial, status):
         # Forward data to datalogger and MQTT
         # TODO
         # Forward logger message to MTTQ if host is defined
         if self.mqttfw:
-            self.mqttfw.mqttforward(json.dumps(str(base64.b64encode(self.data))), 
+            self.mqttfw.mqttforward(json.dumps(str(base64.b64encode(self.data))),
                                     serial, status)
         # Forward data to proxy or Omnik datalogger
         if args.omniklogger:
@@ -174,8 +182,9 @@ class ProxyServer(threading.Thread):
                 # Kill the thread if it is blocking
                 self.fwthread.self.raise_exception()
 
+
 class tcpforward(threading.Thread):
-    
+
     def forward(self, data):
         threading.Thread.__init__(self, target=self._run)
         self.data = data
@@ -195,6 +204,7 @@ class tcpforward(threading.Thread):
             logging.warning("Error forwarding: {0}".format(e))
         finally:
             self.forwardsock.close()
+
 
 class mqtt(object):
 
@@ -222,7 +232,7 @@ class mqtt(object):
         # default prefixes
         self.discovery_prefix = args.mqtt_discovery_prefix
         self.device_name = args.mqtt_device_name
-        self.logger_sensor_name  = args.mqtt_logger_sensor_name 
+        self.logger_sensor_name = args.mqtt_logger_sensor_name
 
     def close(self):
         self.mqtt_client.disconnect()
@@ -231,7 +241,7 @@ class mqtt(object):
         topics = {}
         topics['main'] = "{0}/binary_sensor/{1}_{2}".format(self.discovery_prefix, self.device_name, self.serial)
         topics['state'] = "{0}/state".format(topics['main'])
-        topics['attr'] =  "{0}/attr".format(topics['main'])
+        topics['attr'] = "{0}/attr".format(topics['main'])
         topics['config'] = {}
         topics['config']['logger_sensor'] = "{0}/logger_sensor/config".format(topics['main'])
         return topics
@@ -268,7 +278,7 @@ class mqtt(object):
         return config_pl
 
     def _value_payload(self):
-        value_pl = { "state" : self.status }
+        value_pl = {"state": self.status}
         return value_pl
 
     def _attribute_payload(self):
@@ -287,7 +297,7 @@ class mqtt(object):
             else:
                 logging.warning("Publishing config {0} failed!".format(entity))
         except Exception as e:
-            logging.error("Unhandled error publishing config for entity {entity}: {0}".format(e))
+            logging.error("Unhandled error publishing config for entity {0}: {1}".format(entity, e))
 
     def _publish_attributes(self, topics, attr_pl):
         try:
@@ -342,10 +352,11 @@ class mqtt(object):
         if rc == 0:
             logging.info("MQTT disconnected")
 
+
 def main(args):
     global stopflag
     signal.signal(signal.SIGINT, signal_handler)
-    proxy=ProxyServer(args)
+    proxy = ProxyServer(args)
     proxy.start()
     try:
         while not (proxy.stopsignal or stopflag):
@@ -355,6 +366,7 @@ def main(args):
     proxy.cancel()
     logging.info("Stopping threads...")
     proxy.join()
+
 
 if __name__ == '__main__':
     stopflag = False
@@ -373,7 +385,8 @@ if __name__ == '__main__':
     parser.add_argument('--listenport', default=listenport, type=int,
                         help='The local port to listen to')
     parser.add_argument('--omniklogger', default=None,
-                        help='Forward to an address omnik/SolarmanPV datalogger server listens to. Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
+                        help='Forward to an address omnik/SolarmanPV datalogger server listens to. \
+                              Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
     parser.add_argument('--omnikloggerport', default=omnikloggerdestport,
                         help='The port the omnik/SolarmanPV datalogger server listens to')
     parser.add_argument('--mqtt_host', default=None,
@@ -408,14 +421,14 @@ if __name__ == '__main__':
     if args.config:
         c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
         c.read([args.config], encoding='utf-8')
-        args.mqtt_host = c.get('mqtt','host', fallback=args.mqtt_host)
-        args.mqtt_port = c.get('mqtt','port', fallback=args.mqtt_port)
-        args.mqtt_discovery_prefix = c.get('mqtt','discovery_prefix ', fallback=args.mqtt_discovery_prefix)
-        args.mqtt_client_name_prefix = c.get('mqtt','client_name_prefix', fallback=args.mqtt_client_name_prefix)
+        args.mqtt_host = c.get('mqtt', 'host', fallback=args.mqtt_host)
+        args.mqtt_port = c.get('mqtt', 'port', fallback=args.mqtt_port)
+        args.mqtt_discovery_prefix = c.get('mqtt', 'discovery_prefix ', fallback=args.mqtt_discovery_prefix)
+        args.mqtt_client_name_prefix = c.get('mqtt', 'client_name_prefix', fallback=args.mqtt_client_name_prefix)
         args.mqtt_username = c.get('mqtt', 'username', fallback=args.mqtt_username)
         args.mqtt_password = c.get('mqtt', 'password', fallback=args.mqtt_password)
-        args.mqtt_device_name = c.get('mqtt','device_name', fallback=args.mqtt_device_name)
-        args.mqtt_device_name = c.get('mqtt','logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
-        args.timezone = c.get('default','timezone',  fallback=args.timezone)
-        
+        args.mqtt_device_name = c.get('mqtt', 'device_name', fallback=args.mqtt_device_name)
+        args.mqtt_device_name = c.get('mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
+        args.timezone = c.get('default', 'timezone',  fallback=args.timezone)
+
     main(args)
