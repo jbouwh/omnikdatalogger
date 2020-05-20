@@ -139,32 +139,33 @@ class ProxyServer(threading.Thread):
             self.sockwait.wait()
             if self.connection:
                 if self.data and len(self.data) == 128:
-                    rawserial = str(self.data[15:31].decode())
-                    # obj dLog transforms de raw data from the photovoltaic Systems converter
-                    valid = False
-                    if rawserial in args.serialnumber:
-                        self.status[rawserial] = STATUS_ON
-                        self.lastupdate[rawserial] = datetime.datetime.now()
-                        valid = True
-                    if valid:
-                        # Process data
-                        logging.info("Processing message for inverter '{0}'".format(rawserial))
-                        self.forwardstate(rawserial, self.status[rawserial])
-                        if self.connection:
-                            try:
-                                self.connection.sendall(b'')
-                            except Exception as e:
-                                logging.debug('Unabled to reply to log request: {0}'.format(e))
-                            # give replay if connection is not closed yet
-                    else:
-                        logging.warning("Received incorrect data, ignoring connection!")
-                        continue
-                if self.connection:
-                    try:
-                        self.connection.close()
-                        logging.debug('connection closed')
-                    except Exception as e:
-                        logging.debug('closing connection failed: {0}'.format(e))
+                    self._processmsg()
+                try:
+                    self.connection.close()
+                    logging.debug('connection closed')
+                except Exception as e:
+                    logging.debug('closing connection failed: {0}'.format(e))
+
+    def _processmsg(self):
+        rawserial = str(self.data[15:31].decode())
+        # obj dLog transforms de raw data from the photovoltaic Systems converter
+        valid = False
+        if rawserial in args.serialnumber:
+            self.status[rawserial] = STATUS_ON
+            self.lastupdate[rawserial] = datetime.datetime.now()
+            valid = True
+        if valid:
+            # Process data
+            logging.info("Processing message for inverter '{0}'".format(rawserial))
+            self.forwardstate(rawserial, self.status[rawserial])
+            if self.connection:
+                try:
+                    self.connection.sendall(b'')
+                except Exception as e:
+                    logging.debug('Unabled to reply to log request: {0}'.format(e))
+                # give replay if connection is not closed yet
+        else:
+            logging.warning("Received incorrect data, ignoring connection!")
 
     def forwardstate(self, serial, status):
         # Forward data to datalogger and MQTT
