@@ -25,7 +25,7 @@ class InverterMsg:
         return float(struct.unpack('!I', self.rawmsg[begin:begin + 4])[0]) / devider
 
     def getID(self):
-        return self.__getString(15,31)
+        return self.__getString(15, 31)
 
     def getTemp(self):
         return self.__getShort(31)
@@ -37,7 +37,7 @@ class InverterMsg:
         return self.__getLong(71)
 
     def getVPV(self, i=1):
-        if i  not in range(1, 4):
+        if i not in range(1, 4):
             i = 1
         num = 33 + (i - 1) * 2
         return self.__getShort(num)
@@ -58,13 +58,13 @@ class InverterMsg:
         if i not in range(1, 4):
             i = 1
         num = 51 + (i - 1) * 2
-        return self.__getShort(num)  
+        return self.__getShort(num)
 
     def getFAC(self, i=1):
         if i not in range(1, 4):
             i = 1
         num = 57 + (i - 1) * 4
-        return self.__getShort(num, 100)          
+        return self.__getShort(num, 100)
 
     def getPAC(self, i=1):
         if i not in range(1, 4):
@@ -86,13 +86,13 @@ def generate_string(ser):
     the s/n twice; then again a fixed string of two chars; a checksum of
     the double s/n with an offset; and finally a fixed ending char.
     '''
-    responseString = '\x68\x02\x40\x30';
+    responseString = '\x68\x02\x40\x30'
 
     doublehex = hex(ser)[2:]*2
-    hexlist = [ doublehex[i:i+2].decode('hex') for i in 
-        reversed(range(0, len(doublehex), 2))]
+    hexlist = [doublehex[i:i+2].decode('hex') for i in
+               reversed(range(0, len(doublehex), 2))]
 
-    cs_count = 115 + sum([ ord(c) for c in hexlist])
+    cs_count = 115 + sum([ord(c) for c in hexlist])
     cs = hex(cs_count)[-2:].decode('hex')
     responseString += ''.join(hexlist) + '\x01\x00'+cs+'\x16'
     return responseString
