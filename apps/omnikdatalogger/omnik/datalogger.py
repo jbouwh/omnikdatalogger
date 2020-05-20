@@ -36,7 +36,8 @@ class DataLogger(object):
         if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
 
-        self.client_module = self.config.get('default', 'client', 'omnikportal')
+        # For now the default client is solarmanpv, clinet should be configured in the config
+        self.client_module = self.config.get('default', 'client', 'solarmanpv')
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Initializing client : {self.client_module}.")
         sys.path.append(self.__expand_path('client'))
         Client.logger = self.logger

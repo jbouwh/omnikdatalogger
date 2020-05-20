@@ -11,6 +11,6 @@
     "\\scripts",
     "\\scripts\\proxy"
   ],
-  "SelectedNode": "\\apps\\omnikdatalogger\\omniklogger.py",
+  "SelectedNode": "\\scripts\\proxy\\omnikloggerproxy.py",
   "PreviewInSolutionExplorer": false
 }
