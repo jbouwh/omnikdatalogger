@@ -18,7 +18,7 @@ class pvoutput(Plugin):
                              fallback='Europe/Amsterdam')
         self.timezone = pytz.timezone(tz)
 
-    def get_weather(self, hass_api):
+    def get_weather(self):
         try:
             if 'weather' not in self.cache:
                 self.logger.debug('[cache miss] Fetching weather data')
@@ -79,7 +79,7 @@ class pvoutput(Plugin):
             }
 
             if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
-                weather = self.get_weather(self.hass_api)
+                weather = self.get_weather()
 
                 data['v5'] = str(weather['main']['temp'])
 
