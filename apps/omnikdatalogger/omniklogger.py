@@ -9,6 +9,10 @@ import appdaemon.plugins.hass.hassapi as hass
 from ha_logger import hybridlogger
 from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
+import pathlib
+import json
+
+mqtt_config_file = f"{pathlib.Path(__file__).parent.absolute()}/mqtt_fields.json"
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +31,7 @@ class ha_ConfigParser(configparser.ConfigParser):
         super().__init__(*args, **kwargs)
 
     def has_option(self, section: str, option: str):
-        if str.lower(section) == 'default':
+        if str(section).lower() == 'default':
             if option in self.ha_args:
                 return True
         else:
@@ -36,8 +40,8 @@ class ha_ConfigParser(configparser.ConfigParser):
                     return True
         return super().has_option(section, option)
 
-    def get(self, section: str, option: str, fallback=None, **kwargs):
-        if str.lower(section) == 'default':
+    def get(self, section, option, fallback=None, **kwargs):
+        if str(section).lower() == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
         else:
@@ -45,18 +49,21 @@ class ha_ConfigParser(configparser.ConfigParser):
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
         try:
-            retval = super().get(section, option, fallback=fallback, **kwargs)
+            if fallback:
+                retval = super().get(section, option, fallback=fallback, **kwargs)
+            else:
+                retval = super().get(section, option, fallback='', **kwargs)
         except Exception:
             retval = fallback
         return retval
 
-    def getboolean(self, section: str, option: str, fallback=None, **kwargs):
+    def getboolean(self, section, option, fallback=None, **kwargs):
         truelist = ['true', '1', 't', 'y', 'yes', 'j', 'ja']
         valstr = str(self.get(section, option, fallback, **kwargs)).lower()
         return (valstr in truelist)
 
-    def getlist(self, section: str, option: str, fallback=[], **kwargs):
-        if str.lower(section) == 'default':
+    def getlist(self, section, option, fallback=[], **kwargs):
+        if str(section).lower() == 'default':
             if option in self.ha_args:
                 return self.ha_args.get(option, fallback)
         else:
@@ -88,26 +95,41 @@ class HA_OmnikDataLogger(hass.Hass):
                                     f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
+        # Link mqtt field config to config parser
+        with open(mqtt_config_file) as json_file_config:
+            c.mqtt_field_config = json.load(json_file_config)
+
         self.interval = int(c.get('default', 'interval', 360))
-        self.clazz = DataLogger(c, hass_api=self)
-        # running repeatedly, every X seconds
-        hybridlogger.ha_log(logger, self, "INFO", f"Daemon interval {self.interval} seconds.")
-        self.rt = RepeatedJob(c, function=self.clazz.process, hass_api=self)
+        self.datalogger = DataLogger(c, hass_api=self)
+
+        # running repeatedly
+        if self.datalogger.client.use_timer:
+            hybridlogger.ha_log(logger, self, "INFO", f"Daemon interval {self.interval} seconds.")
+        else:
+            hybridlogger.ha_log(logger, self, "INFO", "Daemon starts listening.")
+        self.rt = RepeatedJob(c, self.datalogger, hass_api=self)
 
     def terminate(self):
         hybridlogger.ha_log(logger, self, "INFO", "Daemon was stopped.")
         self.rt.stop()
 
 
-# Initialisation form commandline
+# Initialization from the commandline
 def main(c: ha_ConfigParser, hass_api=None):
+    # Link mqtt field config to config parser
+    with open(mqtt_config_file) as json_file_config:
+        c.mqtt_field_config = json.load(json_file_config)
+    # Enabled debigging if the flag is set
     if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)
-    clazz = DataLogger(c, hass_api=hass_api)
+    datalogger = DataLogger(c, hass_api=hass_api)
     if c.has_option('default', 'interval'):
-        # running repeatedly, every X seconds
-        hybridlogger.ha_log(logger, hass_api, "INFO", f"Monitoring interval {c.get('default','interval')} seconds.")
-        rt = RepeatedJob(c, function=clazz.process, hass_api=hass_api)
+        # running repeatedly
+        if datalogger.client.use_timer:
+            hybridlogger.ha_log(logger, hass_api, "INFO", f"Daemon interval {int(c.get('default', 'interval', 360))} seconds.")
+        else:
+            hybridlogger.ha_log(logger, hass_api, "INFO", "Daemon starts listening.")
+        rt = RepeatedJob(c, datalogger, hass_api)
         if hass_api:
             hass_api.rt = rt
         else:
@@ -120,7 +142,7 @@ def main(c: ha_ConfigParser, hass_api=None):
                 rt.stop()
     else:
         # running only once
-        clazz.process()
+        datalogger.process()
 
 
 if __name__ == '__main__':

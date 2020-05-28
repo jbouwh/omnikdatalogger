@@ -4,7 +4,7 @@ from ha_logger import hybridlogger
 import hashlib
 import xml.etree.ElementTree as ET
 import datetime
-from omnik.client import Client
+from omnik.plugin_client import Client
 
 
 class SolarmanPVClient(Client):
@@ -24,7 +24,7 @@ class SolarmanPVClient(Client):
         self.username = self.config.get('solarmanpv', 'username')
         self.password = self.config.get('solarmanpv', 'password')
 
-    def initialize(self, logger):
+    def initialize(self):
         pwhash = hashlib.md5(self.password.encode('utf-8')).hexdigest()
         url = f'{self.base_url}/Login?username={self.username}&password={pwhash}&key={self.api_key}'
 
@@ -61,7 +61,7 @@ class SolarmanPVClient(Client):
 
         return r.content
 
-    def getPlants(self, logger):
+    def getPlants(self):
 
         data = []
         for plant in self.config.getlist('solarmanpv', 'plant_id_list'):
@@ -82,7 +82,7 @@ class SolarmanPVClient(Client):
                     return el.text
         return fallback
 
-    def getPlantData(self, logger, plant_id):
+    def getPlantData(self, plant_id):
 
         data = {}
         url = f'{self.base_url}/Data?username={self.username}&stationid={plant_id}&key={self.api_key}&token={self.token}'
@@ -110,13 +110,12 @@ class SolarmanPVClient(Client):
             data['income'] = float(self.xmlprop(xml, ['income', 'TotalIncome'], 0.0))
             data['data_logger'] = self.xmlprop(xml, ['detail', 'WiFi', 'id'], '')
             data['inverter'] = self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'SN'], '')
-            data['status'] = self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'status'], '')
-            data['current_power'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'power'], 0.0))
+            data['status'] = int(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'status'], 0))
+            data['current_power'] = int(float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'power'], 0.0)) * 1000)
             data['today_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etoday'], 0.0))
             data['total_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etotal'], 0.0))
-            data['last_update_time'] = \
-                datetime.datetime.utcfromtimestamp(float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'lastupdated'],
-                                                   datetime.datetime.now().timestamp()))).strftime('%Y-%m-%dT%H:%M:%SZ')
+            data['last_update'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'lastupdated'], datetime.datetime.now().timestamp()))
+            data['last_update_time'] = datetime.datetime.utcfromtimestamp(data['last_update']).strftime('%Y-%m-%dT%H:%M:%SZ')
             return data
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Cannot fetch data: {xmldata}")

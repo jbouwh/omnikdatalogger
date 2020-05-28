@@ -234,21 +234,73 @@ As mentioned command line and AppDaemon configuration override settings the `con
 
 Arguments marked with * must be configured either in the `apps.yaml` or `config.ini` configuration file.
 
+### General settings
 
-### General settings - `apps.yaml` 'only' configuration options
+#### General settings - `apps.yaml` 'only' configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `module` | False | string | _(none)_ | Should be the name of the base script `omniklogger`. A path should not be configured. AppDaemon wil find the module automatically.
 `class` | False | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
 `config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required when using the command line. A sample config.ini template file is can be found at /config/appdaemon/apps/omnikdatalogger/config.ini
 
-### General settings `apps.yaml` or `config.ini` configuration options
+#### General settings `apps.yaml` or `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
-`timezone` | True | string | `Europe/Amsterdam` | Time zone string recognizable by the pytz python module to enable logging in local time (pvoutput plugin). E.g. _Europe/Amsterdam_
-`city` | True | string | `Amsterdam` | City name recognizable by the Astral python module. Based on this city the data logiing is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
+`city` | True | string | `Amsterdam` | City name recognizable by the Astral python module. Based on this city the data logging is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
 `interval` | True | integer | `360` | The number of seconds of the interval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
-`client` | True | string | `solarmanpv` | Name of the client that will be used to fetch the data. Valid choices are `solarmanpv` and `omnikportal`.
+
+#### Plugin settings  under `plugins` in `apps.yaml` or `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
+`localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
+
+
+### Client settings
+
+#### LocalProxy client settings under `localproxy` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Every plant has its own section.
+
+##### Plant settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
+Details for the plant are set under `[plant_id]`. Every plant has its own section. Possible keys are:
+key | optional | type | default | description
+-- | --| -- | -- | --
+`inverter_address` | True | string | _(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.
+`logger_sn` | True | int | _(none)_ | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.
+`inverter_port` | True | int | _8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
+`inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant_id' to validate/filter the raw data messages received.
+
+The LocalProxy client uses input plugins that are used to collect the data.
+The `omnikloggerproxy.py` script (under the folder `/scripts/proxy`) enable to proxy the raw logger data to MQTT and can help to forward your data to omnikdatalogger and still support forwarding the logging to the the legacy portal of Omnik/Solarman.
+Multiple plugins can be enabled, but usualy you will use one of these input pluging. The decoding is based on _(https://github.com/Woutrrr/Omnik-Data-Logger)_ by Wouter van der Zwan.
+The plugings for the `localproxy` client are:
+* `tcp_proxy`: Listens to directed inverter input on port 10004. See *tcp_proxy* paragraph. Yo need to forward the inverter traffic to be able to intercept your inverter data.
+* `mqtt_proxy`: Listens to a MQTT topic to retreive the data. Use `omnikloggerproxy.py` to forward to your MQTT server.
+* `hassapi`: Listens to a homeassitant entity (ascociated with MQTT) using the HASSAPI in AppDaemon. This plugin is prefered for use in combination with Home Assistant.
+
+##### `tcp_proxy` plugin for the `localproxy` client under `tcp_proxy` in `apps.yaml` or `[tcp_proxy]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`listen_address` | True | string | _(0.0.0.0)_ | The IP-adres to listen to.
+`listen_port` | True | string | _(10004)_ | The port to listen to.
+
+##### `mqtt_proxy` plugin for the `localproxy` client under `mqtt_proxy` in `apps.yaml` or `[mqtt_proxy]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`logger_sensor_name` | True | string | _(Datalogger)_ | The mqtt topic is assembled as {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
+`discovery_prefix` | True | string | (key under the `mqtt`section`) | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
+`host` | True | string | (key under the `mqtt`section`) | Hostname or fqdn of the MQTT server for publishing.
+`port` | True | integer | (key under the `mqtt`section`) | MQTT port to be used. 
+`client_name_prefix` | True | string | (key under the `mqtt`section`) then `ha-mqttproxy-omniklogger` | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
+`username`* | False | string | _(key under the `mqtt`section`)_ | The MQTT username used for authentication
+`password`* | False | string | _(key under the `mqtt`section`)_ | The MQTT password used for authentication
+
+##### `hassapi` plugin for the `localproxy` client under `hassapi` in `apps.yaml` or `[hassapi]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script
 
 ### SolarmanPV client settings under `solarmanpv` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
 key | optional | type | default | description
@@ -257,7 +309,9 @@ key | optional | type | default | description
 `password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
 `plant_id_list` |  False | list | _(empty list)_ | A (comma separated) or yaml list of strings specifying the plant_id(s) or pid's of of your plants.
 `api_key` | True | string | _(apitest)_ | The API key used to access your data. The default key might work for you as well.
-`base_url` | True | string | _(http://www.solarmanpv.com:18000/SolarmanApi/serverapi)_ | The API URL used to access your data. The default url might work for you as well.
+`base_url` | True | string | _(http://www.solarmanpv.com:18000/SolarmanApi/serverapi)_ | The API URL used to access your data.
+
+This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section mentioned earlier.
 
 ### OmnikPortal client settings under `omnikportal` in `apps.yaml` or `[omnikportal]` `config.ini` configuration options
 key | optional | type | default | description
@@ -266,7 +320,7 @@ key | optional | type | default | description
 `password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
 `app_id ` | True | string | _(10038)_ | The APP_ID used to access your data. The default value might work for you as well.
 `app_key` | True | string | _(Ox7yu3Eivicheinguth9ef9kohngo9oo)_ | The API key to access your data 
-`base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data. The default url might work for you as well.
+`base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data.
     
 ### Enable plugins under `plugins:` in `apps.yaml` or `[plugins]` in `config.ini`
 key | optional | type | default | description
@@ -298,7 +352,7 @@ key | optional | type | default | description
 `username`* | False | string | _(none)_ | The MQTT username used for authentication
 `password`* | False | string | _(none)_ | The MQTT password used for authentication
 
-#### Renaming entities
+#### Renaming entities. (Keys are like {fieldname}_name)
 _For every solar plant, 4 entities are added to the mqtt auto discovery. The default name can be configured._
 
 key | optional | type | default | description
@@ -307,6 +361,33 @@ key | optional | type | default | description
 `total_energy_name` | True | string | `Energy total` | Name override for the entity that indicates total energy in kWh the solar plant has generated since installation.
 `today_energy_name` | True | string | `Energy today` | Name override for the entity that indicates total energy in kWh the solar plant has generated this day.
 `last_update_time_name` | True | string | `Last update` | Name override for the entity that is a timestamp total of the last update of the solar plant.
+`name` | True | string | `Current power` | Name override for the entity that indicates the current power in Watt the solar plant is producing.
+`inverter_temperature_name` | True | string | `Inverter temperature` | Name override for inverters Temperature. Only the clients `tcpclient` and `localproxy` are supported.
+`current_ac1_name` | True | string | `AC Current fase R` | Name override for AC Current fase 1. Only the clients `tcpclient` and `localproxy` are supported.
+`current_ac2_name` | True | string | `AC Current fase S` | Name override for AC Current fase 2. Only the clients `tcpclient` and `localproxy` are supported.
+`current_ac3_name` | True | string | `AC Current fase T` | Name override for AC Current fase 3. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_ac1_name` | True | string | `AC Voltage fase R` | Name override for AC Voltage fase 1. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_ac2_name` | True | string | `AC Voltage fase S` | Name override for AC Voltage fase 2. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_ac3_name` | True | string | `AC Voltage fase T` | Name override for AC Voltage fase 3. Only the clients `tcpclient` and `localproxy` are supported.
+`frequency_ac1_name` | True | string | `AC Frequency fase R` | Name override for AC Frequency fase 1. Only the clients `tcpclient` and `localproxy` are supported.
+`frequency_ac2_name` | True | string | `AC Frequency fase S` | Name override for AC Frequency fase 2. Only the clients `tcpclient` and `localproxy` are supported.
+`frequency_ac3_name` | True | string | `AC Frequency fase T` | Name override for AC Frequency fase 3. Only the clients `tcpclient` and `localproxy` are supported.
+`power_ac1_name` | True | string | `AC Power fase R` | Name override for AC Power fase 1. Only the clients `tcpclient` and `localproxy` are supported.
+`power_ac2_name` | True | string | `AC Power fase S` | Name override for AC Power fase 2.  Only the clients `tcpclient` and `localproxy` are supported.
+`power_ac3_name` | True | string | `AC Power fase T` | Name override for AC Power fase 3. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_pv1_name` | True | string | `DC Voltage string 1` | Name override for PV Voltage string 1. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_pv2_name` | True | string | `DC Voltage string 2` | Name override for PV Voltage string 2. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_pv3_name` | True | string | `DC Voltage string 3` | Name override for PV Voltage string 3. Only the clients `tcpclient` and `localproxy` are supported.
+`current_pv1_name` | True | string | `DC Current string 1` | Name override for PV Current string 1. Only the clients `tcpclient` and `localproxy` are supported.
+`current_pv2_name` | True | string | `DC Current string 2` | Name override for PV Current string 2. Only the clients `tcpclient` and `localproxy` are supported.
+`current_pv3_name` | True | string | `DC Current string 3` | Name override for PV Current string 3. Only the clients `tcpclient` and `localproxy` are supported.
+`power_pv1_name` | True | string | `DC Power string 1` | Name override for PV Power string 1. Only the clients `tcpclient` and `localproxy` are supported.
+`power_pv2_name` | True | string | `DC Power string 2` | Name override for PV Power string 2. Only the clients `tcpclient` and `localproxy` are supported.
+`power_pv3_name` | True | string | `DC Power string 3` | Name override for PV Power string 3. Only the clients `tcpclient` and `localproxy` are supported.
+`current_power_pv_name` | True | string | `DC Current power` | Name override for PV total power. Only the clients `tcpclient` and `localproxy` are supported.
+`operation_hours_name` | True | string | `Hours active` | Name override for the oprational hours of the inverter. Only the clients `tcpclient` and `localproxy` are supported.
+
+The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'mqtt_fields.json'.
 
 ## PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
 
@@ -316,7 +397,9 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `sys_id`* | False | string | _(none)_ | Your unique system id, generated when creating an account at pvoutput.org.    
 `api_key`* | False | string | _(none)_ | Unique API access key generated at pvoutput.org
-`use_temperature` | True | bool | `false` | When set to true the temperature obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
+`use_temperature` | True | bool | `false` | When set to true and `use_inverter_temperature` is not set, the temperature is obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
+`use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
+`publish_voltage ` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 
 ## OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true)_

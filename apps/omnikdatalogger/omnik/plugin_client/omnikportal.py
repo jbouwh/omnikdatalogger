@@ -1,7 +1,8 @@
 import requests
 import urllib.parse
 from ha_logger import hybridlogger
-from omnik.client import Client
+from omnik.plugin_client import Client
+from datetime import datetime
 
 
 class OmnikPortalClient(Client):
@@ -20,7 +21,7 @@ class OmnikPortalClient(Client):
         self.username = self.config.get('omnikportal', 'username')
         self.password = self.config.get('omnikportal', 'password')
 
-    def initialize(self, logger):
+    def initialize(self):
         url = f'{self.base_url}/user/account_validate'
 
         body = {
@@ -57,7 +58,7 @@ class OmnikPortalClient(Client):
 
         return r.json()
 
-    def getPlants(self, logger):
+    def getPlants(self):
         url = f'{self.base_url}/plant/list'
 
         data = self._api_request(url, 'GET', None)
@@ -65,11 +66,19 @@ class OmnikPortalClient(Client):
 
         return data['data'].get('plants', [])
 
-    def getPlantData(self, logger, plant_id):
+    def getPlantData(self, plant_id):
 
         url = f'{self.base_url}/plant/data?plant_id={plant_id}'
 
-        data = self._api_request(url, 'GET', None)
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant data ({plant_id}) {data}")
+        rawdata = self._api_request(url, 'GET', None)
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant data ({plant_id}) {rawdata}")
+        data = rawdata['data']
+        # Adjust power to Watt (not kW) and covert strings numbers to float or int
+        data['total_energy'] = float(data['total_energy'])
+        data['current_power'] = int(data['current_power'] * 1000)
+        data['peak_power_actual'] = int(data['peak_power_actual'] * 1000)
+        data['income'] = float(data['income'])
+        data['last_update'] = datetime.timestamp(datetime.strptime(f"{data['last_update_time']} UTC+0000",
+                                                '%Y-%m-%dT%H:%M:%SZ %Z%z'))
 
-        return data['data']
+        return data

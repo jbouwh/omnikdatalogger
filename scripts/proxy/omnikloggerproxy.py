@@ -16,13 +16,15 @@ import configparser
 import threading
 import signal
 import json
-import base64
+import binascii
 import os
 import paho.mqtt.client as mqttclient
 import uuid
 import logging
 import datetime
+import time
 
+__VERSION__ = '1.0'
 listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -31,7 +33,7 @@ omnikloggerdestport = 10004                        # This is the port the omnik/
 STATUS_ON = 'ON'
 STATUS_OFF = 'OFF'
 CHECK_STATUS_INTERVAL = 60
-INVERTER_MAX_IDLE_TIME = 30
+INVERTER_MAX_IDLE_TIME = 10
 
 global stopflag
 
@@ -68,7 +70,7 @@ class ProxyServer(threading.Thread):
         for serial in self.lastupdate:
             if self.lastupdate[serial] + datetime.timedelta(minutes=INVERTER_MAX_IDLE_TIME) < datetime.datetime.now():
                 self.status[serial] = STATUS_OFF
-                self.mqttfw.mqttforward(json.dumps(str(base64.b64encode(b'')).encode('UTF-8')),
+                self.mqttfw.mqttforward('',
                                         serial, self.status[serial])
         # Restart timer
         self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
@@ -113,8 +115,9 @@ class ProxyServer(threading.Thread):
         self.server_address = (args.listenaddress, args.listenport)
         try:
             self.sock.bind(self.server_address)
+            self.sock.settimeout(40)
         except Exception as e:
-            logging.critical('Not able to open socket for listeing, exiting! Error: {0}'.format(e))
+            logging.critical('Not able to open socket for listening, exiting! Error: {0}'.format(e))
             self.cancel()
             return
 
@@ -172,7 +175,7 @@ class ProxyServer(threading.Thread):
         # TODO
         # Forward logger message to MTTQ if host is defined
         if self.mqttfw:
-            self.mqttfw.mqttforward(json.dumps(str(base64.b64encode(self.data))),
+            self.mqttfw.mqttforward(json.dumps(str(binascii.b2a_base64(self.data), encoding='ascii')),
                                     serial, status)
         # Forward data to proxy or Omnik datalogger
         if args.omniklogger:
@@ -210,10 +213,10 @@ class tcpforward(threading.Thread):
 class mqtt(object):
 
     def __init__(self, args=[], kwargs={}):
-        # self.timezone = pytz.timezone(args.timezone)
         self.mqtt_client_name = args.mqtt_client_name_prefix + uuid.uuid4().hex
         self.mqtt_host = args.mqtt_host
         self.mqtt_port = int(args.mqtt_port)
+        self.mqtt_retain = args.mqtt_retain
         if not args.mqtt_username or not args.mqtt_password:
             logging.error("Please specify MQTT username and password in the configuration")
             return
@@ -240,7 +243,7 @@ class mqtt(object):
 
     def _topics(self):
         topics = {}
-        topics['main'] = "{0}/binary_sensor/{1}_{2}".format(self.discovery_prefix, self.device_name, self.serial)
+        topics['main'] = "{0}/binary_sensor/{1}_{2}".format(self.discovery_prefix, self.logger_sensor_name, self.serial)
         topics['state'] = "{0}/state".format(topics['main'])
         topics['attr'] = "{0}/attr".format(topics['main'])
         topics['config'] = {}
@@ -249,14 +252,15 @@ class mqtt(object):
 
     def _device_payload(self):
         # Determine model
-        model = "Omnik data logger"
+        model = "Omnik datalogger proxy"
 
         # Device payload
         device_pl = {
             "identifiers": ["{0}_{1}".format(self.device_name, self.serial)],
             "name": "{0}_{1}".format(self.device_name, self.serial),
             "mdl": model,
-            "mf": 'Omnik'
+            "mf": 'JBsoft',
+            "sw": __VERSION__
             }
         return device_pl
 
@@ -286,6 +290,7 @@ class mqtt(object):
         attr_pl = {
             "inverter": self.serial,
             "data": self.data,
+            "timestamp": time.time(),
             "last_update": "{0} {1}".format(self.reporttime.strftime('%Y-%m-%d'), self.reporttime.strftime('%H:%M:%S'))
             }
         return attr_pl
@@ -293,7 +298,7 @@ class mqtt(object):
     def _publish_config(self, topics, config_pl, entity):
         try:
             # publish config
-            if self.mqtt_client.publish(topics['config'][entity], json.dumps(config_pl[entity])):
+            if self.mqtt_client.publish(topics['config'][entity], json.dumps(config_pl[entity]), retain=self.mqtt_retain):
                 logging.debug("Publishing config {0} successful.".format(entity))
             else:
                 logging.warning("Publishing config {0} failed!".format(entity))
@@ -303,7 +308,7 @@ class mqtt(object):
     def _publish_attributes(self, topics, attr_pl):
         try:
             # publish attributes
-            if self.mqtt_client.publish(topics['attr'], json.dumps(attr_pl)):
+            if self.mqtt_client.publish(topics['attr'], json.dumps(attr_pl), retain=self.mqtt_retain):
                 logging.debug("Publishing attributes successful.")
             else:
                 logging.warning("Publishing attributes failed!")
@@ -313,7 +318,7 @@ class mqtt(object):
     def _publish_state(self, topics, value_pl):
         try:
             # publish state
-            if self.mqtt_client.publish(topics['state'], json.dumps(value_pl)):
+            if self.mqtt_client.publish(topics['state'], json.dumps(value_pl), retain=self.mqtt_retain):
                 logging.debug("Publishing state {0} successful.".format(json.dumps(value_pl)))
             else:
                 logging.warning("Publishing state {0} failed!".format(json.dumps(value_pl)))
@@ -322,7 +327,6 @@ class mqtt(object):
 
     def mqttforward(self, data, serial, status):
         # Decode data: base64.b64decode(json.loads(d, encoding='UTF-8'))
-        # Set report time in local timezone
         self.data = data
         self.serial = serial
         self.status = status
@@ -349,7 +353,7 @@ class mqtt(object):
             logging.info("MQTT connected")
             # subscribe listening (not used)
 
-    def _mqtt_on_disconnect(client, userdata, flags, rc):
+    def _mqtt_on_disconnect(self, client, userdata, flags, rc):
         if rc == 0:
             logging.info("MQTT disconnected")
 
@@ -394,6 +398,8 @@ if __name__ == '__main__':
                         help='The mqtt host to forward processed data to. Config overrides.')
     parser.add_argument('--mqtt_port', default='1883',
                         help='The mqtt server port. Config overrides.')
+    parser.add_argument('--mqtt_retain', default=True, type=bool,
+                        help='The mqtt data message retains. Config overrides.')
     parser.add_argument('--mqtt_discovery_prefix', default='homeassistant',
                         help='The mqtt topoc prefix (used for MQTT auto discovery). Config overrides.')
     parser.add_argument('--mqtt_client_name_prefix', default='ha-mqtt-omnikloggerproxy',
@@ -402,12 +408,10 @@ if __name__ == '__main__':
                         help='The mqtt username. Config overrides.')
     parser.add_argument('--mqtt_password', default=None,
                         help='The mqtt password. Config overrides.')
-    parser.add_argument('--mqtt_device_name', default='Omnik',
+    parser.add_argument('--mqtt_device_name', default='Datalogger proxy',
                         help='The device name that apears using mqtt autodiscovery (HA). Config overrides.')
     parser.add_argument('--mqtt_logger_sensor_name', default='Datalogger',
-                        help='The device name that apears using mqtt autodiscovery (HA). Config overrides.')
-    parser.add_argument('--timezone', default='Europe/Amsterdam',
-                        help='The local time zone (for tzdata). Config overrides.')
+                        help='The name of data sensor using mqtt autodiscovery (HA). Config overrides.')
     args = parser.parse_args()
     FORMAT = '%(module)s: %(message)s'
     loglevel = {
@@ -424,12 +428,12 @@ if __name__ == '__main__':
         c.read([args.config], encoding='utf-8')
         args.mqtt_host = c.get('mqtt', 'host', fallback=args.mqtt_host)
         args.mqtt_port = c.get('mqtt', 'port', fallback=args.mqtt_port)
+        args.mqtt_retain = True if c.get('mqtt', 'retain', fallback='true') == 'true' else args.mqtt_retain
         args.mqtt_discovery_prefix = c.get('mqtt', 'discovery_prefix ', fallback=args.mqtt_discovery_prefix)
         args.mqtt_client_name_prefix = c.get('mqtt', 'client_name_prefix', fallback=args.mqtt_client_name_prefix)
         args.mqtt_username = c.get('mqtt', 'username', fallback=args.mqtt_username)
         args.mqtt_password = c.get('mqtt', 'password', fallback=args.mqtt_password)
         args.mqtt_device_name = c.get('mqtt', 'device_name', fallback=args.mqtt_device_name)
-        args.mqtt_device_name = c.get('mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
-        args.timezone = c.get('default', 'timezone',  fallback=args.timezone)
+        args.logger_sensor_name = c.get('mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
 
     main(args)

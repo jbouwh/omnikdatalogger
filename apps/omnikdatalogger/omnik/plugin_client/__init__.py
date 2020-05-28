@@ -15,3 +15,12 @@ class Client(object, metaclass=BaseClient):
     config = None
     logger = None
     hass_api = None
+    use_timer = True
+    stoprequest = False
+    
+    def initialize(self):
+        pass
+
+    def stop(self):
+         self.stoprequest = True
+

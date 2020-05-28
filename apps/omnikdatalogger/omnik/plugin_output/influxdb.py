@@ -1,4 +1,4 @@
-from omnik.plugins import Plugin
+from omnik.plugin_output import Plugin
 from ha_logger import hybridlogger
 
 

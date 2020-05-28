@@ -1,0 +1,20 @@
+# Exampel config file for omnikloggerproxy.py (rename to config.ini)
+# Encoding: UTF-8
+
+[mqtt]
+# mqtt integration
+# Creates sensor 'binary_sensor.datalogger' with MQTT auto discovery in Home Assistant
+# 
+#override for name field from omnik portal
+discovery_prefix = homeassistant
+host = homeassistant.local
+port = 1883
+retain = true
+client_name_prefix = ha-mqtt-omniklogger
+username = username_123
+password = password_123
+device_name = Inverter
+append_plant_id = false
+
+# Sensor name (omnikproxylogger only)
+logger_sensor_name = Datalogger

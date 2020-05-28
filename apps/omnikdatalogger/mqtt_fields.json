@@ -1,0 +1,205 @@
+{
+    "current_power": {
+        "name": "Current power",
+        "dev_cla": "power",
+        "ic": "chart-bell-curve",
+        "unit": "W",
+        "filter": ""
+    },
+    "total_energy": {
+        "name": "Energy total",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kWh",
+        "filter": "|round(1)"
+    },
+    "today_energy": {
+        "name": "Energy today",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kWh",
+        "filter": "|round(2)"
+    },
+    "last_update": {
+        "name": "Last Update",
+        "dev_cla": "timestamp",
+        "ic": "calendar-clock",
+        "unit": "",
+        "filter": "|timestamp_local"
+    },
+    "inverter_temperature": {
+        "name": "Inverter temperature",
+        "dev_cla": "temperature",
+        "ic": "thermometer-lines",
+        "unit": "\u00b0C",
+        "filter": "|round(1)"
+    },
+    "current_ac1": {
+        "name": "AC Current fase R",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "filter": "|round(2)"
+    },
+    "current_ac2": {
+        "name": "AC Current fase S",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "filter": "|round(2)"
+    },
+    "current_ac3": {
+        "name": "AC Current fase T",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "filter": "|round(2)"
+    },
+    "voltage_ac1": {
+        "name": "AC Voltage fase R",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
+    "voltage_ac2": {
+        "name": "AC Voltage fase S",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
+    "voltage_ac3": {
+        "name": "AC Voltage fase T",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
+    "frequency_ac1": {
+        "name": "AC Frequency fase R",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "Hz",
+        "filter": "|round(2)"
+    },
+    "frequency_ac2": {
+        "name": "AC Frequency fase S",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "Hz",
+        "filter": "|round(2)"
+    },
+    "frequency_ac3": {
+        "name": "AC Frequency fase T",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "Hz",
+        "filter": "|round(2)"
+    },
+    "power_ac1": {
+        "name": "AC Power fase R",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "filter": ""
+    },
+    "power_ac2": {
+        "name": "AC Power fase S",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "filter": ""
+    },
+    "power_ac3": {
+        "name": "AC Power fase T",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "filter": ""
+    },
+    "voltage_pv1": {
+        "name": "DC Voltage string 1",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
+    "voltage_pv2": {
+        "name": "DC Voltage string 2",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
+    "voltage_pv3": {
+        "name": "DC Voltage string 3",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
+    "current_pv1": {
+        "name": "DC Current string 1",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "filter": "|round(1)"
+    },
+    "current_pv2": {
+        "name": "DC Current string 2",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "filter": "|round(1)"
+    },
+    "current_pv3": {
+        "name": "DC Current string 3",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "filter": "|round(1)"
+    },
+    "power_pv1": {
+        "name": "DC Power string 1",
+        "dev_cla": "power",
+        "ic": "flash",
+        "unit": "W",
+        "filter": ""
+    },
+    "power_pv2": {
+        "name": "DC Power string 2",
+        "dev_cla": "power",
+        "ic": "flash",
+        "unit": "W",
+        "filter": ""
+    },
+    "power_pv3": {
+        "name": "DC Power string 3",
+        "dev_cla": "power",
+        "ic": "flash",
+        "unit": "W",
+        "filter": ""
+    },
+    "operation_hours": {
+        "name": "Hours active",
+        "dev_cla": "",
+        "ic": "progress-clock",
+        "unit": "Hours",
+        "filter": ""
+    },
+    "current_power_pv": {
+        "name": "DC Current power",
+        "dev_cla": "power",
+        "ic": "flash",
+        "unit": "W",
+        "filter": ""
+    },
+    "efficiency_inverter": {
+        "name": "Efficiency",
+        "dev_cla": "",
+        "ic": "clipboard-pulse-outline",
+        "unit": "%",
+        "filter": "* 100 | round(3)"
+    }
+}

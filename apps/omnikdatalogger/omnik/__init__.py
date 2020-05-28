@@ -15,21 +15,27 @@ logger = logging.getLogger(__name__)
 
 
 class RepeatedJob(object):
-    def __init__(self, c, function, hass_api, *args, **kwargs):
+    def __init__(self, c, datalogger, hass_api, *args, **kwargs):
         if c.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
-        self._timer = None
         self.logger = logger
         self.hass_api = hass_api
-        self.interval = int(c.get('default', 'interval', fallback=360))
-        self.half_interval = self.interval/2
-        self.function = function
+        self.datalogger = datalogger
+        self.client = datalogger.client
+        self.use_timer = datalogger.client.use_timer
+        if self.use_timer:
+            self._timer = None
+            self.interval = int(c.get('default', 'interval', fallback=360))
+            self.half_interval = self.interval/2
+            self.retries = 0
+            # Trigger the RepeatedJob using a short timer (1s) for the first time so the initialization can finish
+            self.calculated_interval = 1
+        else:
+            self.semaphore = self.client.semaphore
+            self.msgevent = self.client.msgevent
         self.args = args
         self.kwargs = kwargs
         # Initialize retry counter
-        self.retries = 0
-        # Trigger the RepeatedJob using a short timer (1s) for the first time so the initialization can finish
-        self.calculated_interval = 1
         self.is_running = False
         self.start()
 
@@ -40,7 +46,7 @@ class RepeatedJob(object):
     def _run(self):
         self.is_running = False
         # The function calls DataLogger.process()
-        self.last_update_time = self.function(*self.args, **self.kwargs)
+        self.last_update_time = self.datalogger.process(*self.args, **self.kwargs)
         # Calculate the new timer interval
         if self.last_update_time:
             # Reset retry counter
@@ -50,7 +56,7 @@ class RepeatedJob(object):
                 self.new_report_expected_at = self.last_update_time + datetime.timedelta(seconds=self.interval)
                 # Check if we have at least 60 seconds for the next cycle
                 if (self.new_report_expected_at + datetime.timedelta(seconds=-10) <
-                   datetime.datetime.now(datetime.timezone.utc)):
+                    datetime.datetime.now(datetime.timezone.utc)):
                     # No recent update of missing update: wait {interval} from now()
                     self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
                         datetime.timedelta(seconds=self.interval)
@@ -82,13 +88,29 @@ class RepeatedJob(object):
 
     # This function actual starts the timer
     def start(self):
-        # starting actual timer
-        if not self.is_running:
-            self._timer = threading.Timer(self.calculated_interval, self._run)
-            self._timer.daemon = True
-            self._timer.start()
-            self.is_running = True
+        if self.use_timer:
+            # starting actual timer
+            if not self.is_running:
+                self._timer = threading.Timer(self.calculated_interval, self._run)
+                self._timer.daemon = True
+                self._timer.start()
+                self.is_running = True
+        else:
+            # use a listing thread to process
+            self.listenthread = threading.Thread(target=self._listen_to_events)
+            self.listenthread.start()
 
     def stop(self):
-        self._timer.cancel()
+        if self.use_timer:
+            self._timer.cancel()
+        else:
+            # Stop listening
+            self.client.stop()
+            # exit event message loop
+            self.msgevent.set()
         self.is_running = False
+
+    def _listen_to_events(self):
+        self.is_running = True
+        while self.is_running:
+            self.last_update_time = self.datalogger.process(*self.args, **self.kwargs)
