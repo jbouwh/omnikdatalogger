@@ -97,7 +97,7 @@ class SolarmanPVClient(Client):
             # log warning
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", "No valid data received. Trying to renew token.")
             # Get new token
-            self.initialize(logger)
+            self.initialize()
             # Retry the call
             url = f'{self.base_url}/Data?username={self.username}&stationid={plant_id}&key={self.api_key}&token={self.token}'
             xmldata = self._api_request(url, 'GET', None)
