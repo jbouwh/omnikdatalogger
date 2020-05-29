@@ -136,7 +136,7 @@ class mqtt(Plugin):
         # Generate MQTT config topics
         for field in self.config.mqtt_field_config:
             # Only generate config for available data
-            if not field in msg:
+            if field not in msg:
                 # skip publishing non exitent values
                 continue
             # field: name, dev_cla, ic, unit, filter
@@ -238,7 +238,8 @@ class mqtt(Plugin):
 
     def process(self, **args):
         """
-        Send data to over mqtt (compliant with Home Assistant MQTT discovery standard https://www.home-assistant.io/docs/mqtt/discovery/)
+        Send data to over mqtt (compliant with Home Assistant MQTT discovery standard
+        See: https://www.home-assistant.io/docs/mqtt/discovery/)
         """
         # Get argument
         msg = args['msg']

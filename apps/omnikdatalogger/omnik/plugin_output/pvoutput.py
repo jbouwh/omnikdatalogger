@@ -43,6 +43,21 @@ class pvoutput(Plugin):
                                 type(e).__name__, str(e)))
             raise e
 
+    def _get_temperature(self, data):
+        if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
+            if self.config.getboolean('pvoutput', 'use_inverter_temperature', fallback=False) and 'inverter_temperature' in msg:
+                data['v5'] = msg['inverter_temperature']
+            else:
+                weather = self.get_weather()
+
+                data['v5'] = weather['main']['temp']
+
+    def _get_voltage(self, data):
+        voltage_field = self.config.get('pvoutput', 'publish_voltage', fallback=None)
+        if voltage_field:
+            if voltage_field in msg:
+                data['v6'] = msg[voltage_field]
+
     def process(self, **args):
         """
         Send data to pvoutput
@@ -76,19 +91,10 @@ class pvoutput(Plugin):
             }
 
             # Publish inverter temperature is available or use the temperature from openweather
-            if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
-                if self.config.getboolean('pvoutput', 'use_inverter_temperature', fallback=False) and 'inverter_temperature' in msg:
-                    data['v5'] = msg['inverter_temperature']
-                else:
-                    weather = self.get_weather()
-
-                    data['v5'] = weather['main']['temp']
+            self._get_temperature(data)
 
             # Publish voltage (if available)
-            voltage_field = self.config.get('pvoutput', 'publish_voltage', fallback=None)
-            if voltage_field:
-                if voltage_field in msg:
-                    data['v6'] = msg[voltage_field]
+            self._get_voltage(data)
 
             encoded = urllib.parse.urlencode(data)
 

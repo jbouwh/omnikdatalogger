@@ -1,8 +1,6 @@
 from ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
-import time
-import datetime
 import socket
 
 
@@ -24,24 +22,26 @@ class TCPclient(Client):
         # Initialize dict with inverter info
         self.inverters = {}
 
-
     def getPlants(self):
         data = []
         inverterdata = {}
         for plant in self.plant_id_list:
             inverter_address = self.config.get(plant, 'inverter_address', fallback=None)
             if not inverter_address:
-                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"inverter_address for plant {plant} was not specified [TCPclient]")
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                    f"inverter_address for plant {plant} was not specified [TCPclient]")
                 raise Exception('an inverter_address was not specified')
             inverter_port = int(self.config.get(plant, 'inverter_port', fallback='8899'))
             inverter_connection = (inverter_address, int(inverter_port))
             logger_sn = self.config.get(plant, 'logger_sn', fallback=None)
             if not logger_sn:
-                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "logger_sn (The serial number of the Wi-Fi datalogger) for plant {plant} was not specified for [TCPclient]")
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "logger_sn (The serial number of the \
+                                    Wi-Fi datalogger) for plant {plant} was not specified for [TCPclient]")
                 raise Exception('logger_sn (a serial number f the Wi-Fi datalogger) was not specified')
             inverter_sn = self.config.get(plant, 'inverter_sn', fallback=None)
             if not inverter_sn:
-                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "inverter_sn (The serial number of the inverter) for plant {plant} was not specified for [TCPclient]")
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "inverter_sn (The serial number of the inverter) \
+                                    for plant {plant} was not specified for [TCPclient]")
                 raise Exception('inverter_sn (a serial number of the inverter) was not specified')
             inverterdata = {
                 "inverter_address": inverter_address,
@@ -67,7 +67,8 @@ class TCPclient(Client):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(40)
         try:
-            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Connecting to %s port %s' % self.inverters[plant_id]['inverter_connection'])
+            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Connecting to %s port %s'
+                                % self.inverters[plant_id]['inverter_connection'])
             sock.connect(self.inverters[plant_id]['inverter_connection'])
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Sending request message')
             # Sending request message
@@ -91,10 +92,8 @@ class TCPclient(Client):
             # Get the data from the received message
             inverterMsg.FetchDataDict(data)
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                    f"New message received from inverter '{serialnr}'")
+                                f"New message received from inverter '{serialnr}'")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", "Invalid response, ignoring message")
             data = None
         return data
-
-

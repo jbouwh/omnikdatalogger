@@ -149,13 +149,16 @@ class DataLogger(object):
                             f"Update for plant {plant} update at UTC {newreporttime}")
         return plant
 
+    def _sundown_reset_power(self, data):
+        if self.client.use_timer:
+            if self.sundown:
+                data['current_power'] = 0
+
     def _fetch_update(self, plant):
         try:
             data = self.client.getPlantData(plant)
             if data:
-                if self.client.use_timer:
-                    if self.sundown:
-                        data['current_power'] = 0
+                self._sundown_reset_power(data)
                 # Get the actual report time from the omnik portal
                 newreporttime = datetime.datetime.fromtimestamp(data['last_update']).astimezone(datetime.timezone.utc)
                 # Only proces updates that occured after we started or start a single measurement (TODO)

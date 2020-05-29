@@ -79,6 +79,6 @@ class OmnikPortalClient(Client):
         data['peak_power_actual'] = int(data['peak_power_actual'] * 1000)
         data['income'] = float(data['income'])
         data['last_update'] = datetime.timestamp(datetime.strptime(f"{data['last_update_time']} UTC+0000",
-                                                '%Y-%m-%dT%H:%M:%SZ %Z%z'))
+                                                 '%Y-%m-%dT%H:%M:%SZ %Z%z'))
 
         return data
