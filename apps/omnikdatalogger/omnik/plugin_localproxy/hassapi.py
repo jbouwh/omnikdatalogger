@@ -1,7 +1,7 @@
 from ha_logger import hybridlogger
 from omnik.plugin_localproxy import LocalProxyPlugin
-import json
 import binascii
+
 
 class HASSAPI(LocalProxyPlugin):
 
@@ -22,10 +22,10 @@ class HASSAPI(LocalProxyPlugin):
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "localproxy client plugin: HASSAPI")
         self.hass_handle = None
         if not self.hass_api:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "No HassAPI detected. Use AppDaemon with Home Assistent for this plugin")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "ERROR", "No HassAPI detected. Use AppDaemon with Home Assistent for this plugin")
             return
         self.logger_entity = self.config.get('hassapi', 'logger_entity', 'binary_sensor.datalogger')
-        
 
     def stop(self):
         if self.hass_handle:
@@ -34,11 +34,14 @@ class HASSAPI(LocalProxyPlugin):
     def listen(self):
         if self.hass_api:
             self.hass_handle = self.hass_api.listen_state(self._run, self.logger_entity, attribute='data')
-            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"HASSapi listening to. '{self.logger_entity}', attribute: 'data'")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "INFO", f"HASSapi listening to. '{self.logger_entity}', attribute: 'data'")
 
     def _run(self, entity, attribute, old, new, kwargs):
         # HASSAPI callback handler
-        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"HASSapi state change for {self.hass_api.get_state(self.logger_entity, 'inverter', 'n/a')} at {self.hass_api.get_state(self.logger_entity, 'last_update', 'n/a')}")
+        hybridlogger.ha_log(self.logger, self.hass_api,
+                            "INFO", f"HASSapi state change for {self.hass_api.get_state(self.logger_entity, 'inverter', 'n/a')} \
+                            at {self.hass_api.get_state(self.logger_entity, 'last_update', 'n/a')}")
         # Try to parse payload as json
         try:
             data = binascii.a2b_base64(new)
@@ -53,5 +56,3 @@ class HASSAPI(LocalProxyPlugin):
                 self.client.msgevent.set()
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"HASSapi: invalid data received: {new}. Error {e}")
-
-

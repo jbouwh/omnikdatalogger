@@ -1,13 +1,10 @@
-import os
-import sys
 from ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
 from omnik.plugin_localproxy import LocalProxyPlugin
-import datetime
 import time
 import threading
-# from .plugins import LocalProxyPlugin
+
 
 class LocalProxy(Client):
 
@@ -46,7 +43,8 @@ class LocalProxy(Client):
             for plugin in self.plugins:
                 __import__(plugin)
         else:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "At least one plugin needs to be configured. No 'localproxy' plugins found at the [plugins] section.")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "ERROR", "At least one plugin needs to be configured. No 'localproxy' plugins found at the [plugins] section.")
             self.semaphore.release()
             raise Exception('No localproxy plugins were specified.')
         # Initialize dict with inverter info
@@ -70,7 +68,9 @@ class LocalProxy(Client):
         for plant in self.plant_id_list:
             inverter_sn = self.config.get(plant, 'inverter_sn', fallback=None)
             if not inverter_sn:
-                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "inverter_sn (The serial number of the inverter) for plant {plant} was not specified for [TCPclient]")
+                hybridlogger.ha_log(self.logger, self.hass_api,
+                                    "ERROR", "inverter_sn (The serial number of the inverter) for \
+                                    plant {plant} was not specified for [TCPclient]")
                 raise Exception('inverter_sn (a serial number of the inverter) was not specified')
             inverterdata = {
                 "inverter_sn": inverter_sn
@@ -87,8 +87,6 @@ class LocalProxy(Client):
             plugin.listen()
         # Release the semaphore
         self.semaphore.release()
-
-
         return data
 
     def getPlantData(self, plant_id=None):

@@ -7,10 +7,11 @@
     "\\apps\\omnikdatalogger",
     "\\apps\\omnikdatalogger\\omnik",
     "\\apps\\omnikdatalogger\\omnik\\plugin_client",
-    "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_output",
     "\\scripts",
-    "\\scripts\\proxy"
+    "\\scripts\\systemd",
+    "\\tests"
   ],
-  "SelectedNode": "\\.gitignore",
+  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\plugin_client\\tcpclient.py",
   "PreviewInSolutionExplorer": false
 }

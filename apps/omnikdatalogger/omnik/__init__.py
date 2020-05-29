@@ -56,7 +56,7 @@ class RepeatedJob(object):
                 self.new_report_expected_at = self.last_update_time + datetime.timedelta(seconds=self.interval)
                 # Check if we have at least 60 seconds for the next cycle
                 if (self.new_report_expected_at + datetime.timedelta(seconds=-10) <
-                    datetime.datetime.now(datetime.timezone.utc)):
+                        datetime.datetime.now(datetime.timezone.utc)):
                     # No recent update of missing update: wait {interval} from now()
                     self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
                         datetime.timedelta(seconds=self.interval)

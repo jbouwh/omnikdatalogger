@@ -39,7 +39,7 @@ class MQTTproxy(LocalProxyPlugin):
         self.mqtt_client = mqttclient.Client(self.mqtt_client_name)
         self.mqtt_client.on_connect = self._mqtt_on_connect  # bind call back function
         self.mqtt_client.on_disconnect = self._mqtt_on_disconnect  # bind call back function
-        self.mqtt_client.on_message = self._mqtt_on_message # called on receiving updates on subscibed messages
+        self.mqtt_client.on_message = self._mqtt_on_message  # called on receiving updates on subscibed messages
         self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
     def _mqtt_on_connect(self, client, userdata, flags, rc):
@@ -47,12 +47,15 @@ class MQTTproxy(LocalProxyPlugin):
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTTproxy client connected")
             # subscribe to datalogger objects
             for inverter in self.client.inverters:
-                topic = f"{self.mqtt_discovery_prefix}/binary_sensor/{self.logger_sensor_name}_{self.client.inverters[inverter]['inverter_sn']}/attr"
+                topic = f"{self.mqtt_discovery_prefix}/binary_sensor/{self.logger_sensor_name}_\
+                        {self.client.inverters[inverter]['inverter_sn']}/attr"
                 try:
                     self.mqtt_client.subscribe(topic)
-                    hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"MQTTproxy subscribed on topic: {topic}")
+                    hybridlogger.ha_log(self.logger, self.hass_api,
+                                        "INFO", f"MQTTproxy subscribed on topic: {topic}")
                 except Exception as e:
-                    hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"MQTTproxy failed to subsrcibed ontopic: {topic}. Error {e}")
+                    hybridlogger.ha_log(self.logger, self.hass_api,
+                                        "ERROR", f"MQTTproxy failed to subsrcibed ontopic: {topic}. Error {e}")
 
     def _mqtt_on_disconnect(self, client, userdata, flags, rc):
         if rc == 0:
@@ -73,11 +76,12 @@ class MQTTproxy(LocalProxyPlugin):
                 # Trigger processing the message
                 self.client.msgevent.set()
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"MQTTproxy: invalid data received on topic: {message.topic}. Error {e}")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "WARNING", f"MQTTproxy: invalid data received on topic: {message.topic}. Error {e}")
 
     def mqttconfig(self, parameter, fallback):
         return self.config.get('mqtt_proxy', parameter,
-                               self.config.get('mqtt', parameter, fallback=fallback ))
+                               self.config.get('mqtt', parameter, fallback=fallback))
 
     def stop(self):
         self.mqtt_client.loop_stop()

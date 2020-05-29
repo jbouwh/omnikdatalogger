@@ -44,7 +44,8 @@ class DataLogger(object):
         # options are: localproxy, solarmanpv and omnikportal
         self.client_module = self.config.get('plugins', 'client', None)
         if not self.client_module:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "No 'client' parameter configured under the [plugin] section.")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "ERROR", "No 'client' parameter configured under the [plugin] section.")
             sys.exit(1)
 
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Initializing client : {self.client_module}.")
@@ -56,7 +57,8 @@ class DataLogger(object):
             __import__(self.client_module)
             self.client = Client.client[0]
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Client '{self.client_module}' could not be initialized. Error: {e}")
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "ERROR", f"Client '{self.client_module}' could not be initialized. Error: {e}")
             sys.exit(1)
 
         self.plugins = self.config.getlist('plugins', 'output', fallback=[''])
@@ -144,9 +146,8 @@ class DataLogger(object):
         newreporttime = datetime.datetime.fromtimestamp(data['last_update']).astimezone(datetime.timezone.utc)
         plant = data['plant_id']
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                    f"Update for plant {plant} update at UTC {newreporttime}")
+                            f"Update for plant {plant} update at UTC {newreporttime}")
         return plant
-
 
     def _fetch_update(self, plant):
         try:
@@ -232,16 +233,14 @@ class DataLogger(object):
             # return the last report time return value, but not when there is no sun
             return self.last_update_time
 
-
     def process(self):
-        # Returns the date time of the last update (time behind) or a time in te future when postposing updates.
-        
+        # Returns the date time of the last update (time behind) or a time in te future when postposing updates
         # Do a Sunshine check when a Timer is used
         if self.client.use_timer:
             next_report_at = self._sunshine_check()
         else:
             # Return None when an error occurs
-            next_report_at = None 
+            next_report_at = None
 
         # Check for login, if needed. Return None on failure
         if not self._logon():
@@ -263,24 +262,23 @@ class DataLogger(object):
                 return None
 
         # Process data reports for each plant
-        if (self.omnik_api_level == 2):
-            if self.client.use_timer:
-                for plant in self.plant_update:
-                    # Try getting a new update or wait for logging event
-                    data = self._fetch_update(plant)
-                    if data:
-                        # A new last update time was set
-                        if self.plant_update[plant] > next_report_at:
-                            next_report_at = self.plant_update[plant]
-                        # export the data to the output plugins
-                        self._output_update(plant, data)
-            else:
-                # Wait for new data logging event
-                data = self._listen_for_update()
+        if self.client.use_timer and self.omnik_api_level == 2:
+            for plant in self.plant_update:
+                # Try getting a new update or wait for logging event
+                data = self._fetch_update(plant)
                 if data:
-                    plant = self._process_received_update(data)
+                    # A new last update time was set
+                    if self.plant_update[plant] > next_report_at:
+                        next_report_at = self.plant_update[plant]
                     # export the data to the output plugins
                     self._output_update(plant, data)
+        elif self.omnik_api_level == 2:
+            # Wait for new data logging event
+            data = self._listen_for_update()
+            if data:
+                plant = self._process_received_update(data)
+                # export the data to the output plugins
+                self._output_update(plant, data)
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Data logging processed')

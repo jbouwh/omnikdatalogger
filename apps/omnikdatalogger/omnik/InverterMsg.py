@@ -5,6 +5,7 @@ import struct               # Converting bytes to numbers
 import datetime
 import time
 
+
 class InverterMsg:
 
     'Class for Inverter message'
@@ -15,7 +16,6 @@ class InverterMsg:
         self.offset = offset
         # Set a timestamp
         self.last_update = time.time()
-
 
     def __getString(self, begin, end):
         return str(self.rawmsg[begin:end], encoding='UTF-8')
@@ -170,7 +170,6 @@ def request_string(ser):
                reversed(range(0, len(doublehex), 2))]
 
     cs_count = 115 + sum([ord(c) for c in hexlist])
-    cs =  bytes.fromhex(hex(cs_count)[-2:])
+    cs = bytes.fromhex(hex(cs_count)[-2:])
     responseString += b''.join(hexlist) + b''.join([b'\x01\x00', cs, b'\x16'])
     return responseString
-

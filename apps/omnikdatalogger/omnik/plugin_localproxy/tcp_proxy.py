@@ -23,10 +23,9 @@ class TCPproxy(LocalProxyPlugin):
     def __init__(self):
         super().__init__()
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "localproxy client plugin: TCPproxy")
-        self.listen_address = self.config.get('tcp_proxy', 'listen_address', fallback='0.0.0.0' )
+        self.listen_address = self.config.get('tcp_proxy', 'listen_address', fallback='0.0.0.0')
         self.listen_port = int(self.config.get('tcp_proxy', 'listen_port', fallback='10004'))
         self.listenaddress = (self.listen_address, int(self.listen_port))
-
 
     def stop(self):
         try:
@@ -65,16 +64,11 @@ class TCPproxy(LocalProxyPlugin):
                     # Fill data structure
                     self.client.semaphore.acquire()
                     self.client.msg['data'] = data
-                    self.client.msg['isSet'] = True 
+                    self.client.msg['isSet'] = True
                     self.client.msg['plugin'] = __name__
                     self.client.semaphore.release()
                     # Trigger processing the message
                     self.client.msgevent.set()
             except Exception as e:
                 hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                    "Reading data from socket was aborted..")
-
-
-
-
-
+                                    f"Reading data from socket was aborted. Error: {e}")

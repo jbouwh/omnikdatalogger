@@ -114,7 +114,8 @@ class SolarmanPVClient(Client):
             data['current_power'] = int(float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'power'], 0.0)) * 1000)
             data['today_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etoday'], 0.0))
             data['total_energy'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'etotal'], 0.0))
-            data['last_update'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'lastupdated'], datetime.datetime.now().timestamp()))
+            data['last_update'] = float(self.xmlprop(xml, ['detail', 'WiFi', 'inverter', 'lastupdated'],
+                                        datetime.datetime.now().timestamp()))
             data['last_update_time'] = datetime.datetime.utcfromtimestamp(data['last_update']).strftime('%Y-%m-%dT%H:%M:%SZ')
             return data
         else:
