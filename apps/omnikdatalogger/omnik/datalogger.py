@@ -236,36 +236,25 @@ class DataLogger(object):
             # return the last report time return value, but not when there is no sun
             return self.last_update_time
 
-    def process(self):
+    def _process_timed_event(self):
+        # For portal clients and tcpclient with a fixed interval
         # Returns the date time of the last update (time behind) or a time in te future when postposing updates
         # Do a Sunshine check when a Timer is used
-        if self.client.use_timer:
-            next_report_at = self._sunshine_check()
-        else:
-            # Return None when an error occurs
-            next_report_at = None
+        next_report_at = self._sunshine_check()
 
         # Check for login, if needed. Return None on failure
         if not self._logon():
             # Logon failed
-            if self.client.use_timer:
-                # Sun is down, skip this measurement and wait till dawn
-                return next_report_at if self.sundown else None
-            else:
-                # Skip this measurement, retry later
-                return None
+            # Sun is down, skip this measurement and wait till dawn
+            return next_report_at if self.sundown else None
 
         # Caching of plant id's, if needed. Return None on failure
         if not self._fetch_plants():
-            if self.client.use_timer:
-                # Sun is down, skip this measurement and wait till dawn
-                return next_report_at if self.sundown else None
-            else:
-                # Skip this measurement, retry later
-                return None
+            # Sun is down, skip this measurement and wait till dawn
+            return next_report_at if self.sundown else None
 
         # Process data reports for each plant
-        if self.client.use_timer and self.omnik_api_level == 2:
+        if self.omnik_api_level == 2:
             for plant in self.plant_update:
                 # Try getting a new update or wait for logging event
                 data = self._fetch_update(plant)
@@ -275,7 +264,30 @@ class DataLogger(object):
                         next_report_at = self.plant_update[plant]
                     # export the data to the output plugins
                     self._output_update(plant, data)
-        elif self.omnik_api_level == 2:
+
+        # Finish datalogging process
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Timed data logging processed')
+
+        # Return the the time of the latest report received
+        return next_report_at
+
+    def _process_pushed_event(self):
+        # For localproxy client
+        # Returns the date time of the last update
+        next_report_at = None
+
+        # Check for login, if needed. Return None on failure
+        if not self._logon():
+            # Skip this measurement, retry later
+            return None
+
+        # Caching of plant id's, if needed. Return None on failure
+        if not self._fetch_plants():
+            # Skip this measurement, retry later
+            return None
+
+        # Process data reports for each plant
+        if self.omnik_api_level == 2:
             # Wait for new data logging event
             data = self._listen_for_update()
             if data:
@@ -284,10 +296,19 @@ class DataLogger(object):
                 self._output_update(plant, data)
 
         # Finish datalogging process
-        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Data logging processed')
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Pushed logging processed')
 
         # Return the the time of the latest report received
         return next_report_at
+
+    def process(self):
+        # Returns the date time of the last update (time behind) or a time in te future when postposing updates
+        # Do a Sunshine check when a Timer is used
+        if self.client.use_timer:
+            return self._process_timed_event()
+        else:
+            # Return None when an error occurs
+            return self._process_pushed_event()
 
     @staticmethod
     def __expand_path(path):
