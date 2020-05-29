@@ -7,7 +7,7 @@ Good luck with them
 
 * Make sure you have shell access (ssh or telnet).
 * Install pip: `curl -k https://bootstrap.pypa.io/get-pip.py | python3` See: (https://stackoverflow.com/questions/47649902/installing-pip-on-a-dsm-synology)
-* Install the paho mqtt client: `/volume1/@appstore/py3k/usr/local/bin/pip3 install paho-mqtt`. The path may be diferent. I uses a Synology DS218 play
+* Install the paho mqtt client: `/volume1/@appstore/py3k/usr/local/bin/pip3 install paho-mqtt`. The path may be diferent. I used a Synology DS218 play
 
 On upgrades it might be neccesare to reïnstall pip and paho-mqtt. Make sure you chack on this after an update for your Synology.
 
