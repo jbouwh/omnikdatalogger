@@ -42,7 +42,7 @@ WantedBy=multi-user.target
 ```
 
 To setup as root:
-* Update the serial number in the script
+* Update the user and serial number in the script
 * Link the script to `/etc/systemd/system/omnikloggerproxy.service`
 * Enable the service: `systemctl enable omnikloggerproxy`
 * Start the service: `systemctl start omnikloggerproxy`
