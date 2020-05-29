@@ -3,27 +3,34 @@
 *HACS AppDaemon:* ![Validation](https://github.com/jbouwh/omnikdatalogger/workflows/Validate/badge.svg)
 
 ## Introduction
-The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the Omniksol-5k-TL2 but have been tested with the
-firstgeneration inverter Omniksol-3K-TL as well.
+The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the by Pascal Prins Omniksol-5k-TL2 but have been tested with a
+first generation inverter (Omniksol-3K-TL) as well.
 This datalogger can use data collected at the [omnikportal](https://www.omnikportal.com/) or at [solarmanpv](https://www.solarmanpv.com/portal)
 to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots,
-hangs or returns seemingly random data.
-I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
-Further support has been added for MQTT and is can now be integrated with Home Assistent using the AppDaemon addon.
-The comming version will support the processing of intercepted data on your local network. I wil provide a guide to explain the steps. This wil give an independent datalogging,
-but will also disable the data collection in the cloud. I am investigating a method that still will deliver the logged data to the omnik portla while interception.
+hangs or returns random data. I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
+Support has been added for MQTT and the integration with Home Assistent using the AppDaemon addon.
+Now the new version it also makes possible to process intercepted logger messages and integrate the processing with Home Assistant (`localproxy` client). Polling the inverter directly is also possible
+using the tcpclient, but this client is not tested directly yet, since my inverter does not support this method.
+Special thanks to Wouter van der Zwan for his code (https://github.com/Woutrrr/Omnik-Data-Logger) and t3kpunk (https://github.com/t3kpunk/Omniksol-PV-Logger)
 
 ## How can I use Omnik Data Logger
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
-Since the omnikportal is having outages many times, an laternative will be welcome. There is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved!
-Since omnikportal stopped working the client needed to be updated to work with the SolarMAN API. The code has now a pluggable client module and two new modules wille be developed.
-The first new client module is the `solarmanpv` client which replaces the old `omnikportal` client (code still available). `solarmanpv` is now the default client and ready for use. Make sure to update your configuration. The second module `localproxy` is in development (not ready yet) and will support local captured logging for datasystemens that do not support direct logging.
-My own PV system is of that type, so I can test with that easily. This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend
-This code will be based on is based on (https://github.com/Woutrrr/Omnik-Data-Logger) and (https://github.com/t3kpunk/Omniksol-PV-Logger). This feature will come later. There will be tutorial on how to capture the data in your local network.
+Since the omnikportal is having outages many times, an alternative would be welcome. There is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved.
+But as you could read in the introduction you can now also intercept the data traffic of your Omnik Wi-Fi module and optional still forward. 
+The code has a pluggable client module and two new modules (localproxy and tcpclient) have been developed.
+The existing client modules `solarmanpv` and `omnikportal have now been expanded with two new modules (localproxy and tcpclient).
+Make sure to update your configuration and configure the `client` key onther the plugins section. The new module `localproxy` supports local captured logging. Access is not required, but you need accces to your router to add a static route to reroute the loggers traffic.
+This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend.
 
-The Home Assistant output plugin Integration requires a MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
-If you want to use the [pvoutput](https://pvoutput.org) output plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) is needed).
-The omnik portal presents approximately updates every 300 seconds. The interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you wille nog miss any updates.
+Check my [script `omnikloggerproxy.py` and documentation](https://github.com/jbouwh/omnikdatalogger/tree/master/scripts/proxy) for the interception of the inverter messages.
+This script makes it possible to intercept and forward at the same time. This meas you can still make use of the classic Omnik portal or Solarman PV portal.
+Forwaring and intercepting requires a server else where out of the intercepted routing, to be still be able to route to the logging servers as log thes are supported.
+
+The Home Assistant output plugin Integration requires the MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
+If you want to use the [pvoutput](https://pvoutput.org) output plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) account is needed).
+If you capture using the localproxy or tcpclient client you can also log the inverters temperature and net voltage.
+
+My invereter presents updates approximately updates every 300 seconds. Fore times clients the interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you will not miss any updates.
 
 ## Installation
 The application can be installed:
@@ -58,34 +65,90 @@ Example configuration
 When using the datalogger using the commandline this data logger will need a configuration file. By default, it looks for a config file at `~/.omnik/config.ini`. You can override this path by using the `--config` parameter.
 
 ```ini
+# Config file for omnikdatalogger
+# Encoding: UTF-8
 [default]
-timezone = Europe/Amsterdam
 city = Amsterdam
 interval = 360
 
-# valid clients are omnikportal, solarmanpv (site possible not active). solarmanpv is the default now
-client = solarmanpv
+[plugins]
+# valid clients are localproxy, omnikportal, solarmanpv and tcpclient. Chose one!
+client = localproxy
 
+# valid localproxy client plugins are: mqtt_proxy, tcp_proxy, hassapi
+localproxy = mqtt_proxy
+
+#valid output plugins are pvoutput and mqtt
+output=pvoutput,mqtt
+
+# localproxy client settings
+[localproxy]
+# plant_id_list: comma seperated list of plant_id's
+plant_id_list = 123
+
+# Inverter settings for example plant 123
+[123]
+inverter_address = 192.168.1.1
+logger_sn = 123456789
+inverter_port = 8899
+inverter_sn = NLxxxxxxxxxxxxxx
+
+# plugin: localproxy.mqtt_proxy
+[mqtt_proxy]
+# mqtt_prefix_override: Default = {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
+# {serialnumber} = read from data and checked with {plants.{plant_id}} where {plant_id} in {localproxy.plant_id_list}: 
+logger_sensor_name = Datalogger
+
+# The following keys default to the sessings unther the [mqtt] sections
+discovery_prefix = homeassistant
+host = homeassistant.fritz.box
+port = 1883
+client_name_prefix = ha-mqttproxy-omniklogger
+username = mqttuername
+password = mqttpasswordabcdefgh
+
+# plugin: localproxy.hassapi 
+[hassapi]
+logger_entity = binary_sensor.datalogger
+
+# plugin: localproxy.tcp_proxy
+[tcp_proxy]
+# Inverter settings are read from [plant_id] section
+listen_address = 0.0.0.0
+listen_port = 10004
+
+# tcpclient settings (poll your inverter at intervals)
+# see also https://github.com/Woutrrr/Omnik-Data-Logger
+# Users reported that this script works for wifi kits with a s/n starting with 602xxxxxx to 606xxxxxx. With wifi kits in the range 
+[tcpclient]
+plant_id_list = 123
+# The serial number is checked against the section [plant_id] inverter_sn = serialnumber
+
+# omnik portal client settings
 [omnikportal]
 username = john.doe@example.com
 password = S3cret!
 
+# solarmanpv portal client settings
 [solarmanpv]
 username = john.doe@example.com
 password = S3cret!
+plant_id_list = 123
 
 # Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal
 # and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
 # Multiple numbers can be supplied like 123,124
 plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc 
 
-[plugins]
-output=pvoutput,mqtt
-
 [pvoutput]
 api_key = <YOUR API KEY>
 sys_id = <YOUR SYSTEM ID>
 use_temperature = true
+# If the inverter temperature is available then use that value, not openweather
+# The inverter temperature is avaivable only when using the localproxy plugin
+use_inverter_temperature = true
+# voltage_ac1 is avaivable only when using the localproxy plugin
+publish_voltage = voltage_ac1
 
 [openweathermap]
 api_key = <YOUR API KEY>
@@ -96,21 +159,54 @@ units = metric
 
 [mqtt]
 #mqtt integration with 
-#override for name field from omnik portal
 discovery_prefix = homeassistant
 host = homeassistant.local
 port = 1883
+retain = true
 client_name_prefix = ha-mqtt-omniklogger
 username = mqttusername
 password = mqttpassword
+
+#override for name field from omnik portal
 device_name = Omvormer
 append_plant_id = false
+
+# Sensor name (omnikproxylogger only)
+logger_sensor_name = Datalogger
 
 #Entities name override
 current_power_name = Vermogen
 total_energy_name = Gegenereerd totaal
 today_enery_name = Gegenereerd vandaag
 last_update_time_name = Laatste statusupdate
+
+# Following keys are only avaiable used when processing inverter data directly
+# See also mqtt_fields.json for additional customization
+inverter_temperature_name = Temperatuur omvormer
+current_ac1_name = Stroom AC 
+current_ac2_name = Stroom AC fase 2
+current_ac3_name = Stroom AC fase 3
+voltage_ac1_name = Spanning AC
+voltage_ac2_name = Spanning AC fase 2
+voltage_ac3_name = Spanning AC fase 3
+frequency_ac1_name = Netfrequentie
+frequency_ac2_name = Netfrequentie fase 2
+frequency_ac3_name = Netfrequentie fase 3
+power_ac1_name = Vermogen AC
+power_ac2_name = Vermogen AC fase 2
+power_ac3_name = Vermogen AC fase 3
+voltage_pv1_name = Spanning DC 1
+voltage_pv2_name = Spanning DC 2
+voltage_pv3_name = Spanning DC 3
+current_pv1_name = Stroom DC 1
+current_pv2_name = Stroom DC 2
+current_pv3_name = Stroom DC 3
+power_pv1_name = Vermogen DC 1
+power_pv2_name = Vermogen DC 2
+power_pv3_name = Vermogen DC 3
+current_power_pv_name = Vermogen DC
+operation_hours_name = Actieve uren
+
 ```
 
 PS: `openweathermap` is currently only used when `use_temperature = true`. 
@@ -180,15 +276,59 @@ omnik_datalogger:
 # General options
   module: omniklogger
   class: HA_OmnikDataLogger
-  config: /config/appdaemon/apps/omnikdatalogger/config.ini
-  timezone: Europe/Amsterdam
+# The config key is optional you can store your config outside this yaml
+# config: /config/appdaemon/apps/omnikdatalogger/config.ini
   city: Amsterdam
   interval: 360
-  client: solarmanpv
+
+# plugin section
+  plugins:
+# plugins for data logging (output)
+    output:
+      - pvoutput
+      - mqtt 
+# plugins for local proxy client (list)
+    localproxy:
+      - hassapi
+#     - mqtt_proxy
+#     - tcp_proxy
+# the client that is beging used (chose one)
+# valid clients are localproxy, omnikportal, solarmanpv and tcpclient
+    client: localproxy
+
+# Section for your inverters specific settings
+  '123':
+    inverter_address: 192.168.1.1
+    logger_sn: 123456789
+    inverter_port: 8899
+    inverter_sn: NLxxxxxxxxxxxxxx
+
+# Section for the localproxy client
+  localproxy:
+    plant_id_list:
+      - '123
+# Section for the localproxy plugin hassapi
+  hassapi:
+    logger_entity: binary_sensor.datalogger
+# Section for the localproxy plugin mqtt_proxy
+  mqtt_proxy:
+    logger_sensor_name: Datalogger
+    discovery_prefix: homeassistant
+    host: homeassistant.example.com
+    port: 1883
+    client_name_prefix: ha-mqtt-omniklogger
+    username: mqttuername
+    password: mqttpasswordabcdefgh
+# Section for the localproxy plugin tcp_proxy
+  tcp_proxy:
+    listen_address: '0.0.0.0'
+    listen_port: '10004'
+
 # SolarmanPV portal options
   solarmanpv:
     username: john.doe@example.com
     password: some_password
+    api_key: apitest
     plant_id_list:
       - 123
 
@@ -197,16 +337,15 @@ omnik_datalogger:
     username: john.doe@example.com
     password: some_password
     base_url: https://api.omnikportal.com/v1
-# Plugins for data logging (output)
-  plugins:
-    output:
-      - pvoutput
-      - mqtt
+
 # PVoutput plugin configuration options
   pvoutput:
     sys_id: 12345
     api_key: jadfjlasexample0api0keykfjasldfkajdflasd
     use_temperature: true
+    use_inverter_temperature: true
+    publish_voltage: voltage_ac1
+
 # Open Weather map options
   openweathermap:
     api_key: someexampleapikeygenerateone4you 
@@ -220,7 +359,8 @@ omnik_datalogger:
     password: mqttpasswordabcdefgh
     discovery_prefix: homeassistant
     host: homeassistant.example.com
-    port: 1883
+    port: '1883'
+    retain: True
     client_name_prefix: ha-mqtt-omniklogger
     device_name: Converter
     append_plant_id: false
@@ -228,6 +368,31 @@ omnik_datalogger:
     total_energy_name: Generated total
     todat_energy_name: Generated today
     last_update_time_name: Last status update
+    inverter_temperature_name: Temperatuur omvormer
+    current_ac1_name: Stroom AC 
+    current_ac2_name: Stroom AC fase 2
+    current_ac3_name: Stroom AC fase 3
+    voltage_ac1_name: Spanning AC
+    voltage_ac2_name: Spanning AC fase 2
+    voltage_ac3_name: Spanning AC fase 3
+    frequency_ac1_name: Netfrequentie
+    frequency_ac2_name: Netfrequentie fase 2
+    frequency_ac3_name: Netfrequentie fase 3
+    power_ac1_name: Vermogen AC
+    power_ac2_name: Vermogen AC fase 2
+    power_ac3_name: Vermogen AC fase 3
+    voltage_pv1_name: Spanning DC 1
+    voltage_pv2_name: Spanning DC 2
+    voltage_pv3_name: Spanning DC 3
+    current_pv1_name: Stroom DC 1
+    current_pv2_name: Stroom DC 2
+    current_pv3_name: Stroom DC 3
+    power_pv1_name: Vermogen DC 1
+    power_pv2_name: Vermogen DC 2
+    power_pv3_name: Vermogen DC 3
+    current_power_pv_name: Vermogen DC
+    operation_hours_name: Actieve uren
+
 ```
 ## Configuration options (required, optional and defaults)
 As mentioned command line and AppDaemon configuration override settings the `config.ini` (if used).
@@ -254,7 +419,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
-
+`output` |  True | list | _(empty list)_ | A yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
 
 ### Client settings
 
@@ -322,11 +487,6 @@ key | optional | type | default | description
 `app_key` | True | string | _(Ox7yu3Eivicheinguth9ef9kohngo9oo)_ | The API key to access your data 
 `base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data.
     
-### Enable plugins under `plugins:` in `apps.yaml` or `[plugins]` in `config.ini`
-key | optional | type | default | description
--- | --| -- | -- | --
-`output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of strings specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
-
 ### MQTT plugin
 You can use the the official add-on 'Mosquito broker' for the MQTT integration in HomeAssistant
 Make sure you configure an account that has access to the MQTT service.
@@ -348,6 +508,7 @@ key | optional | type | default | description
 `append_plant_id` | True | bool | `false` | When a device_name is specified the plant id can be added to the name te be able to identify the plant.
 `host` | True | string | `localhost` | Hostname or fqdn of the MQTT server for publishing.
 `port` | True | integer | `1883` | MQTT port to be used. 
+`retain` | True | bool | True | Retains the data send to the MQTT service
 `client_name_prefix` | True | string | `ha-mqtt-omniklogger` | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
 `username`* | False | string | _(none)_ | The MQTT username used for authentication
 `password`* | False | string | _(none)_ | The MQTT password used for authentication
@@ -402,9 +563,9 @@ key | optional | type | default | description
 `publish_voltage ` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 
 ## OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
-_(used by *PVoutput* plugin if *use_temperature* is true)_
+_(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
 
-Visit https://openweathermap.org/price to obtain a (free) api key. The weather is cached with een TTL of 300 seconds.
+Visit https://openweathermap.org/price to obtain a (free) api key. The weather data is cached with een TTL of 300 seconds.
 
 key | optional | type | default | description
 -- | --| -- | -- | --
