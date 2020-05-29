@@ -45,7 +45,8 @@ class pvoutput(Plugin):
 
     def _get_temperature(self, msg, data):
         if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
-            if self.config.getboolean('pvoutput', 'use_inverter_temperature', fallback=False) and 'inverter_temperature' in msg:
+            if self.config.getboolean('pvoutput', 'use_inverter_temperature', fallback=False) and \
+                    ('inverter_temperature' in msg):
                 data['v5'] = msg['inverter_temperature']
             else:
                 weather = self.get_weather()
