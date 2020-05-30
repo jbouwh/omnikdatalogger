@@ -35,12 +35,12 @@ class TCPclient(Client):
             inverter_connection = (inverter_address, int(inverter_port))
             logger_sn = self.config.get(plant, 'logger_sn', fallback=None)
             if not logger_sn:
-                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "logger_sn (The serial number of the "\
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "logger_sn (The serial number of the "
                                     "Wi-Fi datalogger) for plant {plant} was not specified for [TCPclient]")
                 raise Exception('logger_sn (a serial number f the Wi-Fi datalogger) was not specified')
             inverter_sn = self.config.get(plant, 'inverter_sn', fallback=None)
             if not inverter_sn:
-                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "inverter_sn (The serial number of the inverter) "\
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "inverter_sn (The serial number of the inverter) "
                                     "for plant {plant} was not specified for [TCPclient]")
                 raise Exception('inverter_sn (a serial number of the inverter) was not specified')
             inverterdata = {

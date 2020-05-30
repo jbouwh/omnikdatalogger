@@ -40,8 +40,9 @@ class HASSAPI(LocalProxyPlugin):
     def _run(self, entity, attribute, old, new, kwargs):
         # HASSAPI callback handler
         hybridlogger.ha_log(self.logger, self.hass_api,
-                            "INFO", f"HASSapi state change for {self.hass_api.get_state(self.logger_entity, 'inverter', 'n/a')} "\
-                            "at {self.hass_api.get_state(self.logger_entity, 'last_update', 'n/a')}")
+                            "INFO",
+                            f"HASSapi state change for {self.hass_api.get_state(self.logger_entity, 'inverter', 'n/a')} "
+                            f"at {self.hass_api.get_state(self.logger_entity, 'last_update', 'n/a')}")
         # Try to parse payload as json
         try:
             data = binascii.a2b_base64(new)
