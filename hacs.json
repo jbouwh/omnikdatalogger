@@ -1,4 +1,4 @@
 {
-    "name": "Omnik Data Logger (using the Omnik portal API)",
+    "name": "Omnik Data Logger (using portal or direct logging)",
     "render_readme": false
 }
