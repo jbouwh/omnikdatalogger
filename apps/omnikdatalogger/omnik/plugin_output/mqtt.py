@@ -198,12 +198,12 @@ class mqtt(Plugin):
             # publish config
             if self.mqtt_client.publish(topics['config'][entity], json.dumps(config_pl[entity]), retain=self.mqtt_retain):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing config {json.dumps(config_pl[entity])} \
-                                    to {topics['config'][entity]} successful.")
+                                    f"Publishing config {json.dumps(config_pl[entity])} "\
+                                    f"to {topics['config'][entity]} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing config {json.dumps(config_pl[entity])} \
-                                    to {topics['config'][entity]} failed!")
+                                    f"Publishing config {json.dumps(config_pl[entity])} "\
+                                    f"to {topics['config'][entity]} failed!")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Unhandled error publishing config for entity {entity}: {e}")
@@ -213,12 +213,12 @@ class mqtt(Plugin):
             # publish attributes
             if self.mqtt_client.publish(topics['attr'], json.dumps(attr_pl), retain=self.mqtt_retain):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing attributes {json.dumps(attr_pl)} to \
-                                    {topics['attr']} successful.")
+                                    f"Publishing attributes {json.dumps(attr_pl)} to "\
+                                    f"{topics['attr']} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing attributes {json.dumps(attr_pl)} to \
-                                    {topics['attr']} failed!")
+                                    f"Publishing attributes {json.dumps(attr_pl)} to "\
+                                    f"{topics['attr']} failed!")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing attributes: {e}")
 
@@ -227,12 +227,12 @@ class mqtt(Plugin):
             # publish state
             if self.mqtt_client.publish(topics['state'], json.dumps(value_pl), retain=self.mqtt_retain):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing state {json.dumps(value_pl)} to \
-                                    {topics['state']} successful.")
+                                    f"Publishing state {json.dumps(value_pl)} to "\
+                                    f"{topics['state']} successful.")
             else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing state {json.dumps(value_pl)} to \
-                                    {topics['state']} failed!")
+                                    f"Publishing state {json.dumps(value_pl)} to "\
+                                    f"{topics['state']} failed!")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing states: {e}")
 

@@ -390,8 +390,8 @@ if __name__ == '__main__':
     parser.add_argument('--listenport', default=listenport, type=int,
                         help='The local port to listen to')
     parser.add_argument('--omniklogger', default=None,
-                        help='Forward to an address omnik/SolarmanPV datalogger server listens to. \
-                              Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
+                        help='Forward to an address omnik/SolarmanPV datalogger server listens to. '\
+                             'Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
     parser.add_argument('--omnikloggerport', default=omnikloggerdestport,
                         help='The port the omnik/SolarmanPV datalogger server listens to')
     parser.add_argument('--mqtt_host', default=None,

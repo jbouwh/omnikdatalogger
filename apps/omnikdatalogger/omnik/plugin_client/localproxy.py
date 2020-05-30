@@ -44,8 +44,8 @@ class LocalProxy(Client):
                 __import__(plugin)
         else:
             hybridlogger.ha_log(self.logger, self.hass_api,
-                                "ERROR", "At least one plugin needs to be configured. \
-                                No 'localproxy' plugins found at the [plugins] section.")
+                                "ERROR", "At least one plugin needs to be configured. "\
+                                "No 'localproxy' plugins found at the [plugins] section.")
             self.semaphore.release()
             raise Exception('No localproxy plugins were specified.')
         # Initialize dict with inverter info
@@ -70,8 +70,8 @@ class LocalProxy(Client):
             inverter_sn = self.config.get(plant, 'inverter_sn', fallback=None)
             if not inverter_sn:
                 hybridlogger.ha_log(self.logger, self.hass_api,
-                                    "ERROR", "inverter_sn (The serial number of the inverter) for \
-                                    plant {plant} was not specified for [TCPclient]")
+                                    "ERROR", "inverter_sn (The serial number of the inverter) for "\
+                                    f"plant {plant} was not specified for [TCPclient]")
                 raise Exception('inverter_sn (a serial number of the inverter) was not specified')
             inverterdata = {
                 "inverter_sn": inverter_sn
