@@ -1,6 +1,6 @@
 # omnikdatalogger
 *Code parsing:* ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-*HACS AppDaemon:* ![Validation](https://github.com/jbouwh/omnikdatalogger/workflows/Validate/badge.svg)
+*HACS AppDaemon:* ![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
 
 ## Introduction
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the by Pascal Prins Omniksol-5k-TL2 but have been tested with a
