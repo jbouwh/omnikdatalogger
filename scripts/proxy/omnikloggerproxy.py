@@ -183,8 +183,9 @@ class ProxyServer(threading.Thread):
             self.fwthread.forward(self.data)
             self.fwthread.join(60)
             if self.fwthread.isAlive():
-                # Kill the thread if it is blocking
-                self.fwthread.self.raise_exception()
+                # Kill the thread if it is still blocking
+                logging.warning("Waiting for forward connection takes a long time...")
+                self.fwthread.join()
 
 
 class tcpforward(threading.Thread):
@@ -202,13 +203,11 @@ class tcpforward(threading.Thread):
             logging.info('{0} Forwarding to omnik logger "{1}"'.format(datetime.datetime.now(), args.omniklogger))
             self.forwardsock.sendall(self.data)
             logging.info('Forwarding succesful.')
-        except socket.timeout as e:
-            logging.warning("Timeout error forwarding: {0}".format(e))
+            self.forwardsock.close()
         except Exception as e:
             logging.warning("Error forwarding: {0}".format(e))
         finally:
             self.forwardsock.close()
-
 
 class mqtt(object):
 
