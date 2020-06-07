@@ -198,6 +198,7 @@ class tcpforward(threading.Thread):
     def _run(self):
         loggeraddress = (args.omniklogger, int(args.omnikloggerport))
         self.forwardsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.forwardsock.settimeout(90)
         try:
             self.forwardsock.connect(loggeraddress)
             logging.info('{0} Forwarding to omnik logger "{1}"'.format(datetime.datetime.now(), args.omniklogger))
@@ -208,6 +209,7 @@ class tcpforward(threading.Thread):
             logging.warning("Error forwarding: {0}".format(e))
         finally:
             self.forwardsock.close()
+
 
 class mqtt(object):
 

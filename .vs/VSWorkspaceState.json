@@ -4,10 +4,13 @@
     "\\.github",
     "\\.github\\workflows",
     "\\apps",
+    "\\apps\\omnikdatalogger",
+    "\\apps\\omnikdatalogger\\omnik",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_client",
     "\\scripts",
     "\\scripts\\proxy",
     "\\tests"
   ],
-  "SelectedNode": "\\scripts\\proxy",
+  "SelectedNode": "\\scripts\\proxy\\omnikloggerproxy.py",
   "PreviewInSolutionExplorer": false
 }
