@@ -30,7 +30,7 @@ The Home Assistant output plugin Integration requires the MQTT integration is se
 If you want to use the [pvoutput](https://pvoutput.org) output plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) account is needed).
 If you capture using the localproxy or tcpclient client you can also log the inverters temperature and net voltage.
 
-My invereter presents updates approximately updates every 300 seconds. Fore times clients the interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you will not miss any updates.
+My inverter presents updates approximately updates every 300 seconds. Fore times clients the interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you will not miss any updates.
 
 ## Installation
 The application can be installed:
@@ -40,6 +40,7 @@ The application can be installed:
     -   Select `AppDaemon` as _Category_
 -   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
 -   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`
+
 The main application files are in the folder `apps\omnikdatalogger`
 
 ## Configuration options
