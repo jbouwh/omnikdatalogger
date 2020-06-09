@@ -40,6 +40,7 @@ The application can be installed:
     -   Select `AppDaemon` as _Category_
 -   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
 -   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`
+The main application files are in the folder `apps\omnikdatalogger`
 
 ## Configuration options
 The application can be configured using:
