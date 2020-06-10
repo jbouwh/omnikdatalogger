@@ -48,7 +48,7 @@ class MQTTproxy(LocalProxyPlugin):
             # subscribe to datalogger objects
             for inverter in self.client.inverters:
                 topic = f"{self.mqtt_discovery_prefix}/binary_sensor/{self.logger_sensor_name}_"\
-                        "{self.client.inverters[inverter]['inverter_sn']}/attr"
+                        f"{self.client.inverters[inverter]['inverter_sn']}/attr"
                 try:
                     self.mqtt_client.subscribe(topic)
                     hybridlogger.ha_log(self.logger, self.hass_api,

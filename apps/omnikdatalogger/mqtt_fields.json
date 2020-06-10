@@ -76,6 +76,13 @@
         "unit": "V",
         "filter": "|round(1)"
     },
+    "voltage_ac_max": {
+        "name": "AC Voltage max",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "filter": "|round(1)"
+    },
     "frequency_ac1": {
         "name": "AC Frequency fase R",
         "dev_cla": "",

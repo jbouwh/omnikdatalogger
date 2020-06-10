@@ -41,7 +41,7 @@ The application can be installed:
 -   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
 -   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`
 
-The main application files are in the folder `apps\omnikdatalogger`
+The main application files are in the folder `apps/omnikdatalogger`
 
 ## Configuration options
 The application can be configured using:
@@ -94,6 +94,8 @@ inverter_address = 192.168.1.1
 logger_sn = 123456789
 inverter_port = 8899
 inverter_sn = NLxxxxxxxxxxxxxx
+# Override sys_id for pvoutput.org
+sys_id = <YOUR SYSTEM ID>
 
 # plugin: localproxy.mqtt_proxy
 [mqtt_proxy]
@@ -304,6 +306,7 @@ omnik_datalogger:
     logger_sn: 123456789
     inverter_port: 8899
     inverter_sn: NLxxxxxxxxxxxxxx
+    sys_id: <YOUR SYSTEM ID>
 
 # Section for the localproxy client
   localproxy:
@@ -438,6 +441,7 @@ key | optional | type | default | description
 `logger_sn` | True | int | _(none)_ | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.
 `inverter_port` | True | int | _8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
 `inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant_id' to validate/filter the raw data messages received.
+`sys_id` | True | int | _`sys_id` setting under [pvoutput] section_ | Your unique system id, generated when creating an account at pvoutput.org. See `pvoutput` settings for more information.
 
 The LocalProxy client uses input plugins that are used to collect the data.
 The `omnikloggerproxy.py` script (under the folder `/scripts/proxy`) enable to proxy the raw logger data to MQTT and can help to forward your data to omnikdatalogger and still support forwarding the logging to the the legacy portal of Omnik/Solarman.
@@ -562,8 +566,7 @@ key | optional | type | default | description
 `api_key`* | False | string | _(none)_ | Unique API access key generated at pvoutput.org
 `use_temperature` | True | bool | `false` | When set to true and `use_inverter_temperature` is not set, the temperature is obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
-`publish_voltage ` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
-
+`publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max`. The field `voltage_ac_max` holds the highest voltages measures over all fases.
 ## OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
 

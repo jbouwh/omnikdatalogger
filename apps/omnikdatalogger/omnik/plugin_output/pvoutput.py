@@ -13,9 +13,8 @@ class pvoutput(Plugin):
         super().__init__()
         self.name = 'pvoutput'
         self.description = 'Write output to PVOutput'
-        # tz = self.config.get('default', 'timezone',
-        #                      fallback='Europe/Amsterdam')
-        # self.timezone = pytz.timezone(tz)
+        # Enable support for aggregates
+        self.process_aggregates = True
 
     def get_weather(self):
         try:
@@ -69,14 +68,20 @@ class pvoutput(Plugin):
 
             self.logger.debug(json.dumps(msg, indent=2))
 
-            if not self.config.has_option('pvoutput', 'sys_id') or not self.config.has_option('pvoutput', 'api_key'):
+            if not self.config.has_option('pvoutput', 'api_key'):
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                                    f'[{__name__}] No api_key and/or sys_id found in configuration')
+                                    f'[{__name__}] No api_key found in configuration')
+                return
+
+            if not 'sys_id' in msg:
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                    f'[{__name__}] No sys_id found in dataset, set sys_id under '
+                                    'your plant settings or global under the pvoutpt section')
                 return
 
             headers = {
                 "X-Pvoutput-Apikey": self.config.get('pvoutput', 'api_key'),
-                "X-Pvoutput-SystemId": str(self.config.get('pvoutput', 'sys_id')),
+                "X-Pvoutput-SystemId": str(msg['sys_id']),
                 "Content-type": "application/x-www-form-urlencoded",
                 "Accept": "text/plain"
             }

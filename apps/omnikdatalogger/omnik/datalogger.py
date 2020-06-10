@@ -221,9 +221,71 @@ class DataLogger(object):
         data = self._validate_client_data(plant, data)
         # Process for each plugin, but only when valid
         for plugin in Plugin.plugins:
-            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                f"Trigger plugin '{getattr(plugin, 'name')}'.")
-            plugin.process(msg=data)
+            if not plugin.process_aggregates:
+                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                    f"Trigger plugin '{getattr(plugin, 'name')}'.")
+                plugin.process(msg=data)
+
+    def _output_update_aggegated_data(self, plant, data):
+        # Insert dummy data for fields that have not been supplied by the client
+        data = self._validate_client_data(plant, data)
+        # Process for each plugin, but only when valid
+        for plugin in Plugin.plugins:
+            if plugin.process_aggregates:
+                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                    f"Trigger plugin '{getattr(plugin, 'name')}' with aggregated data.")
+                plugin.process(msg=data)
+
+    def _init_aggregated_data(self, aggregated_data, sys_id):
+        if not aggregated_data:
+            # Initialize
+            aggregated_data['sys_id'] = sys_id
+            aggregated_data['last_update'] = 0
+            aggregated_data['current_power'] = 0
+            aggregated_data['today_energy'] = 0
+            aggregated_data['total_energy'] = 0
+            aggregated_data['voltage_ac1'] = 0
+            aggregated_data['voltage_ac2'] = 0
+            aggregated_data['voltage_ac3'] = 0
+            aggregated_data['voltage_ac_max'] = 0
+            aggregated_data['inverter_temperature'] = 0
+
+    def _adapt_max_value(self, aggregated_data, data, field):
+        if field in data:
+            if data[field] > aggregated_data[field]:
+                aggregated_data[field] = data[field]
+
+    def _adapt_add_value(self, aggregated_data, data, field):
+        if field in data:
+            aggregated_data[field] += data[field]
+
+    def _aggregate_data(self, aggregated_data, data):
+        # Check for pvoutput sys_id override in config
+        sys_id = int(self.config.get(data['plant_id'], 'sys_id', '0'))
+        global_sys_id = int(self.config.get('pvoutput', 'sys_id', '0'))
+        if sys_id and (sys_id != global_sys_id):
+            # Do no aggegate: add sys_id to data set
+            data['sys_id'] = sys_id
+        else:
+            # Get sys_id from pvoutput section, cannot aggregate without sys_id
+            sys_id = self.config.get('pvoutput', 'sys_id', '')
+            if sys_id:
+                # Aggerate data (initialize dict and set sys_id)
+                self._init_aggregated_data(aggregated_data, sys_id)
+                # Timestamp
+                self._adapt_max_value(aggregated_data, data, 'last_update')
+                # Add energy
+                self._adapt_add_value(aggregated_data, data, 'today_energy')
+                self._adapt_add_value(aggregated_data, data, 'total_energy')
+                # Add power
+                self._adapt_add_value(aggregated_data, data, 'current_power')
+                # Max voltage
+                self._adapt_max_value(aggregated_data, data, 'voltage_ac_max')
+                self._adapt_max_value(aggregated_data, data, 'voltage_ac1')
+                self._adapt_max_value(aggregated_data, data, 'voltage_ac2')
+                self._adapt_max_value(aggregated_data, data, 'voltage_ac3')
+                # Max inverter temperature
+                self._adapt_max_value(aggregated_data, data, 'inverter_temperature')
 
     def _sunshine_check(self):
         self.sundown = not self.dl.sun_shine()
@@ -255,6 +317,7 @@ class DataLogger(object):
 
         # Process data reports for each plant
         if self.omnik_api_level == 2:
+            aggegated_data = {}
             for plant in self.plant_update:
                 # Try getting a new update or wait for logging event
                 data = self._fetch_update(plant)
@@ -262,8 +325,12 @@ class DataLogger(object):
                     # A new last update time was set
                     if self.plant_update[plant] > next_report_at:
                         next_report_at = self.plant_update[plant]
+                    # Assemble aggegated data
+                    self._aggregate_data(aggegated_data, data)
                     # export the data to the output plugins
                     self._output_update(plant, data)
+            # Process aggregated data
+            self._output_update_aggegated_data(plant, aggegated_data)
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Timed data logging processed')
@@ -291,9 +358,15 @@ class DataLogger(object):
             # Wait for new data logging event
             data = self._listen_for_update()
             if data:
+                aggegated_data = {}
                 plant = self._process_received_update(data)
+                # Assemble aggegated data
+                self._aggregate_data(aggegated_data, data)
                 # export the data to the output plugins
                 self._output_update(plant, data)
+                # Process aggregated
+                self._output_update_aggegated_data(plant, aggegated_data)
+
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Pushed logging processed')
