@@ -367,7 +367,6 @@ class DataLogger(object):
                 # Process aggregated
                 self._output_update_aggegated_data(plant, aggegated_data)
 
-
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Pushed logging processed')
 
