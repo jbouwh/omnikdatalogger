@@ -160,7 +160,8 @@ class InverterMsg:
         self.setIfValid('power_pv3', data, self.getPPV(3))
         self.setIfValid('operation_hours', data, self.getHTotal())
         self.setIfValid('current_power_pv', data, self.getPVPower())
-        self.setIfValid('voltage_ac_max', data, self._maxoflist([self.getVAC(1),self.getVAC(2),self.getVAC(3)]))
+        self.setIfValid('voltage_ac_max', data, self._maxoflist([self.getVAC(1), self.getVAC(2), self.getVAC(3)]))
+
 
 def request_string(ser):
     '''
