@@ -1,9 +1,9 @@
 # omnikdatalogger
-*Code parsing:* ![omnikdatalogger](./workflows/omnikdatalogger/badge.svg)
-*HACS AppDaemon:* ![HACS Validate](./workflows/HACS%20Validate/badge.svg)
+*Code parsing:* ![omnikdatalogger](../../workflows/omnikdatalogger/badge.svg)
+*HACS AppDaemon:* ![HACS Validate](../../workflows/HACS%20Validate/badge.svg)
 
 ## See also
-- [Omnik data logger Wiki](./wiki)
+- [Omnik data logger Wiki](../../wiki)
 - [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
 
 ## Introduction
