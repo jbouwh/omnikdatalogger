@@ -8,8 +8,9 @@
     "\\apps\\omnikdatalogger\\omnik",
     "\\apps\\omnikdatalogger\\omnik\\plugin_client",
     "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
-    "\\apps\\omnikdatalogger\\omnik\\plugin_output"
+    "\\scripts",
+    "\\scripts\\systemd"
   ],
-  "SelectedNode": "\\info.md",
+  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\plugin_client\\solarmanpv.py",
   "PreviewInSolutionExplorer": false
 }
