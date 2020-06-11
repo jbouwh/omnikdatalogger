@@ -19,7 +19,10 @@ class DataLogger(object):
         # Defaults to UTC now() - every interval
         self.plant_update = {}
         self.config = config
-        self.every = int(self.config.get('default', 'interval', 0))
+        if self.config.hasoption('default', 'interval'):
+            self.every = int(self.config.get('default', 'interval'))
+        else:
+            self.every = 0
         self.hass_api = hass_api
         self.logger = logger
         # Make sure we check for a recent update first
