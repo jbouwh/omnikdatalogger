@@ -1,6 +1,10 @@
 # omnikdatalogger
-*Code parsing:* ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-*HACS AppDaemon:* ![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
+*Code parsing:* ![omnikdatalogger](/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+*HACS AppDaemon:* ![HACS Validate](/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
+
+## See also
+- [Omnik data logger Wiki](/jbouwh/omnikdatalogger/wiki)
+- [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
 
 ## Introduction
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the by Pascal Prins Omniksol-5k-TL2 but have been tested with a
@@ -22,7 +26,7 @@ The existing client modules `solarmanpv` and `omnikportal have now been expanded
 Make sure to update your configuration and configure the `client` key onther the plugins section. The new module `localproxy` supports local captured logging. Access is not required, but you need accces to your router to add a static route to reroute the loggers traffic.
 This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend.
 
-Check my [script `omnikloggerproxy.py` and documentation](https://github.com/jbouwh/omnikdatalogger/tree/master/scripts/proxy) for the interception of the inverter messages.
+Check my [script `omnikloggerproxy.py` and documentation](/jbouwh/omnikdatalogger/tree/master/scripts/proxy) for the interception of the inverter messages.
 This script makes it possible to intercept and forward at the same time. This meas you can still make use of the classic Omnik portal or Solarman PV portal.
 Forwaring and intercepting requires a server else where out of the intercepted routing, to be still be able to route to the logging servers as log thes are supported.
 
@@ -298,7 +302,7 @@ omnik_datalogger:
       - hassapi
 #     - mqtt_proxy
 #     - tcp_proxy
-# the client that is beging used (chose one)
+# the client that is beging used (choose one)
 # valid clients are localproxy, omnikportal, solarmanpv and tcpclient
     client: localproxy
 
