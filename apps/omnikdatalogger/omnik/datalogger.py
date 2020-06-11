@@ -19,7 +19,7 @@ class DataLogger(object):
         # Defaults to UTC now() - every interval
         self.plant_update = {}
         self.config = config
-        if self.config.hasoption('default', 'interval'):
+        if self.config.has_option('default', 'interval'):
             self.every = int(self.config.get('default', 'interval'))
         else:
             self.every = 0
