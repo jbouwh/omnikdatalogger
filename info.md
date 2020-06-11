@@ -12,6 +12,8 @@ Using apps.yaml there is no need for config.ini.
 
 See [README.md](https://github.com/jbouwh/omnikdatalogger/blob/master/README.md) for a more detailed description.
 
+When using HACS, do not forget to restart AppDaemon after a software update!
+
 ## App configuration
 
 When used with HACS the dependencies in [requirements.txt](https://github.com/jbouwh/omnikdatalogger/requirements.txt) should be installed automatically. The dependency for `cachetools` is the only 'hard' dependency within Home Assistant since all other dependencies are ok. You can add this following packages to your appdaemon 4 configuration on the supervisor page of the add-on.
@@ -244,6 +246,8 @@ logins:
     password: mysecretpassword
 ```
 Restart Mosquito after changing the config.
+
+### Output plugin settings (required, optional and defaults)
 
 #### MQTT settings under `mqtt:`
 

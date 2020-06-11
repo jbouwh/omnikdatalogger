@@ -7,10 +7,9 @@
     "\\apps\\omnikdatalogger",
     "\\apps\\omnikdatalogger\\omnik",
     "\\apps\\omnikdatalogger\\omnik\\plugin_client",
-    "\\scripts",
-    "\\scripts\\proxy",
-    "\\tests"
+    "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_output"
   ],
-  "SelectedNode": "\\scripts\\proxy\\omnikloggerproxy.py",
+  "SelectedNode": "\\info.md",
   "PreviewInSolutionExplorer": false
 }

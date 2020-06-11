@@ -43,13 +43,13 @@ The application can be installed:
 
 The main application files are in the folder `apps/omnikdatalogger`
 
-## Configuration options
+## Usage
 The application can be configured using:
--   Commandline (limited options)
+-   Commandline (limited options available)
 -   Configuration file (config.ini)
 -   apps.yaml configuration file (with AppDaemon) *(This applies tot HACS-users)*
 
-### Use omniklogger from the command line
+### Commandline
 ```
 usage: python3 omniklogger.py [-h] [--config FILE] [--interval n] [-d]
 
@@ -60,7 +60,7 @@ optional arguments:
   -d, --debug    debug mode
 ```
 
-### Configuration (config.ini)
+### Configuration using config.ini
 
 Example configuration
 
@@ -215,7 +215,9 @@ operation_hours_name = Actieve uren
 
 PS: `openweathermap` is currently only used when `use_temperature = true`. 
 
-### Configuration for scheduled use with AppDaemon4 (with possible HomeAssistant integration)
+### Configuration using apps.yaml (AppDeamon) (with possible HomeAssistant integration)
+
+#### Preparation for scheduled use with AppDaemon4
 This a new feature is the integration AppDaemon which makes an integration with Home Assistant possible
 When integrating with AppDaemon it is possible to move the configuration (or parts) of config.ini to the AppDaemon configuration.
 
@@ -261,7 +263,7 @@ logs:
 ```
 Make sure the url is accessible with the hostname you configure. 
 
-### Integration with HomeAssistant
+#### Configuring `apps.yaml` to use Omnik Data Logger with AppDaemon4
 Install the datalogger files from git under /config/appdaemon/apps/omnikdatalogger
 
 The base script is located at:
@@ -399,7 +401,7 @@ omnik_datalogger:
     operation_hours_name: Actieve uren
 
 ```
-## Configuration options (required, optional and defaults)
+## Configuration keys (required, optional and defaults)
 As mentioned command line and AppDaemon configuration override settings the `config.ini` (if used).
 
 Arguments marked with * must be configured either in the `apps.yaml` or `config.ini` configuration file.
@@ -426,14 +428,14 @@ key | optional | type | default | description
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
 `output` |  True | list | _(empty list)_ | A yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
 
-### Client settings
-
-#### LocalProxy client settings under `localproxy` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+## Client settings
+Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
+### LocalProxy client settings under `localproxy` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Every plant has its own section.
 
-##### Plant settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
+#### Plant settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
 Details for the plant are set under `[plant_id]`. Every plant has its own section. Possible keys are:
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -451,13 +453,13 @@ The plugings for the `localproxy` client are:
 * `mqtt_proxy`: Listens to a MQTT topic to retreive the data. Use `omnikloggerproxy.py` to forward to your MQTT server.
 * `hassapi`: Listens to a homeassitant entity (ascociated with MQTT) using the HASSAPI in AppDaemon. This plugin is prefered for use in combination with Home Assistant.
 
-##### `tcp_proxy` plugin for the `localproxy` client under `tcp_proxy` in `apps.yaml` or `[tcp_proxy]` `config.ini` configuration options
+#### `tcp_proxy` plugin for the `localproxy` client under `tcp_proxy` in `apps.yaml` or `[tcp_proxy]` `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `listen_address` | True | string | _(0.0.0.0)_ | The IP-adres to listen to.
 `listen_port` | True | string | _(10004)_ | The port to listen to.
 
-##### `mqtt_proxy` plugin for the `localproxy` client under `mqtt_proxy` in `apps.yaml` or `[mqtt_proxy]` `config.ini` configuration options
+#### `mqtt_proxy` plugin for the `localproxy` client under `mqtt_proxy` in `apps.yaml` or `[mqtt_proxy]` `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `logger_sensor_name` | True | string | _(Datalogger)_ | The mqtt topic is assembled as {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
@@ -468,7 +470,7 @@ key | optional | type | default | description
 `username`* | False | string | _(key under the `mqtt`section`)_ | The MQTT username used for authentication
 `password`* | False | string | _(key under the `mqtt`section`)_ | The MQTT password used for authentication
 
-##### `hassapi` plugin for the `localproxy` client under `hassapi` in `apps.yaml` or `[hassapi]` `config.ini` configuration options
+#### `hassapi` plugin for the `localproxy` client under `hassapi` in `apps.yaml` or `[hassapi]` `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script
@@ -493,6 +495,8 @@ key | optional | type | default | description
 `app_key` | True | string | _(Ox7yu3Eivicheinguth9ef9kohngo9oo)_ | The API key to access your data 
 `base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data.
     
+## Output plugins
+
 ### MQTT plugin
 You can use the the official add-on 'Mosquito broker' for the MQTT integration in HomeAssistant
 Make sure you configure an account that has access to the MQTT service.
@@ -556,7 +560,7 @@ key | optional | type | default | description
 
 The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'mqtt_fields.json'.
 
-## PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
+### PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
 
 Register a free acount and API key at https://pvoutput.org/register.jsp
 
@@ -567,7 +571,7 @@ key | optional | type | default | description
 `use_temperature` | True | bool | `false` | When set to true and `use_inverter_temperature` is not set, the temperature is obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 `publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max`. The field `voltage_ac_max` holds the highest voltages measures over all fases.
-## OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
+#### OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
 
 Visit https://openweathermap.org/price to obtain a (free) api key. The weather data is cached with een TTL of 300 seconds.
@@ -636,20 +640,10 @@ $ systemd status omnikdatalogger
            └─2445 /usr/bin/python3 /usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --interval 300
 ```
 
-## Manual Run
+## Plugins in development
+Working on a couple of plugins to customize processing of the omnik inverter data:
 
-Just run `python3 omniklogger.py`.
-> By default omniklogger is searching for config file ~/.omnik/config.ini when executed from the command line
-
-## P1 DSRM (Dutch Smart Meter) integration (Work-in-progress)
-
-I have plans to integrate measurements done on the P1 port of the DUTCH Smart Meter.
-
-## Plugins
-Working on a couple of plugins to customize processing of the omnik-portal data:
-
-* `pvoutput` ~ write data to [PVOutput](https://www.pvoutput.org)
-* `mqtt` ~ write data to a [MQTT] 
-* `P1` ~ support for the the Dutch Smart Meter (***TODO***)
+* `influxdb` ~ write data to InfluxDB
+* `P1` ~ support for the the Dutch Smart Meter
 
 ~ the end
