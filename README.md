@@ -598,7 +598,7 @@ $ git clone https://github.com/jbouwh/omnikdatalogger
 > onmiklogger.py can be found in the `./apps` folder
 # check if properly installed
 $ omniklogger.py -h
-usage: omnik-logger [-h] [--config FILE] [--interval n] [-d]
+usage: omniklogger [-h] [--config FILE] [--interval n] [-d]
 
 optional arguments:
   -h, --help     show this help message and exit
