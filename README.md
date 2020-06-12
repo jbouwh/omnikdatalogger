@@ -1,9 +1,9 @@
 # omnikdatalogger
-*Code parsing:* ![omnikdatalogger](../../workflows/omnikdatalogger/badge.svg)
-*HACS AppDaemon:* ![HACS Validate](../../workflows/HACS%20Validate/badge.svg)
+*Code parsing:* ![omnikdatalogger](/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+*HACS AppDaemon:* ![HACS Validate](/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
 
 ## See also
-- [Omnik data logger Wiki](../../wiki)
+- [Omnik data logger Wiki](/jbouwh/omnikdatalogger/wiki)
 - [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
 
 ## Introduction
@@ -21,8 +21,8 @@ Special thanks to Wouter van der Zwan for his code (https://github.com/Woutrrr/O
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
 Since the omnikportal is having outages many times, an alternative would be welcome. There is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved.
 But as you could read in the introduction you can now also intercept the data traffic of your Omnik Wi-Fi module and optional still forward. 
-The code has a pluggable client module and two new modules (localproxy and tcpclient) have been developed.
-The existing client modules `solarmanpv` and `omnikportal have now been expanded with two new modules (localproxy and tcpclient).
+The code has a pluggable client module and two new modules (`localproxy` and `tcpclient`) have been developed.
+The existing client modules `solarmanpv` and `omnikportal` now have been expanded with two new modules (`localproxy` and `tcpclient`).
 Make sure to update your configuration and configure the `client` key onther the plugins section. The new module `localproxy` supports local captured logging. Access is not required, but you need accces to your router to add a static route to reroute the loggers traffic.
 This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend.
 
@@ -386,6 +386,7 @@ omnik_datalogger:
     voltage_ac1_name: Spanning AC
     voltage_ac2_name: Spanning AC fase 2
     voltage_ac3_name: Spanning AC fase 3
+    voltage_ac_max: Spanning AC max
     frequency_ac1_name: Netfrequentie
     frequency_ac2_name: Netfrequentie fase 2
     frequency_ac3_name: Netfrequentie fase 3
@@ -423,7 +424,7 @@ key | optional | type | default | description
 key | optional | type | default | description
 -- | --| -- | -- | --
 `city` | True | string | `Amsterdam` | City name recognizable by the Astral python module. Based on this city the data logging is disabled from dusk to dawn. This prevents unneccesary calls to the omnik portal.
-`interval` | True | integer | `360` | The number of seconds of the interval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
+`interval` | True | integer | `360` | The number of seconds of the interval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done. A pushing client as `localproxy` is, needs an interval te be set when used from the command line higher then 0. The interval it self is not used since the data is pushed. When no interval is given at the command line (or in a systemd setup) the executable will stop automatically after one reading!
 
 #### Plugin settings  under `plugins` in `apps.yaml` or `config.ini` configuration options
 key | optional | type | default | description
@@ -437,10 +438,15 @@ Every client and client plugin has an own section with configuration keys. Addit
 ### LocalProxy client settings under `localproxy` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
-`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Every plant has its own section.
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
 
-#### Plant settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
-Details for the plant are set under `[plant_id]`. Every plant has its own section. Possible keys are:
+### TCPclient client settings under `tcpclient` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you want to be monitored. Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
+
+#### Plant specific settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
+Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by loggin in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`.  Possible keys in this section are:
 key | optional | type | default | description
 -- | --| -- | -- | --
 `inverter_address` | True | string | _(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.
@@ -544,6 +550,7 @@ key | optional | type | default | description
 `voltage_ac1_name` | True | string | `AC Voltage fase R` | Name override for AC Voltage fase 1. Only the clients `tcpclient` and `localproxy` are supported.
 `voltage_ac2_name` | True | string | `AC Voltage fase S` | Name override for AC Voltage fase 2. Only the clients `tcpclient` and `localproxy` are supported.
 `voltage_ac3_name` | True | string | `AC Voltage fase T` | Name override for AC Voltage fase 3. Only the clients `tcpclient` and `localproxy` are supported.
+`voltage_ac_max_name` | True | string | `AC Voltage max` | Name override for the maximal AC Voltage over al fases. Only the clients `tcpclient` and `localproxy` are supported.
 `frequency_ac1_name` | True | string | `AC Frequency fase R` | Name override for AC Frequency fase 1. Only the clients `tcpclient` and `localproxy` are supported.
 `frequency_ac2_name` | True | string | `AC Frequency fase S` | Name override for AC Frequency fase 2. Only the clients `tcpclient` and `localproxy` are supported.
 `frequency_ac3_name` | True | string | `AC Frequency fase T` | Name override for AC Frequency fase 3. Only the clients `tcpclient` and `localproxy` are supported.

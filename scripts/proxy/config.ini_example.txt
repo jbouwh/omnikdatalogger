@@ -1,4 +1,4 @@
-# Exampel config file for omnikloggerproxy.py (rename to config.ini)
+# Example config file for omnikloggerproxy.py (rename to config.ini)
 # Encoding: UTF-8
 
 [mqtt]
