@@ -486,7 +486,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script
 
-### SolarmanPV client settings under `solarmanpv` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+### SolarmanPV client settings under `solarmanpv` in `apps.yaml` or `[solarmanpv]` in `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
@@ -497,7 +497,7 @@ key | optional | type | default | description
 
 This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section mentioned earlier.
 
-### OmnikPortal client settings under `omnikportal` in `apps.yaml` or `[omnikportal]` `config.ini` configuration options
+### OmnikPortal client settings under `omnikportal` in `apps.yaml` or `[omnikportal]` in `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
