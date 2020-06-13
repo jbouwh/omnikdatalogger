@@ -9,8 +9,8 @@
     "\\apps\\omnikdatalogger\\omnik\\plugin_client",
     "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
     "\\scripts",
-    "\\scripts\\systemd"
+    "\\scripts\\proxy"
   ],
-  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\plugin_client\\solarmanpv.py",
+  "SelectedNode": "\\scripts\\proxy\\iptables_setup_example.sh",
   "PreviewInSolutionExplorer": false
 }

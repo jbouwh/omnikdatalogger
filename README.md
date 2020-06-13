@@ -23,7 +23,7 @@ Since the omnikportal is having outages many times, an alternative would be welc
 But as you could read in the introduction you can now also intercept the data traffic of your Omnik Wi-Fi module and optional still forward. 
 The code has a pluggable client module and two new modules (`localproxy` and `tcpclient`) have been developed.
 The existing client modules `solarmanpv` and `omnikportal` now have been expanded with two new modules (`localproxy` and `tcpclient`).
-Make sure to update your configuration and configure the `client` key onther the plugins section. The new module `localproxy` supports local captured logging. Access is not required, but you need accces to your router to add a static route to reroute the loggers traffic.
+Make sure to update your configuration and configure the `client` key at the `[plugins]` section. The new module `localproxy` supports local captured logging. Access is not required, but you need accces to your router to add a static route to reroute the loggers traffic.
 This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend.
 
 Check my [script `omnikloggerproxy.py` and documentation](/jbouwh/omnikdatalogger/tree/master/scripts/proxy) for the interception of the inverter messages.
@@ -155,8 +155,8 @@ use_temperature = true
 # If the inverter temperature is available then use that value, not openweather
 # The inverter temperature is avaivable only when using the localproxy plugin
 use_inverter_temperature = true
-# voltage_ac1 is avaivable only when using the localproxy plugin
-publish_voltage = voltage_ac1
+# voltage_ac1, voltage_ac2, voltage_ac3, and voltage_ac_max are avaivable only when using the localproxy plugin
+publish_voltage = voltage_ac_max
 
 [openweathermap]
 api_key = <YOUR API KEY>
@@ -194,9 +194,10 @@ inverter_temperature_name = Temperatuur omvormer
 current_ac1_name = Stroom AC 
 current_ac2_name = Stroom AC fase 2
 current_ac3_name = Stroom AC fase 3
-voltage_ac1_name = Spanning AC
+voltage_ac1_name = Spanning AC fase 1
 voltage_ac2_name = Spanning AC fase 2
 voltage_ac3_name = Spanning AC fase 3
+voltage_ac_max_name Spanning AC max
 frequency_ac1_name = Netfrequentie
 frequency_ac2_name = Netfrequentie fase 2
 frequency_ac3_name = Netfrequentie fase 3
@@ -355,7 +356,7 @@ omnik_datalogger:
     api_key: jadfjlasexample0api0keykfjasldfkajdflasd
     use_temperature: true
     use_inverter_temperature: true
-    publish_voltage: voltage_ac1
+    publish_voltage: voltage_ac_max
 
 # Open Weather map options
   openweathermap:
@@ -446,7 +447,7 @@ key | optional | type | default | description
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you want to be monitored. Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
 
 #### Plant specific settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
-Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by loggin in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`.  Possible keys in this section are:
+Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by loggin in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
 key | optional | type | default | description
 -- | --| -- | -- | --
 `inverter_address` | True | string | _(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.
@@ -581,7 +582,7 @@ key | optional | type | default | description
 `api_key`* | False | string | _(none)_ | Unique API access key generated at pvoutput.org
 `use_temperature` | True | bool | `false` | When set to true and `use_inverter_temperature` is not set, the temperature is obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
-`publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max`. The field `voltage_ac_max` holds the highest voltages measures over all fases.
+`publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac_max'`, the maximal inverter AC voltage over all fases is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max`. The field `voltage_ac_max` holds the highest voltages measures over all fases.
 #### OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
 
