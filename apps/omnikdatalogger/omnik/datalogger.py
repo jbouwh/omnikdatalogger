@@ -42,7 +42,14 @@ class DataLogger(object):
 
         if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
+        # Initialize client
+        self._init_client()
+        # Initialize output plugins
+        self._init_output_plugins()
 
+        self.omnik_api_level = 0
+
+    def _init_client(self):
         # For now the default client is not set by default, client should be configured in the config
         # options are: localproxy, solarmanpv and omnikportal
         self.client_module = self.config.get('plugins', 'client', None)
@@ -55,8 +62,8 @@ class DataLogger(object):
         # Try to load client
         try:
             Client.logger = self.logger
-            Client.config = config
-            Client.hass_api = hass_api
+            Client.config = self.config
+            Client.hass_api = self.hass_api
             __import__(self.client_module)
             self.client = Client.client[0]
         except Exception as e:
@@ -64,6 +71,7 @@ class DataLogger(object):
                                 "ERROR", f"Client '{self.client_module}' could not be initialized. Error: {e}")
             sys.exit(1)
 
+    def _init_output_plugins(self):
         self.plugins = self.config.getlist('plugins', 'output', fallback=[''])
         if self.plugins[0]:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Plugins enabled: {self.plugins}.")
@@ -73,13 +81,11 @@ class DataLogger(object):
         # Import output plugins
         if self.plugins[0]:
             Plugin.logger = self.logger
-            Plugin.config = config
-            Plugin.hass_api = hass_api
+            Plugin.config = self.config
+            Plugin.hass_api = self.hass_api
 
             for plugin in self.plugins:
                 __import__(plugin)
-
-        self.omnik_api_level = 0
 
     def _validate_user_login(self):
         self.omnik_api_level = 0
