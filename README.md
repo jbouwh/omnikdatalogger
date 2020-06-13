@@ -436,12 +436,12 @@ key | optional | type | default | description
 
 ## Client settings
 Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
-### LocalProxy client settings under `localproxy` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+### LocalProxy client settings under `localproxy` in `apps.yaml` or `[localproxy]` in `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
 
-### TCPclient client settings under `tcpclient` in `apps.yaml` or `[solarmanpv]` `config.ini` configuration options
+### TCPclient client settings under `tcpclient` in `apps.yaml` or `[tcpclient]` `config.ini` configuration options
 key | optional | type | default | description
 -- | --| -- | -- | --
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you want to be monitored. Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
