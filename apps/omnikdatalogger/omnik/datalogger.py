@@ -19,7 +19,8 @@ class DataLogger(object):
         # Defaults to UTC now() - every interval
         self.plant_update = {}
         self.config = config
-        self.every = int(self.config.get('default', 'interval'))
+        self.every = self._get_interval()
+
         self.hass_api = hass_api
         self.logger = logger
         # Make sure we check for a recent update first
@@ -83,6 +84,12 @@ class DataLogger(object):
 
             for plugin in self.plugins:
                 __import__(plugin)
+
+    def _get_interval(self):
+        if self.config.has_option('default', 'interval'):
+            return int(self.config.get('default', 'interval'))
+        else:
+            return 0
 
     def _validate_user_login(self):
         self.omnik_api_level = 0
