@@ -1,5 +1,6 @@
 import json
 import requests
+from ha_logger import hybridlogger
 
 from omnik.plugin_output import Plugin
 
