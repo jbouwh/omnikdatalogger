@@ -4,6 +4,7 @@
         "dev_cla": "power",
         "ic": "chart-bell-curve",
         "unit": "W",
+        "tags": "power_class=ac",
         "filter": ""
     },
     "total_energy": {
@@ -11,6 +12,7 @@
         "dev_cla": "",
         "ic": "counter",
         "unit": "kWh",
+        "tags": "",
         "filter": "|round(1)"
     },
     "today_energy": {
@@ -18,6 +20,7 @@
         "dev_cla": "",
         "ic": "counter",
         "unit": "kWh",
+        "tags": "",
         "filter": "|round(2)"
     },
     "last_update": {
@@ -25,6 +28,7 @@
         "dev_cla": "timestamp",
         "ic": "calendar-clock",
         "unit": "",
+        "tags": "",
         "filter": "|timestamp_local"
     },
     "inverter_temperature": {
@@ -32,6 +36,7 @@
         "dev_cla": "temperature",
         "ic": "thermometer-lines",
         "unit": "\u00b0C",
+        "tags": "",
         "filter": "|round(1)"
     },
     "current_ac1": {
@@ -39,6 +44,7 @@
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
+        "tags": "power_class=ac,fase=R",
         "filter": "|round(2)"
     },
     "current_ac2": {
@@ -46,6 +52,7 @@
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
+        "tags": "power_class=ac,fase=S",
         "filter": "|round(2)"
     },
     "current_ac3": {
@@ -53,6 +60,7 @@
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
+        "tags": "power_class=ac,fase=T",
         "filter": "|round(2)"
     },
     "voltage_ac1": {
@@ -60,6 +68,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=ac,fase=R",
         "filter": "|round(1)"
     },
     "voltage_ac2": {
@@ -67,6 +76,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=ac,fase=S",
         "filter": "|round(1)"
     },
     "voltage_ac3": {
@@ -74,6 +84,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=ac,fase=R",
         "filter": "|round(1)"
     },
     "voltage_ac_max": {
@@ -81,6 +92,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=ac",
         "filter": "|round(1)"
     },
     "frequency_ac1": {
@@ -88,6 +100,7 @@
         "dev_cla": "",
         "ic": "pulse",
         "unit": "Hz",
+        "tags": "power_class=ac,fase=R",
         "filter": "|round(2)"
     },
     "frequency_ac2": {
@@ -95,6 +108,7 @@
         "dev_cla": "",
         "ic": "pulse",
         "unit": "Hz",
+        "tags": "power_class=ac,fase=S",
         "filter": "|round(2)"
     },
     "frequency_ac3": {
@@ -102,6 +116,7 @@
         "dev_cla": "",
         "ic": "pulse",
         "unit": "Hz",
+        "tags": "power_class=ac,fase=T",
         "filter": "|round(2)"
     },
     "power_ac1": {
@@ -109,6 +124,7 @@
         "dev_cla": "power",
         "ic": "flash-circle",
         "unit": "W",
+        "tags": "power_class=ac,fase=R",
         "filter": ""
     },
     "power_ac2": {
@@ -116,6 +132,7 @@
         "dev_cla": "power",
         "ic": "flash-circle",
         "unit": "W",
+        "tags": "power_class=ac,fase=S",
         "filter": ""
     },
     "power_ac3": {
@@ -123,6 +140,7 @@
         "dev_cla": "power",
         "ic": "flash-circle",
         "unit": "W",
+        "tags": "power_class=ac,fase=T",
         "filter": ""
     },
     "voltage_pv1": {
@@ -130,6 +148,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=dc,input=1",
         "filter": "|round(1)"
     },
     "voltage_pv2": {
@@ -137,6 +156,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=dc,input=2",
         "filter": "|round(1)"
     },
     "voltage_pv3": {
@@ -144,6 +164,7 @@
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
+        "tags": "power_class=dc,input=3",
         "filter": "|round(1)"
     },
     "current_pv1": {
@@ -151,6 +172,7 @@
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
+        "tags": "power_class=dc,input=1",
         "filter": "|round(1)"
     },
     "current_pv2": {
@@ -158,6 +180,7 @@
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
+        "tags": "power_class=dc,input=2",
         "filter": "|round(1)"
     },
     "current_pv3": {
@@ -165,6 +188,7 @@
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
+        "tags": "power_class=dc,input=3",
         "filter": "|round(1)"
     },
     "power_pv1": {
@@ -172,6 +196,7 @@
         "dev_cla": "power",
         "ic": "flash",
         "unit": "W",
+        "tags": "power_class=dc,input=1",
         "filter": ""
     },
     "power_pv2": {
@@ -179,6 +204,7 @@
         "dev_cla": "power",
         "ic": "flash",
         "unit": "W",
+        "tags": "power_class=dc,input=2",
         "filter": ""
     },
     "power_pv3": {
@@ -186,6 +212,7 @@
         "dev_cla": "power",
         "ic": "flash",
         "unit": "W",
+        "tags": "power_class=dc,input=3",
         "filter": ""
     },
     "operation_hours": {
@@ -193,6 +220,7 @@
         "dev_cla": "",
         "ic": "progress-clock",
         "unit": "Hours",
+        "tags": "",
         "filter": ""
     },
     "current_power_pv": {
@@ -200,13 +228,7 @@
         "dev_cla": "power",
         "ic": "flash",
         "unit": "W",
-        "filter": ""
-    },
-    "efficiency_inverter": {
-        "name": "Efficiency",
-        "dev_cla": "",
-        "ic": "clipboard-pulse-outline",
-        "unit": "%",
-        "filter": "* 100 | round(3)"
+        "tags": "",
+        "filter": "power_class=dc"
     }
 }
