@@ -39,16 +39,6 @@ class influxdb(Plugin):
 
     def process(self, **args):
         # Send data to influxdb
-        # for field in self.config.data_field_config
-        # "current_power": {
-        # "name": "Current power",
-        # "dev_cla": "power",
-        # "ic": "chart-bell-curve",
-        # "unit": "W",
-        # "measurement": "power",
-        # "tags": "power_class=ac",
-        # "filter": ""
-        # },
         try:
             msg = args['msg']
 
@@ -106,7 +96,7 @@ class influxdb(Plugin):
                                f'{",".join("{}={}".format(key, value) for key, value in data[field]["tags"].items())} ' \
                                f'value={data[field]["value"]} {nanoepoch}\n'
 
-            # Influx has no tables!
+            # Influx has no tables! Use measurement prefix
             # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value)
             # for key, value in values.items())} {nanoepoch}'
 
