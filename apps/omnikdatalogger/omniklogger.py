@@ -12,7 +12,7 @@ from omnik.datalogger import DataLogger
 import pathlib
 import json
 
-mqtt_config_file = f"{pathlib.Path(__file__).parent.absolute()}/mqtt_fields.json"
+mqtt_config_file = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
 
 logger = logging.getLogger(__name__)
 

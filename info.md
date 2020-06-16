@@ -298,7 +298,7 @@ key | optional | type | default | description
 `current_power_pv_name` | True | string | `DC Current power` | Name override for PV total power. Only the clients `tcpclient` and `localproxy` are supported.
 `operation_hours_name` | True | string | `Hours active` | Name override for the oprational hours of the inverter. Only the clients `tcpclient` and `localproxy` are supported.
 
-The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'mqtt_fields.json'.
+The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'data_fields.json'.
 
 #### PVoutput plugin settings under `pvoutput:`
 

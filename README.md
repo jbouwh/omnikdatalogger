@@ -189,7 +189,7 @@ today_enery_name = Gegenereerd vandaag
 last_update_time_name = Laatste statusupdate
 
 # Following keys are only avaiable used when processing inverter data directly
-# See also mqtt_fields.json for additional customization
+# See also data_fields.json for additional customization
 inverter_temperature_name = Temperatuur omvormer
 current_ac1_name = Stroom AC 
 current_ac2_name = Stroom AC fase 2
@@ -570,7 +570,7 @@ key | optional | type | default | description
 `current_power_pv_name` | True | string | `DC Current power` | Name override for PV total power. Only the clients `tcpclient` and `localproxy` are supported.
 `operation_hours_name` | True | string | `Hours active` | Name override for the oprational hours of the inverter. Only the clients `tcpclient` and `localproxy` are supported.
 
-The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'mqtt_fields.json'.
+The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'data_fields.json'.
 
 ### PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
 
