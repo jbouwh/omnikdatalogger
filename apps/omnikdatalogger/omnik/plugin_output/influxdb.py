@@ -67,7 +67,7 @@ class influxdb(Plugin):
             values = msg.copy()
             if self.config.getboolean('influxdb', 'use_temperature', fallback=False):
                 weather = self.get_weather()
-                values['temp'] = str(weather['main']['temp'])
+                values['temperature'] = str(weather['main']['temp'])
 
             if 'last_update_time' in values:
                 values.pop('last_update_time')
@@ -85,13 +85,19 @@ class influxdb(Plugin):
                 if field in values:
                     tags = attributes.copy()
                     tags['entity'] = field
+                    tags['name'] = self.config.data_field_config[field]['name']
+                    if self.config.data_field_config[field]['dev_cla']:
+                        tags['dev_cla'] = self.config.data_field_config[field]['dev_cla']
+                    if self.config.data_field_config[field]['dev_cla']:
+                        tags['unit'] = self.config.data_field_config[field]['unit']
                     tags.update(self.config.data_field_config[field]['tags'])
-                    #  measurement = self.config.data_field_config[field]['measurement']
                     data[field] = {
                         "measurement": self.config.data_field_config[field]['measurement'],
                         "tags": tags.copy(),
                         "value": msg[field]
                         }
+                    # format output data using the InfluxDB line protocol
+                    # https://v2.docs.influxdata.com/v2.0/write-data/#line-protocol
                     encoded += f'{data[field]["measurement"]},' \
                                f'{",".join("{}={}".format(key, value) for key, value in data[field]["tags"].items())} ' \
                                f'value={data[field]["value"]} {nanoepoch}\n'
@@ -107,9 +113,11 @@ class influxdb(Plugin):
             r = requests.post(url, data=encoded, headers=headers, auth=auth)
 
             r.raise_for_status()
+            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                f"Submit to Influxdb {url} successful.")
         except requests.exceptions.HTTPError as e:
-            self.logger.warn(f"Got error from influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
-
+            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
+                                f"Got error from influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
         except Exception as e:
-            self.logger.error(e, exc_info=True)
-            raise e
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                f"Got unknown submidding to influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
