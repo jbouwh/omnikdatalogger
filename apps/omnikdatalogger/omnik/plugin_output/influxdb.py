@@ -2,10 +2,9 @@ import json
 import requests
 
 from omnik.plugin_output import Plugin
-from ha_logger import hybridlogger
+
 
 class influxdb(Plugin):
-
 
     def __init__(self):
         super().__init__()
@@ -63,7 +62,6 @@ class influxdb(Plugin):
             host = self.config.get('influxdb', 'host', fallback='localhost')
             port = self.config.get('influxdb', 'port', fallback='8086')
             database = self.config.get('influxdb', 'database')
-            #table = self.config.get('influxdb', 'table')
 
             headers = {
                 "Content-type": "application/x-www-form-urlencoded"
@@ -72,7 +70,8 @@ class influxdb(Plugin):
             if self.config.has_option('influxdb', 'jwt_token'):
                 headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
             elif self.config.has_option('influxdb', 'username') and self.config.has_option('influxdb', 'password'):
-                auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'), self.config.get('influxdb', 'password'))
+                auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'),
+                                                   self.config.get('influxdb', 'password'))
                 headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
             data = {}
             values = msg.copy()
@@ -103,12 +102,16 @@ class influxdb(Plugin):
                         "tags": tags.copy(),
                         "value": msg[field]
                         }
-                    encoded += f'{data[field]["measurement"]},{",".join("{}={}".format(key, value) for key, value in data[field]["tags"].items())} value={data[field]["value"]} {nanoepoch}\n'
+                    encoded += f'{data[field]["measurement"]},' \
+                               f'{",".join("{}={}".format(key, value) for key, value in data[field]["tags"].items())} ' \
+                               f'value={data[field]["value"]} {nanoepoch}\n'
 
             # Influx has no tables!
-            # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value) for key, value in values.items())} {nanoepoch}'
+            # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value)
+            # for key, value in values.items())} {nanoepoch}'
 
-            # curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
+            # curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary
+            # 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
             url = f'http://{host}:{port}/write?db={database}'
 
             r = requests.post(url, data=encoded, headers=headers, auth=auth)
@@ -120,4 +123,3 @@ class influxdb(Plugin):
         except Exception as e:
             self.logger.error(e, exc_info=True)
             raise e
-
