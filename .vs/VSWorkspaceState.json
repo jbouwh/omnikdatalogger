@@ -8,8 +8,9 @@
     "\\apps\\omnikdatalogger\\omnik",
     "\\apps\\omnikdatalogger\\omnik\\plugin_client",
     "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
-    "\\scripts",
-    "\\scripts\\proxy"
+    "\\apps\\omnikdatalogger\\omnik\\plugin_output",
+    "\\scripts"
   ],
+  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\plugin_output\\influxdb.py",
   "PreviewInSolutionExplorer": false
 }

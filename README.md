@@ -16,6 +16,7 @@ Support has been added for MQTT and the integration with Home Assistent using th
 Now the new version it also makes possible to process intercepted logger messages and integrate the processing with Home Assistant (`localproxy` client). Polling the inverter directly is also possible
 using the tcpclient, but this client is not tested directly yet, since my inverter does not support this method.
 Special thanks to Wouter van der Zwan for his code (https://github.com/Woutrrr/Omnik-Data-Logger) and t3kpunk (https://github.com/t3kpunk/Omniksol-PV-Logger)
+Also special thanks to [lepirlouit](https://github.com/lepirlouit/omnik-data-logger) for creating the basis for the new influxdb output plugin.
 
 ## How can I use Omnik Data Logger
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
@@ -30,9 +31,10 @@ Check my [script `omnikloggerproxy.py` and documentation](/jbouwh/omnikdatalogge
 This script makes it possible to intercept and forward at the same time. This meas you can still make use of the classic Omnik portal or Solarman PV portal.
 Forwaring and intercepting requires a server else where out of the intercepted routing, to be still be able to route to the logging servers as log thes are supported.
 
-The Home Assistant output plugin Integration requires the MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
+The Home Assistant output plugin integration requires the MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
 If you want to use the [pvoutput](https://pvoutput.org) output plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) account is needed).
 If you capture using the localproxy or tcpclient client you can also log the inverters temperature and net voltage.
+The new influxdb output plugin can now be used as well.
 
 My inverter presents updates approximately updates every 300 seconds. Fore times clients the interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you will not miss any updates.
 
@@ -84,8 +86,8 @@ client = localproxy
 # valid localproxy client plugins are: mqtt_proxy, tcp_proxy, hassapi
 localproxy = mqtt_proxy
 
-#valid output plugins are pvoutput and mqtt
-output=pvoutput,mqtt
+#valid output plugins are pvoutput, mqtt and influxdb
+output=pvoutput,mqtt,influxdb
 
 # localproxy client settings
 [localproxy]
@@ -164,6 +166,15 @@ endpoint = api.openweathermap.org
 lon = 4.0000000
 lat = 50.1234567
 units = metric
+
+[influxdb]
+host=localhost
+port=8086
+database=omnikdatalogger
+username=omnikdatalogger
+password=mysecretpassword
+#jwt_token= (use this for JSON web token authentication)
+use_temperature=true
 
 [mqtt]
 #mqtt integration with 
@@ -298,6 +309,7 @@ omnik_datalogger:
     output:
       - pvoutput
       - mqtt 
+      - influxdb
 # plugins for local proxy client (list)
     localproxy:
       - hassapi
@@ -350,7 +362,17 @@ omnik_datalogger:
     password: some_password
     base_url: https://api.omnikportal.com/v1
 
-# PVoutput plugin configuration options
+# Influxdb output plugin configuration options
+  influxdb:
+    host: localhost
+    port: 8086
+    database: omnikdatalogger
+    username: omnikdatalogger
+    password: mysecretpassword
+    #jwt_token=
+    use_temperature=true  
+
+# PVoutput output plugin configuration options
   pvoutput:
     sys_id: 12345
     api_key: jadfjlasexample0api0keykfjasldfkajdflasd
@@ -365,7 +387,8 @@ omnik_datalogger:
     lon: 4.0000000
     lat: 50.1234567
     units: metric
-# MQTT plugin configuration options
+
+# MQTT output plugin configuration options
   mqtt:
     username: mqttuername
     password: mqttpasswordabcdefgh
@@ -381,7 +404,7 @@ omnik_datalogger:
     todat_energy_name: Generated today
     last_update_time_name: Last status update
     inverter_temperature_name: Temperatuur omvormer
-    current_ac1_name: Stroom AC 
+    current_ac1_name: Stroom AC fase 1
     current_ac2_name: Stroom AC fase 2
     current_ac3_name: Stroom AC fase 3
     voltage_ac1_name: Spanning AC
@@ -432,7 +455,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
-`output` |  True | list | _(empty list)_ | A yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
+`output` |  True | list | _(empty list)_ | A yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
 
 ## Client settings
 Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
@@ -570,7 +593,7 @@ key | optional | type | default | description
 `current_power_pv_name` | True | string | `DC Current power` | Name override for PV total power. Only the clients `tcpclient` and `localproxy` are supported.
 `operation_hours_name` | True | string | `Hours active` | Name override for the oprational hours of the inverter. Only the clients `tcpclient` and `localproxy` are supported.
 
-The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'data_fields.json'.
+The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file `data_fields.json`.
 
 ### PVoutput plugin settings under `pvoutput:` in `apps.yaml` or `[pvoutput]` in `config.ini` configuration options
 
@@ -583,6 +606,18 @@ key | optional | type | default | description
 `use_temperature` | True | bool | `false` | When set to true and `use_inverter_temperature` is not set, the temperature is obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 `publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac_max'`, the maximal inverter AC voltage over all fases is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max`. The field `voltage_ac_max` holds the highest voltages measures over all fases.
+### InfluxDB plugin settings under `influxdb:` in `apps.yaml` or `[influxdb]` in `config.ini` configuration options
+key | optional | type | default | description
+-- | --| -- | -- | --
+`host` | True | string | `localhost` | Hostname or fqdn of the InfluxDB server for logging.
+`port` | True | integer | `8086` | InfluxDB port to be used. 
+`database` | True | string | _omnikdatalogger_ | The InfluxDB database
+`username` | True | string | _(none)_ | The InfluxDB username used for Basic authentication
+`password` | True | string | _(none)_ | The InfluxDB password used for Basic authentication
+`jwt_token` | True | string | _(none)_ | The InfluxDB webtoken for JSON Web Token authentication
+`use_temperature` | True | bool | `false` | When set to true the temperature is obtained from OpenWeatherMap and logged.
+
+Logging to InfluxDB is supported with configuration settings from `data_fields.json` The file allows to customize measurement header and allows setting additional tags.
 #### OpenWeatherMap settings under `openweathermap:` in `apps.yaml' or `[openweathermap]` in `config.ini` configuration 
 _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
 

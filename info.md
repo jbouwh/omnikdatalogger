@@ -46,6 +46,7 @@ omnik_datalogger:
     output:
       - pvoutput
       - mqtt 
+      - influxdb
 # plugins for local proxy client (list)
     localproxy:
       - hassapi
@@ -104,6 +105,17 @@ omnik_datalogger:
     use_temperature: true
     use_inverter_temperature: true
     publish_voltage: voltage_ac1
+
+# Influxdb output plugin configuration options
+  influxdb:
+    host: localhost
+    port: 8086
+    database: omnikdatalogger
+    username: omnikdatalogger
+    password: mysecretpassword
+    #jwt_token=
+    use_temperature=true  
+
 # Open Weather map options
   openweathermap:
     api_key: someexampleapikeygenerateone4you 
@@ -111,6 +123,7 @@ omnik_datalogger:
     lon: 4.0000000
     lat: 50.1234567
     units: metric
+
 # MQTT plugin configuration options
   mqtt:
     username: mqttuername
@@ -167,7 +180,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
-`output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput* and *mqtt*. If no plugins are configured, nothing will be logged.
+`output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
 
 ### Client settings (required, optional and defaults)
 
@@ -298,7 +311,7 @@ key | optional | type | default | description
 `current_power_pv_name` | True | string | `DC Current power` | Name override for PV total power. Only the clients `tcpclient` and `localproxy` are supported.
 `operation_hours_name` | True | string | `Hours active` | Name override for the oprational hours of the inverter. Only the clients `tcpclient` and `localproxy` are supported.
 
-The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'data_fields.json'.
+The unit of measurement the used icon, MQTT device_class and value template filyet can be customized by updating the file 'data_fields.json`.
 
 #### PVoutput plugin settings under `pvoutput:`
 
@@ -311,6 +324,19 @@ key | optional | type | default | description
 `use_temperature` | True | bool | `false` | When set to true the temperature obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 `publish_voltage ` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
+
+### InfluxDB plugin settings under `influxdb:`
+key | optional | type | default | description
+-- | --| -- | -- | --
+`host` | True | string | `localhost` | Hostname or fqdn of the InfluxDB server for logging.
+`port` | True | integer | `8086` | InfluxDB port to be used. 
+`database` | True | string | _omnikdatalogger_ | The InfluxDB database
+`username` | True | string | _(none)_ | The InfluxDB username used for Basic authentication
+`password` | True | string | _(none)_ | The InfluxDB password used for Basic authentication
+`jwt_token` | True | string | _(none)_ | The InfluxDB webtoken for JSON Web Token authentication
+`use_temperature` | True | bool | `false` | When set to true the temperature is obtained from OpenWeatherMap and logged.
+
+Logging to InfluxDB is supported with configuration settings from `data_fields.json` The file allows to customize measurement header and allows setting additional tags.
 
 ##### OpenWeatherMap settings under `openweathermap:`
 _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
