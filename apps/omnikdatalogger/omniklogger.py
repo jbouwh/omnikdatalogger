@@ -12,7 +12,7 @@ from omnik.datalogger import DataLogger
 import pathlib
 import json
 
-mqtt_config_file = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
+data_config_file = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
 
 logger = logging.getLogger(__name__)
 
@@ -96,8 +96,8 @@ class HA_OmnikDataLogger(hass.Hass):
         else:
             c = ha_ConfigParser(ha_args=self.args)
         # Link mqtt field config to config parser
-        with open(mqtt_config_file) as json_file_config:
-            c.mqtt_field_config = json.load(json_file_config)
+        with open(data_config_file) as json_file_config:
+            c.data_field_config = json.load(json_file_config)
 
         self.interval = int(c.get('default', 'interval', 360))
         self.datalogger = DataLogger(c, hass_api=self)
@@ -117,8 +117,8 @@ class HA_OmnikDataLogger(hass.Hass):
 # Initialization from the commandline
 def main(c: ha_ConfigParser, hass_api=None):
     # Link mqtt field config to config parser
-    with open(mqtt_config_file) as json_file_config:
-        c.mqtt_field_config = json.load(json_file_config)
+    with open(data_config_file) as json_file_config:
+        c.data_field_config = json.load(json_file_config)
     # Enabled debigging if the flag is set
     if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)

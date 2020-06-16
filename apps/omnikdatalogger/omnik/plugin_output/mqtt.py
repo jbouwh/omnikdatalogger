@@ -64,7 +64,7 @@ class mqtt(Plugin):
         if msg['plant_id'] in self.mqtt_field_name_override_init:
             return
         # Init from using mqtt field config (loaded from json)
-        # self.config.mqtt_field_config
+        # self.config.data_field_config
         # field: name, dev_cla, ic, unit, filter
 
         # Assemble topics
@@ -87,7 +87,7 @@ class mqtt(Plugin):
 
     def _topics(self, msg):
         # Init from using mqtt field config (loaded from json)
-        # self.config.mqtt_field_config
+        # self.config.data_field_config
         # field: name, dev_cla, ic, unit, filter
 
         topics = {}
@@ -95,7 +95,7 @@ class mqtt(Plugin):
         topics['state'] = f"{topics['main']}/state"
         topics['attr'] = f"{topics['main']}/attr"
         topics['config'] = {}
-        for field in self.config.mqtt_field_config:
+        for field in self.config.data_field_config:
             if field in msg:
                 topics['config'][field] = f"{topics['main']}/{field}/config"
         return topics
@@ -130,11 +130,11 @@ class mqtt(Plugin):
 
         # Fill config_pl dict
         # Init from using mqtt field config (loaded from json)
-        # self.config.mqtt_field_config
+        # self.config.data_field_config
         config_pl = {}
 
         # Generate MQTT config topics
-        for field in self.config.mqtt_field_config:
+        for field in self.config.data_field_config:
             # Only generate config for available data
             if field not in msg:
                 # skip publishing non exitent values
@@ -143,32 +143,32 @@ class mqtt(Plugin):
             if self.config.has_option('mqtt', f'{field}_name'):
                 fieldname = self.config.get('mqtt', f'{field}_name')
             else:
-                fieldname = self.config.mqtt_field_config[field]['name']
+                fieldname = self.config.data_field_config[field]['name']
             config_pl[field] = {
                 "~": f"{topics['main']}",
                 "uniq_id": f"{msg['plant_id']}_{field}",
                 "name": f"{fieldname}",
                 "stat_t": "~/state",
                 "json_attr_t": "~/attr",
-                "val_tpl": f"{{{{(value_json.{field}{self.config.mqtt_field_config[field]['filter']})}}}}",
+                "val_tpl": f"{{{{(value_json.{field}{self.config.data_field_config[field]['filter']})}}}}",
                 "dev": device_pl
                 }
             # Set device class if configured
-            if self.config.mqtt_field_config[field]['dev_cla']:
-                config_pl[field]['dev_cla'] = self.config.mqtt_field_config[field]['dev_cla']
+            if self.config.data_field_config[field]['dev_cla']:
+                config_pl[field]['dev_cla'] = self.config.data_field_config[field]['dev_cla']
             # Set icon if configured
-            if self.config.mqtt_field_config[field]['ic']:
-                config_pl[field]['ic'] = f"mdi:{self.config.mqtt_field_config[field]['ic']}"
+            if self.config.data_field_config[field]['ic']:
+                config_pl[field]['ic'] = f"mdi:{self.config.data_field_config[field]['ic']}"
             # Set unit of measurement if configured
-            if self.config.mqtt_field_config[field]['unit']:
-                config_pl[field]['unit_of_meas'] = self.config.mqtt_field_config[field]['unit']
+            if self.config.data_field_config[field]['unit']:
+                config_pl[field]['unit_of_meas'] = self.config.data_field_config[field]['unit']
 
         return config_pl
 
     def _value_payload(self, msg):
         value_pl = {}
         # Generate MQTT config topics
-        for field in self.config.mqtt_field_config:
+        for field in self.config.data_field_config:
             # field: name, dev_cla, ic, unit, filter
             # Only generate payload for available data
             if field in msg:
