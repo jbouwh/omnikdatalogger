@@ -690,7 +690,8 @@ $ systemd status omnikdatalogger
 ## Plugins in development
 Working on a couple of plugins to customize processing of the omnik inverter data:
 
-* `influxdb` ~ write data to InfluxDB
-* `P1` ~ support for the the Dutch Smart Meter
+* `P1` ~ support for the the Dutch Smart Meter (DSRM) with mqtt, pvoutput and influxdb integration
+* `mariadb` ~ mariadb/mysql output plugin
+* `csv` ~ csv output plugin
 
 ~ the end
