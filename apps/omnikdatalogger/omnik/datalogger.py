@@ -226,7 +226,7 @@ class DataLogger(object):
     def _validate_client_data(self, plant, data):
         # Insert defaults for missing fields
         # data['data']['plant_id']
-        self._validate_field(data, 'inverter', self.config.get('plants', str(plant), 'n/a'))
+        self._validate_field(data, 'inverter', self.config.get(str(plant), 'inverter_sn', 'n/a'))
         return data
 
     def _output_update(self, plant, data):
