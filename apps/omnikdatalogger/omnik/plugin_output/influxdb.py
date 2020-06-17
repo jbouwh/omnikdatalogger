@@ -59,12 +59,11 @@ class influxdb(Plugin):
             }
             # Add JWT authentication token
             if self.config.has_option('influxdb', 'jwt_token'):
+                auth = None
                 headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
             elif self.config.has_option('influxdb', 'username') and self.config.has_option('influxdb', 'password'):
                 auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'),
                                                    self.config.get('influxdb', 'password'))
-                headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
-            data = {}
             values = msg.copy()
             if self.config.getboolean('influxdb', 'use_temperature', fallback=False):
                 weather = self.get_weather()
@@ -78,30 +77,29 @@ class influxdb(Plugin):
             )
             # Build structure
             attributes = {
-                "inverter": msg['inverter'],
-                "plant_id": msg['plant_id']
+                "plant_id": values['plant_id']
                 }
+            if 'inverter' in values:
+                if values['inverter'] == 'n/a':
+                    values.pop('inverter')
+                else:
+                    attributes['inverter'] = values.pop('inverter')
             encoded = ""
             for field in self.config.data_field_config:
                 if field in values:
                     tags = attributes.copy()
                     tags['entity'] = field
-                    tags['name'] = self.config.data_field_config[field]['name']
+                    tags['name'] = str(self.config.data_field_config[field]['name']).replace(' ', '\\ ')
                     if self.config.data_field_config[field]['dev_cla']:
                         tags['dev_cla'] = self.config.data_field_config[field]['dev_cla']
-                    if self.config.data_field_config[field]['dev_cla']:
-                        tags['unit'] = self.config.data_field_config[field]['unit']
+                    if self.config.data_field_config[field]['unit']:
+                        tags['unit'] = str(self.config.data_field_config[field]['unit']).replace(' ', '\\ ')
                     tags.update(self.config.data_field_config[field]['tags'])
-                    data[field] = {
-                        "measurement": self.config.data_field_config[field]['measurement'],
-                        "tags": tags.copy(),
-                        "value": msg[field]
-                        }
                     # format output data using the InfluxDB line protocol
                     # https://v2.docs.influxdata.com/v2.0/write-data/#line-protocol
-                    encoded += f'{data[field]["measurement"]},' \
-                               f'{",".join("{}={}".format(key, value) for key, value in data[field]["tags"].items())} ' \
-                               f'value={data[field]["value"]} {nanoepoch}\n'
+                    encoded += f'{self.config.data_field_config[field]["measurement"]},' \
+                               f'{",".join("{}={}".format(key, value) for key, value in tags.items())} ' \
+                               f'value={values[field]} {nanoepoch}\n'
 
             # Influx has no tables! Use measurement prefix
             # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value)
@@ -121,4 +119,4 @@ class influxdb(Plugin):
                                 f"Got error from influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                                f"Got unknown submidding to influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
+                                f"Got unknown submitting to influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
