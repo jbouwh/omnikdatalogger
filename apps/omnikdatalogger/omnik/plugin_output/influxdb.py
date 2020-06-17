@@ -1,4 +1,3 @@
-import json
 import requests
 from ha_logger import hybridlogger
 
@@ -24,7 +23,7 @@ class influxdb(Plugin):
             self.headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
         elif self.config.has_option('influxdb', 'username') and self.config.has_option('influxdb', 'password'):
             self.auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'),
-                                                self.config.get('influxdb', 'password'))
+                                                    self.config.get('influxdb', 'password'))
 
     def _get_temperature(self, values):
         if self.config.getboolean('influxdb', 'use_temperature', fallback=False):
@@ -32,7 +31,7 @@ class influxdb(Plugin):
             values['temperature'] = str(weather['main']['temp'])
 
     def _get_attributes(self, values):
-        attributes = { "plant_id": values['plant_id'] }
+        attributes = {"plant_id": values['plant_id']}
         if 'inverter' in values:
             if values['inverter'] == 'n/a':
                 values.pop('inverter')
