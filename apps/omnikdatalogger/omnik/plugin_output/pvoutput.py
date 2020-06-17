@@ -16,32 +16,6 @@ class pvoutput(Plugin):
         # Enable support for aggregates
         self.process_aggregates = True
 
-    def get_weather(self):
-        try:
-            if 'weather' not in self.cache:
-                self.logger.debug('[cache miss] Fetching weather data')
-                url = "https://{endpoint}/data/2.5/weather?lon={lon}&lat={lat}&units={units}&APPID={api_key}".format(
-                    endpoint=self.config.get('openweathermap', 'endpoint', fallback='api.openweathermap.org'),
-                    lat=self.config.get('openweathermap', 'lat'),
-                    lon=self.config.get('openweathermap', 'lon'),
-                    units=self.config.get(
-                        'openweathermap', 'units', fallback='metric'),
-                    api_key=self.config.get('openweathermap', 'api_key'),
-                )
-
-                res = requests.get(url)
-
-                res.raise_for_status()
-
-                self.cache['weather'] = res.json()
-
-            return self.cache['weather']
-
-        except requests.exceptions.HTTPError as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", 'Unable to get weather data. [{0}]: {1}'.format(
-                                type(e).__name__, str(e)))
-            raise e
-
     def _get_temperature(self, msg, data):
         if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
             if self.config.getboolean('pvoutput', 'use_inverter_temperature', fallback=False) and \

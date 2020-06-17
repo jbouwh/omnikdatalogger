@@ -11,63 +11,65 @@ class influxdb(Plugin):
         super().__init__()
         self.name = 'influxdb'
         self.description = 'Write output to InfluxDB'
+        self.host = self.config.get('influxdb', 'host', fallback='localhost')
+        self.port = self.config.get('influxdb', 'port', fallback='8086')
+        self.database = self.config.get('influxdb', 'database', fallback='omnikdatalogger')
 
-    def get_weather(self):
-        try:
-            if 'weather' not in self.cache:
-                self.logger.debug('[cache miss] Fetching weather data')
-                url = "https://{endpoint}/data/2.5/weather?lon={lon}&lat={lat}&units={units}&APPID={api_key}".format(
-                    endpoint=self.config.get('openweathermap', 'endpoint'),
-                    lat=self.config.get('openweathermap', 'lat'),
-                    lon=self.config.get('openweathermap', 'lon'),
-                    units=self.config.get(
-                        'openweathermap', 'units', fallback='metric'),
-                    api_key=self.config.get('openweathermap', 'api_key'),
-                )
+        self.headers = {
+            "Content-type": "application/x-www-form-urlencoded"
+        }
+        # Add JWT authentication token
+        if self.config.has_option('influxdb', 'jwt_token'):
+            self.auth = None
+            self.headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
+        elif self.config.has_option('influxdb', 'username') and self.config.has_option('influxdb', 'password'):
+            self.auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'),
+                                                self.config.get('influxdb', 'password'))
 
-                res = requests.get(url)
+    def _get_temperature(self, values):
+        if self.config.getboolean('influxdb', 'use_temperature', fallback=False):
+            weather = self.get_weather()
+            values['temperature'] = str(weather['main']['temp'])
 
-                res.raise_for_status()
+    def _get_attributes(self, values):
+        attributes = { "plant_id": values['plant_id'] }
+        if 'inverter' in values:
+            if values['inverter'] == 'n/a':
+                values.pop('inverter')
+            else:
+                attributes['inverter'] = values.pop('inverter')
+        return attributes.copy()
 
-                self.cache['weather'] = res.json()
+    def _get_tags(self, field, attributes):
+        tags = attributes.copy()
+        tags['entity'] = field
+        tags['name'] = str(self.config.data_field_config[field]['name']).replace(' ', '\\ ')
+        if self.config.data_field_config[field]['dev_cla']:
+            tags['dev_cla'] = self.config.data_field_config[field]['dev_cla']
+        if self.config.data_field_config[field]['unit']:
+            tags['unit'] = str(self.config.data_field_config[field]['unit']).replace(' ', '\\ ')
+        tags.update(self.config.data_field_config[field]['tags'])
+        return tags.copy()
 
-            return self.cache['weather']
-
-        except requests.exceptions.HTTPError as e:
-            self.logger.error('Unable to get data. [{0}]: {1}'.format(
-                type(e).__name__, str(e)))
-            raise e
+    def _format_output(self, field, attributes, values, nanoepoch):
+        if field in values:
+            # Get tags
+            tags = self._get_tags(field, attributes)
+            # format output data using the InfluxDB line protocol
+            # https://v2.docs.influxdata.com/v2.0/write-data/#line-protocol
+            return f'{self.config.data_field_config[field]["measurement"]},' \
+                   f'{",".join("{}={}".format(key, value) for key, value in tags.items())} ' \
+                   f'value={values[field]} {nanoepoch}\n'
+        else:
+            return ''
 
     def process(self, **args):
         # Send data to influxdb
         try:
             msg = args['msg']
 
-            self.logger.debug(json.dumps(msg, indent=2))
-
-            if not self.config.has_option('influxdb', 'database'):
-                self.logger.error(
-                    f'[{__name__}] No database found in configuration')
-                return
-
-            host = self.config.get('influxdb', 'host', fallback='localhost')
-            port = self.config.get('influxdb', 'port', fallback='8086')
-            database = self.config.get('influxdb', 'database')
-
-            headers = {
-                "Content-type": "application/x-www-form-urlencoded"
-            }
-            # Add JWT authentication token
-            if self.config.has_option('influxdb', 'jwt_token'):
-                auth = None
-                headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
-            elif self.config.has_option('influxdb', 'username') and self.config.has_option('influxdb', 'password'):
-                auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'),
-                                                   self.config.get('influxdb', 'password'))
             values = msg.copy()
-            if self.config.getboolean('influxdb', 'use_temperature', fallback=False):
-                weather = self.get_weather()
-                values['temperature'] = str(weather['main']['temp'])
+            self._get_temperature(values)
 
             if 'last_update_time' in values:
                 values.pop('last_update_time')
@@ -76,30 +78,10 @@ class influxdb(Plugin):
                 values.pop('last_update') * 1000000000
             )
             # Build structure
-            attributes = {
-                "plant_id": values['plant_id']
-                }
-            if 'inverter' in values:
-                if values['inverter'] == 'n/a':
-                    values.pop('inverter')
-                else:
-                    attributes['inverter'] = values.pop('inverter')
+            attributes = self._get_attributes(values)
             encoded = ""
             for field in self.config.data_field_config:
-                if field in values:
-                    tags = attributes.copy()
-                    tags['entity'] = field
-                    tags['name'] = str(self.config.data_field_config[field]['name']).replace(' ', '\\ ')
-                    if self.config.data_field_config[field]['dev_cla']:
-                        tags['dev_cla'] = self.config.data_field_config[field]['dev_cla']
-                    if self.config.data_field_config[field]['unit']:
-                        tags['unit'] = str(self.config.data_field_config[field]['unit']).replace(' ', '\\ ')
-                    tags.update(self.config.data_field_config[field]['tags'])
-                    # format output data using the InfluxDB line protocol
-                    # https://v2.docs.influxdata.com/v2.0/write-data/#line-protocol
-                    encoded += f'{self.config.data_field_config[field]["measurement"]},' \
-                               f'{",".join("{}={}".format(key, value) for key, value in tags.items())} ' \
-                               f'value={values[field]} {nanoepoch}\n'
+                encoded += self._format_output(field, attributes, values, nanoepoch)
 
             # Influx has no tables! Use measurement prefix
             # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value)
@@ -107,9 +89,9 @@ class influxdb(Plugin):
 
             # curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary
             # 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
-            url = f'http://{host}:{port}/write?db={database}'
+            url = f'http://{self.host}:{self.port}/write?db={self.database}'
 
-            r = requests.post(url, data=encoded, headers=headers, auth=auth)
+            r = requests.post(url, data=encoded, headers=self.headers, auth=self.auth)
 
             r.raise_for_status()
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
