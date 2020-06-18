@@ -1,6 +1,6 @@
 import requests
 import urllib.parse
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 import hashlib
 import xml.etree.ElementTree as ET
 import datetime

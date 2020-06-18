@@ -1,4 +1,4 @@
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 from omnik.plugin_localproxy import LocalProxyPlugin
 import paho.mqtt.client as mqttclient
 import uuid

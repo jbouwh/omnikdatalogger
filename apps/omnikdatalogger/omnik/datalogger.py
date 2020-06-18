@@ -1,10 +1,10 @@
 import os
 import sys
 import logging
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 import datetime
 import requests
-import daylight
+from .daylight import daylight
 
 from .plugin_output import Plugin
 from .plugin_client import Client
@@ -33,7 +33,7 @@ class DataLogger(object):
 
         self.city = self.config.get('default', 'city', fallback='Amsterdam')
         try:
-            self.dl = daylight.daylight(self.city)
+            self.dl = daylight(self.city)
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"City '{self.city}' not recognized. Error: {e}")
             sys.exit(1)

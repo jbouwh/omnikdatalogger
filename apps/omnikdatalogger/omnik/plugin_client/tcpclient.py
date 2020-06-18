@@ -1,4 +1,4 @@
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
 import socket

@@ -6,7 +6,7 @@ import configparser
 import time
 import logging
 import appdaemon.plugins.hass.hassapi as hass
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
 import pathlib

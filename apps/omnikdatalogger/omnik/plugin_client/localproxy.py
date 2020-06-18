@@ -1,4 +1,4 @@
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
 from omnik.plugin_localproxy import LocalProxyPlugin

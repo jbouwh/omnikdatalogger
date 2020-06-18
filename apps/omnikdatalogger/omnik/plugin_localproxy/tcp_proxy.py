@@ -1,4 +1,4 @@
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 from omnik.plugin_localproxy import LocalProxyPlugin
 import threading
 import socket

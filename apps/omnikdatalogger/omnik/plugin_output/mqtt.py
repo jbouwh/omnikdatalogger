@@ -1,6 +1,6 @@
 import json
 import time
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 
 import paho.mqtt.client as mqttclient
 import uuid

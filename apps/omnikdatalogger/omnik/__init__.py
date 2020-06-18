@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 
 import datetime
 import threading

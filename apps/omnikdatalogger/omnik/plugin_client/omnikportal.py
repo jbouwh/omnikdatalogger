@@ -1,6 +1,6 @@
 import requests
 import urllib.parse
-from ha_logger import hybridlogger
+from omnik.ha_logger import hybridlogger
 from omnik.plugin_client import Client
 from datetime import datetime
 
