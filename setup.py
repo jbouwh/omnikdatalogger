@@ -21,7 +21,8 @@ install_requires = [
     'requests>=2.21.0',
     'cachetools>=3.1.1',
     'pytz>=2019.1',
-    'paho-mqtt>=1.5.0'
+    'paho-mqtt>=1.5.0',
+    'dsmr-parser>=0.21'
 ]
 
 setup(
