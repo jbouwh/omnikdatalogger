@@ -133,7 +133,7 @@ def main(c: ha_ConfigParser, hass_api=None):
         d_config_file = data_config_file
         hybridlogger.ha_log(logger, hass_api, "INFO", f"Using data configuration from '{d_config_file}'.")
     elif os.path.exists(data_config_file_shared):
-        d_config_file = data_config_filedata_config_file_shared
+        d_config_file = data_config_file_shared
         hybridlogger.ha_log(logger, hass_api, "INFO", f"Using shared data configuration from '{d_config_file}'.")
     else:
         hybridlogger.ha_log(logger, self, "ERROR",
