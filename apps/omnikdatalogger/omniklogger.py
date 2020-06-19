@@ -102,7 +102,7 @@ class HA_OmnikDataLogger(hass.Hass):
             self.data_config_file = data_config_file
             hybridlogger.ha_log(logger, self, "INFO", f"Using data configuration from '{self.data_config_file}'.")
         elif os.path.exists(data_config_file_shared):
-            self.data_config_file = data_config_filedata_config_file_shared
+            self.data_config_file = data_config_file_shared
             hybridlogger.ha_log(logger, self, "INFO", f"Using shared data configuration from '{self.data_config_file}'.")
         else:
             hybridlogger.ha_log(logger, self, "ERROR",
