@@ -38,6 +38,7 @@ setup(
     url="https://github.com/jbouwh/omnikdatalogger",
     package_dir={"": "apps/omnikdatalogger"},
     packages=find_packages(where="apps/omnikdatalogger"),
+    data_files=[('share/omnikdatalogger', ['apps/omnikdatalogger/data_fields.json'])],
     classifiers=[
         'Topic :: Home Automation',
         'Programming Language :: Python :: 3.7',
