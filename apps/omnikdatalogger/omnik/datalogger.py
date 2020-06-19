@@ -57,10 +57,10 @@ class DataLogger(object):
                 self.config.data_field_config = json.load(json_file_config)
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                                f"Error reading configuration file (data_fields.json). Exiting!")
+                                "Error reading configuration file (data_fields.json). Exiting!")
             raise e
             sys.exit(1)
-            
+
         self.every = self._get_interval()
 
         # Make sure we check for a recent update first
