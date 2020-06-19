@@ -1,4 +1,4 @@
-# omnikdatalogger
+﻿# omnikdatalogger
 *Code parsing:* ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
 *HACS AppDaemon:* ![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
 
@@ -470,7 +470,7 @@ key | optional | type | default | description
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you want to be monitored. Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
 
 #### Plant specific settings under `'plant_id'` in `apps.yaml` or `[plant_id]` `config.ini` configuration options
-Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by loggin in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
+Details for the plant are set under `[plant_id]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by logging in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
 key | optional | type | default | description
 -- | --| -- | -- | --
 `inverter_address` | True | string | _(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.

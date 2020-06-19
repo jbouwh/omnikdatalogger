@@ -13,7 +13,7 @@ def get_version(package):
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
 
 install_requires = [
@@ -22,7 +22,8 @@ install_requires = [
     'cachetools>=3.1.1',
     'pytz>=2019.1',
     'paho-mqtt>=1.5.0',
-    'dsmr-parser>=0.21'
+    'dsmr-parser>=0.21',
+    'appdaemon>=4.0.3'
 ]
 
 setup(
