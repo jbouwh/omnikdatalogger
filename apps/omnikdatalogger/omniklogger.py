@@ -136,7 +136,7 @@ def main(c: ha_ConfigParser, hass_api=None):
         d_config_file = data_config_file_shared
         hybridlogger.ha_log(logger, hass_api, "INFO", f"Using shared data configuration from '{d_config_file}'.")
     else:
-        hybridlogger.ha_log(logger, self, "ERROR",
+        hybridlogger.ha_log(logger, hass_api, "ERROR",
                             "No valid data configuration file found. Exiting!")
         return
     with open(d_config_file) as json_file_config:
