@@ -45,7 +45,9 @@ The application can be installed:
     -   Enter `https://github.com/jbouwh/omnikdatalogger` at `ADD CUSTOM REPOSITORY`
     -   Select `AppDaemon` as _Category_
 -   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
--   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`
+-   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`. Optional install with `pip3 install ./omnikdatalogger`.
+-   Install using pip (pip3) as user: `pip3 install omnikdatalogger`
+-   System install using pip (pip3): `sudo pip3 install omnikdatalogger`
 
 The main application files are in the folder `apps/omnikdatalogger`
 
@@ -57,7 +59,7 @@ The application can be configured using:
 
 ### Commandline
 ```
-usage: python3 omniklogger.py [-h] [--config FILE] [--interval n] [-d]
+usage: [python3] omniklogger.py [-h] [--config FILE] [--interval n] [-d]
 
 optional arguments:
   -h, --help     show this help message and exit
