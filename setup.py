@@ -36,9 +36,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jbouwh/omnikdatalogger",
-    packages=find_packages(),
+    packages=find_packages(where="apps/omnikdatalogger"),
     classifiers=[
-        'Development Status :: 4 - Beta',
         'Topic :: Home Automation',
         'Programming Language :: Python :: 3.7',
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
