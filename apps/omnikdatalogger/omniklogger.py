@@ -91,6 +91,7 @@ class HA_OmnikDataLogger(hass.Hass):
                                     f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
+        set_data_config_path(c)
 
         self.interval = int(c.get('default', 'interval', 360))
         self.datalogger = DataLogger(c, hass_api=self)
@@ -112,6 +113,7 @@ def main(c: ha_ConfigParser, hass_api=None):
     # Enabled debugging if the flag is set
     if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)
+    set_data_config_path(c)
     datalogger = DataLogger(c, hass_api=hass_api)
     if c.has_option('default', 'interval'):
         # running repeatedly
@@ -133,6 +135,11 @@ def main(c: ha_ConfigParser, hass_api=None):
     else:
         # running only once
         datalogger.process()
+
+def set_data_config_path(config):
+    config.data_config_file_path = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
+    config.data_config_file_shared = f"{pathlib.Path(__file__).parent.parent.absolute()}" \
+                                     "/share/omnikdatalogger/data_fields.json"
 
 
 if __name__ == '__main__':

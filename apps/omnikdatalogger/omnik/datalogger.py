@@ -26,27 +26,23 @@ class DataLogger(object):
         if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
 
-
-        data_config_file_args = self.config.get('default', 'data_config', fallback='')
+        self.config.data_config_file_args = self.config.get('default', 'data_config', fallback='')
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [args]: '{data_config_file_args}'.")
-        data_config_file_path = f"{pathlib.Path(__file__).parent.parent.absolute()}/data_fields.json"
+                            f"Data configuration [args]: '{self.config.data_config_file_args}'.")
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [path]: '{data_config_file_path}'.")
-        data_config_file_shared = f"{pathlib.Path(__file__).parent.parent.parent.absolute()}" \
-                                  "/share/omnikdatalogger/data_fields.json"
+                            f"Data configuration [path]: '{self.config.data_config_file_path}'.")
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [path]: '{data_config_file_shared}'.")
-        if os.path.exists(data_config_file_args):
-            self.data_config_file = data_config_file_args
+                            f"Data configuration [path]: '{self.config.data_config_file_shared}'.")
+        if os.path.exists(self.config.data_config_file_args):
+            self.data_config_file = self.config.data_config_file_args
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                 f"Using configured data configuration from '{self.data_config_file}'.")
-        elif os.path.exists(data_config_file_path):
-            self.data_config_file = data_config_file_path
+        elif os.path.exists(self.config.data_config_file_path):
+            self.data_config_file = self.config.data_config_file_path
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                 f"Using configured data configuration from '{self.data_config_file}'.")
-        elif os.path.exists(data_config_file_shared):
-            self.data_config_file = data_config_file_shared
+        elif os.path.exists(self.config.data_config_file_shared):
+            self.data_config_file = self.config.data_config_file_shared
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                 f"Using shared data configuration from '{self.data_config_file}'.")
         else:
