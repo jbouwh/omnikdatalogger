@@ -1,6 +1,7 @@
 ﻿# omnikdatalogger
-*Code parsing:* ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-*HACS AppDaemon:* ![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
+![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
+![PyPI version](https://badge.fury.io/py/omnikdatalogger.svg)](https://badge.fury.io/py/omnikdatalogger) 
 
 ## See also
 - [Omnik data logger Wiki](https://github.com/jbouwh/omnikdatalogger/wiki)
