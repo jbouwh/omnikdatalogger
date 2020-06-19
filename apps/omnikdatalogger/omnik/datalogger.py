@@ -26,14 +26,14 @@ class DataLogger(object):
 
         data_config_file_args = self.config.get('default', 'data_config', fallback='')
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [args]: '{data_config_file_args'.")
+                            f"Data configuration [args]: '{data_config_file_args}'.")
         data_config_file_path = f"{pathlib.Path(__file__).parent.parent.absolute()}/data_fields.json"
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [path]: '{data_config_file_path'.")
+                            f"Data configuration [path]: '{data_config_file_path}'.")
         data_config_file_shared = f"{pathlib.Path(__file__).parent.parent.parent.absolute()}" \
                                   "/share/omnikdatalogger/data_fields.json"
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [path]: '{data_config_file_shared'.")
+                            f"Data configuration [path]: '{data_config_file_shared}'.")
         if os.path.exists(data_config_file_args):
             self.data_config_file = data_config_file_args
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
