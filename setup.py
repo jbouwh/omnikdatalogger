@@ -36,6 +36,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jbouwh/omnikdatalogger",
+    package_dir={"": "apps/omnikdatalogger"},
     packages=find_packages(where="apps/omnikdatalogger"),
     classifiers=[
         'Topic :: Home Automation',
