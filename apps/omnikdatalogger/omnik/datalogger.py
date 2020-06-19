@@ -31,7 +31,10 @@ class DataLogger(object):
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                             f"Data configuration [path]: '{self.config.data_config_file_path}'.")
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [path]: '{self.config.data_config_file_shared}'.")
+                            f"Data configuration [shared]: '{self.config.data_config_file_shared}'.")
+        if self.config.configfile:
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Using configuration from '{self.config.configfile}'.")
+
         if os.path.exists(self.config.data_config_file_args):
             self.data_config_file = self.config.data_config_file_args
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
