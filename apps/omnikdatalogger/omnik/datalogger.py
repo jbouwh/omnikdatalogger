@@ -1,9 +1,11 @@
 import os
+import pathlib
 import sys
 import logging
 from omnik.ha_logger import hybridlogger
 import datetime
 import requests
+import json
 from .daylight import daylight
 
 from .plugin_output import Plugin
@@ -18,11 +20,42 @@ class DataLogger(object):
     def __init__(self, config, hass_api=None):
         # Defaults to UTC now() - every interval
         self.plant_update = {}
-        self.config = config
-        self.every = self._get_interval()
-
         self.hass_api = hass_api
         self.logger = logger
+        self.config = config
+
+        data_config_file_args = self.config.get('default', 'data_config', fallback='')
+        data_config_file_path = f"{pathlib.Path(__file__).parent.parent.absolute()}/data_fields.json"
+        data_config_file_shared = f"{pathlib.Path(__file__).parent.parent.parent.absolute()}" \
+                                  "/share/omnikdatalogger/data_fields.json"
+        if os.path.exists(data_config_file_args):
+            self.data_config_file = data_config_file_args
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
+                                f"Using configured data configuration from '{self.data_config_file}'.")
+        elif os.path.exists(data_config_file_path):
+            self.data_config_file = data_config_file_path
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
+                                f"Using configured data configuration from '{self.data_config_file}'.")
+        elif os.path.exists(data_config_file_shared):
+            self.data_config_file = data_config_file_shared
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
+                                f"Using shared data configuration from '{self.data_config_file}'.")
+        else:
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                "No valid data configuration file (data_fields.json) found. Exiting!")
+            sys.exit(1)
+        # read data_fields
+        try:
+            with open(self.data_config_file) as json_file_config:
+                self.config.data_field_config = json.load(json_file_config)
+        except Exception as e:
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                f"Error reading configuration file (data_fields.json). Exiting!")
+            raise e
+            sys.exit(1)
+            
+        self.every = self._get_interval()
+
         # Make sure we check for a recent update first
         self.last_update_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
 

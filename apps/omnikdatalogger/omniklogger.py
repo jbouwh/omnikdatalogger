@@ -9,12 +9,6 @@ import appdaemon.plugins.hass.hassapi as hass
 from omnik.ha_logger import hybridlogger
 from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
-import pathlib
-import json
-
-data_config_file = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
-data_config_file_shared = f"{pathlib.Path(__file__).parent.absolute()}/../share/omnikdatalogger/data_fields.json"
-
 
 logger = logging.getLogger(__name__)
 
@@ -97,19 +91,6 @@ class HA_OmnikDataLogger(hass.Hass):
                                     f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
         else:
             c = ha_ConfigParser(ha_args=self.args)
-        # Link mqtt field config to config parser
-        if os.path.exists(data_config_file):
-            self.data_config_file = data_config_file
-            hybridlogger.ha_log(logger, self, "INFO", f"Using data configuration from '{self.data_config_file}'.")
-        elif os.path.exists(data_config_file_shared):
-            self.data_config_file = data_config_file_shared
-            hybridlogger.ha_log(logger, self, "INFO", f"Using shared data configuration from '{self.data_config_file}'.")
-        else:
-            hybridlogger.ha_log(logger, self, "ERROR",
-                                "No valid data configuration file found. Exiting!")
-            return
-        with open(self.data_config_file) as json_file_config:
-            c.data_field_config = json.load(json_file_config)
 
         self.interval = int(c.get('default', 'interval', 360))
         self.datalogger = DataLogger(c, hass_api=self)
@@ -128,20 +109,7 @@ class HA_OmnikDataLogger(hass.Hass):
 
 # Initialization from the commandline
 def main(c: ha_ConfigParser, hass_api=None):
-    # Link mqtt field config to config parser
-    if os.path.exists(data_config_file):
-        d_config_file = data_config_file
-        hybridlogger.ha_log(logger, hass_api, "INFO", f"Using data configuration from '{d_config_file}'.")
-    elif os.path.exists(data_config_file_shared):
-        d_config_file = data_config_file_shared
-        hybridlogger.ha_log(logger, hass_api, "INFO", f"Using shared data configuration from '{d_config_file}'.")
-    else:
-        hybridlogger.ha_log(logger, hass_api, "ERROR",
-                            "No valid data configuration file found. Exiting!")
-        return
-    with open(d_config_file) as json_file_config:
-        c.data_field_config = json.load(json_file_config)
-    # Enabled debigging if the flag is set
+    # Enabled debugging if the flag is set
     if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)
     datalogger = DataLogger(c, hass_api=hass_api)
