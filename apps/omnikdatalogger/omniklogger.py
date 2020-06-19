@@ -3,6 +3,7 @@
 import os
 import argparse
 import configparser
+import pathlib
 import time
 import logging
 import appdaemon.plugins.hass.hassapi as hass
