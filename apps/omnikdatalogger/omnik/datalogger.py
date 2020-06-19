@@ -22,6 +22,9 @@ class DataLogger(object):
         self.plant_update = {}
         self.hass_api = hass_api
         self.logger = logger
+        if self.config.get('default', 'debug', fallback=False):
+            logger.setLevel(logging.DEBUG)
+
         self.config = config
 
         data_config_file_args = self.config.get('default', 'data_config', fallback='')
@@ -77,8 +80,6 @@ class DataLogger(object):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"City '{self.city}' not recognized. Error: {e}")
             sys.exit(1)
 
-        if self.config.get('default', 'debug', fallback=False):
-            logger.setLevel(logging.DEBUG)
         # Initialize client
         self._init_client()
         # Initialize output plugins
