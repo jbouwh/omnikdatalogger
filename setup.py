@@ -38,7 +38,12 @@ setup(
     url="https://github.com/jbouwh/omnikdatalogger",
     package_dir={"": "apps/omnikdatalogger"},
     packages=find_packages(where="apps/omnikdatalogger"),
-    data_files=[('share/omnikdatalogger', ['apps/omnikdatalogger/data_fields.json'])],
+    data_files=[('share/omnikdatalogger', [
+        'apps/omnikdatalogger/data_fields.json',
+        'scripts/systemd/omnikdatalogger.service',
+        'scripts/proxy/iptables_setup_example.sh',
+        'scripts/proxy/omnikproxy_example_startup.sh'])
+                ],
     classifiers=[
         'Topic :: Home Automation',
         'Programming Language :: Python :: 3.7',
@@ -46,5 +51,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    scripts=['bin/omniklogger'],
+    scripts=['apps/omnikdatalogger/omniklogger.py', 'scripts/proxy/omnikloggerproxy.py'],
 )
