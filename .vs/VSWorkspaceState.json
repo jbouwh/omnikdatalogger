@@ -9,6 +9,6 @@
     "\\scripts\\systemd",
     "\\tests"
   ],
-  "SelectedNode": "\\scripts\\proxy\\setup.py",
+  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\__init__.py",
   "PreviewInSolutionExplorer": false
 }

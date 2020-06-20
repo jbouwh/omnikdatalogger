@@ -81,7 +81,6 @@ class HA_OmnikDataLogger(hass.Hass):
     def initialize(self, *args, **kwargs):
         hybridlogger.ha_log(logger, self, "INFO", "Starting Omnik datalogger...")
         hybridlogger.ha_log(logger, self, "DEBUG", f"Arguments from AppDaemon config (self.args): {self.args}")
-        self.config.configfile = None
         if 'config' in self.args:
             c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=self.args)
             self.configfile = self.args['config']
@@ -91,9 +90,10 @@ class HA_OmnikDataLogger(hass.Hass):
             except Exception as e:
                 hybridlogger.ha_log(logger, self, "ERROR",
                                     f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
-            self.config.configfile = None
+                c.configfile = None
         else:
             c = ha_ConfigParser(ha_args=self.args)
+            c.configfile = None
         set_data_config_path(c)
 
         self.interval = int(c.get('default', 'interval', 360))
