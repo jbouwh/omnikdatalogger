@@ -12,7 +12,7 @@ Good luck with them
 * Install pip: `curl -k https://bootstrap.pypa.io/get-pip.py | python3` See: (https://stackoverflow.com/questions/47649902/installing-pip-on-a-dsm-synology)
 * Install the paho mqtt client: `/volume1/@appstore/py3k/usr/local/bin/pip3 install paho-mqtt`. The path may be diferent. I used a Synology DS218 play
 
-On upgrades it might be neccesare to reïnstall pip and paho-mqtt. Make sure you chack on this after an update for your Synology.
+On upgrades it might be neccesare to reÃ¯nstall pip and paho-mqtt. Make sure you chack on this after an update for your Synology.
 
 Now take the following steps:
 * Place the omnikloggerproxy.py script, the bash script (omnikproxy_example_startup.sh) and `config.ini_example.txt` to a folder that will not be affected by upgrades. E.g. `/volume1/someshare/yourscriptfolder`.
