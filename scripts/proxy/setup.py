@@ -34,7 +34,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/jbouwh/omnikdatalogger/scripts/proxy",
     packages=find_packages(),
-    data_files=[('.', [
+    data_files=[('share/omnikdataloggerproxy', [
         'iptables_setup_example.sh',
         'omnikproxy_example_startup.sh'])
                 ],
