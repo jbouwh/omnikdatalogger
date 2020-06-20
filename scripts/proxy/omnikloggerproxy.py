@@ -261,7 +261,7 @@ class mqtt(object):
             "name": "{0}_{1}".format(self.device_name, self.serial),
             "mdl": model,
             "mf": 'JBsoft',
-            "sw": __VERSION__
+            "sw": __version__
             }
         return device_pl
 
