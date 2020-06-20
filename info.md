@@ -1,6 +1,6 @@
 ﻿# omnikdatalogger
-*Code parsing:* ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-*HACS AppDaemon:* ![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
+[omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 ## Configuration
 The application can be configured using:

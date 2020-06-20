@@ -1,8 +1,7 @@
 ﻿# omnikdatalogger
 ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
-![HACS Validate](https://github.com/jbouwh/omnikdatalogger/workflows/HACS%20Validate/badge.svg)
 ![PyPI version](https://badge.fury.io/py/omnikdatalogger.svg) 
-
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 ## See also
 - [Omnik data logger Wiki](https://github.com/jbouwh/omnikdatalogger/wiki)
 - [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
