@@ -29,12 +29,12 @@ setup(
     license="gpl-3.0",
     author="Jan Bouwhuis",
     author_email="jan@jbsoft.nl",
-    description="Omnik Data Logger",
+    description="Omnik Data Logger Proxy",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jbouwh/omnikdatalogger",
     package_dir={"": "scripts/proxy"},
-    packages=find_packages(where="apps/omnikdatalogger"),
+    packages=find_packages(where="scripts/proxy"),
     data_files=[('share/omnikdatalogger', [
         'scripts/proxy/iptables_setup_example.sh',
         'scripts/proxy/omnikproxy_example_startup.sh'])
