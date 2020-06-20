@@ -13,7 +13,7 @@ def get_version(package):
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
 
-with open("scripts/proxy/README.md", "r", encoding="UTF-8") as fh:
+with open("README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
 
 install_requires = [
@@ -25,16 +25,16 @@ install_requires = [
 
 setup(
     name="omnikdataloggerproxy",
-    version=get_version('scripts/proxy'),
+    version=get_version('.'),
     license="gpl-3.0",
     author="Jan Bouwhuis",
     author_email="jan@jbsoft.nl",
     description="Omnik Data Logger Proxy",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jbouwh/omnikdatalogger",
-    package_dir={"": "scripts/proxy"},
-    packages=find_packages(where="scripts/proxy"),
+    url="https://github.com/jbouwh/omnikdatalogger/scripts/proxy",
+    package_dir={"": ""},
+    packages=find_packages(),
     data_files=[('share/omnikdatalogger', [
         'scripts/proxy/iptables_setup_example.sh',
         'scripts/proxy/omnikproxy_example_startup.sh'])
@@ -47,5 +47,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    scripts=['scripts/proxy/omnikloggerproxy.py'],
+    scripts=['omnikloggerproxy.py'],
 )
