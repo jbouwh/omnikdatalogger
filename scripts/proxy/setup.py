@@ -34,9 +34,9 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/jbouwh/omnikdatalogger/scripts/proxy",
     packages=find_packages(),
-    data_files=[('share/omnikdatalogger', [
-        'scripts/proxy/iptables_setup_example.sh',
-        'scripts/proxy/omnikproxy_example_startup.sh'])
+    data_files=[('.', [
+        'iptables_setup_example.sh',
+        'omnikproxy_example_startup.sh'])
                 ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
