@@ -23,7 +23,8 @@ install_requires = [
     'pytz>=2019.1',
     'paho-mqtt>=1.5.0',
     'dsmr-parser>=0.21',
-    'appdaemon>=4.0.3'
+    'appdaemon>=4.0.3',
+    'omnikdataloggerproxy>=1.0.2'
 ]
 
 setup(
@@ -41,8 +42,7 @@ setup(
     data_files=[('share/omnikdatalogger', [
         'apps/omnikdatalogger/data_fields.json',
         'scripts/systemd/omnikdatalogger.service',
-        'scripts/proxy/iptables_setup_example.sh',
-        'scripts/proxy/omnikproxy_example_startup.sh'])
+        ])
                 ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -52,5 +52,5 @@ setup(
         "Operating System :: OS Independent"
     ],
     install_requires=install_requires,
-    scripts=['apps/omnikdatalogger/omniklogger.py', 'scripts/proxy/omnikloggerproxy.py'],
+    scripts=['apps/omnikdatalogger/omniklogger.py'],
 )
