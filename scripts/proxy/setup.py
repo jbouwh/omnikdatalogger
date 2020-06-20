@@ -33,7 +33,6 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jbouwh/omnikdatalogger/scripts/proxy",
-    package_dir={"": ""},
     packages=find_packages(),
     data_files=[('share/omnikdatalogger', [
         'scripts/proxy/iptables_setup_example.sh',
