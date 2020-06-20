@@ -3,7 +3,10 @@
 Use these files to intercept your inverters data messages. See the comments in the example shell script en config.ini about how to use them.
 Good luck with them
 
-## Prearing your Synology to run run omnikdatalogger the proxy script
+## Install using pip3
+`pip3 install omnikdataloggerproxy`
+
+## Prearing your Synology to run run omnikdatalogger the proxy script (manual install)
 
 * Make sure you have shell access (ssh or telnet).
 * Install pip: `curl -k https://bootstrap.pypa.io/get-pip.py | python3` See: (https://stackoverflow.com/questions/47649902/installing-pip-on-a-dsm-synology)

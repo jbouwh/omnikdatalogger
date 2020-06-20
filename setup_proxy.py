@@ -13,7 +13,7 @@ def get_version(package):
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
 
-with open("README.md", "r", encoding="UTF-8") as fh:
+with open("scripts/proxy/README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
 
 install_requires = [
@@ -40,6 +40,7 @@ setup(
         'scripts/proxy/omnikproxy_example_startup.sh'])
                 ],
     classifiers=[
+        'Development Status :: 5 - Production/Stable',
         'Topic :: Home Automation',
         'Programming Language :: Python :: 3.5',
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

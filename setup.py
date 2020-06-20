@@ -45,10 +45,11 @@ setup(
         'scripts/proxy/omnikproxy_example_startup.sh'])
                 ],
     classifiers=[
+        'Development Status :: 5 - Production/Stable',
         'Topic :: Home Automation',
         'Programming Language :: Python :: 3.7',
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Operating System :: OS Independent",
+        "Operating System :: OS Independent"
     ],
     install_requires=install_requires,
     scripts=['apps/omnikdatalogger/omniklogger.py', 'scripts/proxy/omnikloggerproxy.py'],
