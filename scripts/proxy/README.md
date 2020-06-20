@@ -1,12 +1,37 @@
 # OMNIKDATALOGGERPROXY
+![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
+![PyPI version](https://badge.fury.io/py/omnikdataloggerproxy.svg) 
 
-Use these files to intercept your inverters data messages. See the comments in the example shell script en config.ini about how to use them.
-Good luck with them
+The `omnikdataloggerproxy.py` script and supporting files can be used intercept your inverters data messages. See the comments in the example shell script enand the config.ini example about how to use them.
+Good luck with them.
+The output can be processed with [omnikdatalogger](https://github.com/jbouwh/omnikdatalogger) for output to pvoutput, mqtt, influxdb and integration with Home Assistant.
 
-## Install using pip3
+## Install using pip
 `pip3 install omnikdataloggerproxy`
 
-## Prearing your Synology to run run omnikdatalogger the proxy script (manual install)
+The supporting files are installed at the folder *{root}/shared/omnikdataloggerproxy/*
+
+### Command line
+```
+usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
+                           [--config CONFIG] [--loglevel LOGLEVEL]
+                           [--listenaddress LISTENADDRESS]
+                           [--listenport LISTENPORT]
+                           [--omniklogger OMNIKLOGGER]
+                           [--omnikloggerport OMNIKLOGGERPORT]
+                           [--mqtt_host MQTT_HOST] [--mqtt_port MQTT_PORT]
+                           [--mqtt_retain MQTT_RETAIN]
+                           [--mqtt_discovery_prefix MQTT_DISCOVERY_PREFIX]
+                           [--mqtt_client_name_prefix MQTT_CLIENT_NAME_PREFIX]
+                           [--mqtt_username MQTT_USERNAME]
+                           [--mqtt_password MQTT_PASSWORD]
+                           [--mqtt_device_name MQTT_DEVICE_NAME]
+                           [--mqtt_logger_sensor_name MQTT_LOGGER_SENSOR_NAME]
+```
+
+## Using the proxy script with Synology
+
+### Prearing your Synology to run run omnikdatalogger the proxy script (manual install)
 
 * Make sure you have shell access (ssh or telnet).
 * Install pip: `curl -k https://bootstrap.pypa.io/get-pip.py | python3` See: (https://stackoverflow.com/questions/47649902/installing-pip-on-a-dsm-synology)
@@ -25,7 +50,7 @@ Now take the following steps:
 
 You can forward the logger trafic to the omnik servers, but if you rerouted yhe traffic for 176.58.117.69 you need to forward to a linux server elswere in the internet.
 
-## Prearing your Synology to run run omnikdatalogger the proxy script
+### Prearing your Synology to run run omnikdatalogger the proxy script
 
 You can use the following systemd config to run the script as a service (The example shows a forwarding only setup)
 

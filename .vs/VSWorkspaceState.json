@@ -9,6 +9,6 @@
     "\\scripts\\systemd",
     "\\tests"
   ],
-  "SelectedNode": "\\scripts\\proxy\\omnikloggerproxy.py",
+  "SelectedNode": "\\scripts\\proxy\\setup.py",
   "PreviewInSolutionExplorer": false
 }

@@ -36,7 +36,8 @@ setup(
     packages=find_packages(),
     data_files=[('share/omnikdataloggerproxy', [
         'iptables_setup_example.sh',
-        'omnikproxy_example_startup.sh'])
+        'omnikproxy_example_startup.sh',
+        'config.ini_example.txt'])
                 ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
