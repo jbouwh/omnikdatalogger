@@ -7,9 +7,9 @@ Good luck with them.
 The output can be processed with [omnikdatalogger](https://github.com/jbouwh/omnikdatalogger) for output to pvoutput, mqtt, influxdb and integration with Home Assistant.
 
 ## Install using pip
-`pip3 install omnikdataloggerproxy`
+`sudo pip3 install omnikdataloggerproxy`
 
-The supporting files are installed at the folder *{root}/shared/omnikdataloggerproxy/*
+The supporting files are installed at the folder */usr/local/share/omnikdataloggerproxy/*
 
 ### Command line
 ```
@@ -50,17 +50,17 @@ Now take the following steps:
 
 You can forward the logger trafic to the omnik servers, but if you rerouted yhe traffic for 176.58.117.69 you need to forward to a linux server elswere in the internet.
 
-### Prearing your Synology to run run omnikdatalogger the proxy script
+### Running omnikdataloggerproxy as a service on a Debian based system
 
-You can use the following systemd config to run the script as a service (The example shows a forwarding only setup)
+You can find the following sample config at `/usr/local/share/omnikdataloggerproxy/omnikdatalogggerproxy.config` after installing `pip3 install omnikdataloggerproxy` as root.
 
-```service
+```ini
 [Unit]
 Description=Omnik datalogger proxy
 After=network.target
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/jbouwh/python/omnikloggerproxy.py --serialnumber NLDN123456789012 --listenaddress 0.0.0.0 --omniklogger 176.58.117.69 --omnikloggerport 10004
+ExecStart=/usr/local/bin/omnikloggerproxy.py --serialnumber NLDN123456789012 --listenaddress 0.0.0.0 --omniklogger 176.58.117.69 --omnikloggerport 10004
 User=jbouwh
 Group=users
 Restart=on-failure
@@ -68,9 +68,41 @@ RestartSec=30s
 [Install]
 WantedBy=multi-user.target
 ```
+The template service file shows a forwarding only setup.
 
-To setup as root:
-* Update the user and serial number in the script
-* Link the script to `/etc/systemd/system/omnikloggerproxy.service`
-* Enable the service: `systemctl enable omnikloggerproxy`
-* Start the service: `systemctl start omnikloggerproxy`
+To setup omnikdatalogger proxy as root do:
+- Create a config folder and copy the sample service script:
+  - `cd /etc/`
+  - `mkdir omnikdataloggerproxy`
+  - `cp /usr/local/share/omnikdataloggerproxy/omnikdatalogggerproxy.config .`
+- Update `User` and *serialnumber* in the script `omnikdatalogggerproxy.config` using your favorite editor.
+  - `nano omnikdatalogggerproxy.config`
+- Link the script to systemd: to `ln -s /etc/omnikdataloggerproxy/omnikdatalogggerproxy.service /etc/systemd/system/omnikdatalogggerproxy.service`
+- Enable the service: `systemctl enable omnikdatalogggerproxy`
+- Start the service: `systemctl start omnikdatalogggerproxy`
+- check if the service is running: `systemctl status omnikdatalogggerproxy`
+
+After some time the logging should show something similar like this:
+```
+# systemctl status omnikdataloggerproxy
+● omnikdataloggerproxy.service - Omnik datalogger proxy
+   Loaded: loaded (/etc/omnikdataloggerproxy/omnikdataloggerproxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sun 2020-06-21 13:33:21 CEST; 16min ago
+ Main PID: 28182 (omnikloggerprox)
+    Tasks: 4 (limit: 4915)
+   Memory: 9.8M
+   CGroup: /system.slice/omnikdataloggerproxy.service
+           └─28182 /usr/bin/python3 /usr/local/bin/omnikloggerproxy.py --serialnumber NLDN123456789012 --listenaddress 0.0.0.0 --omniklogger 176.58.117.69 --omnikloggerport 10004
+
+Jun 21 13:33:22 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Forwarding succesful.
+Jun 21 13:38:33 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Processing message for inverter 'NLDN123456789012'
+Jun 21 13:38:33 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: 2020-06-21 13:38:33.795477 Forwarding to omnik logger "176.58.117.69"
+Jun 21 13:38:33 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Forwarding succesful.
+Jun 21 13:43:38 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Processing message for inverter 'NLDN123456789012'
+Jun 21 13:43:38 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: 2020-06-21 13:43:38.937148 Forwarding to omnik logger "176.58.117.69"
+Jun 21 13:43:38 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Forwarding succesful.
+Jun 21 13:48:50 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Processing message for inverter 'NLDN123456789012'
+Jun 21 13:48:50 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: 2020-06-21 13:48:50.194599 Forwarding to omnik logger "176.58.117.69"
+Jun 21 13:48:50 alpha omnikloggerproxy.py[28182]: omnikloggerproxy: Forwarding succesful.
+```
+The log shows when messages were forwarded.

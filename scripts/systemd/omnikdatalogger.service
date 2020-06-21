@@ -1,9 +1,12 @@
 [Unit]
 Description=Omnik Data Logger service
+After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --interval 360
+ExecStart=/usr/local/bin/omniklogger.py --config /etc/omnik/config.ini --interval 360
+Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target

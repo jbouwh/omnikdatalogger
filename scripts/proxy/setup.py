@@ -19,7 +19,6 @@ with open("README.md", "r", encoding="UTF-8") as fh:
 install_requires = [
     'configparser>=3.7.4',
     'requests>=2.21.0',
-    'cachetools>=3.1.1',
     'paho-mqtt>=1.5.0',
 ]
 
@@ -37,7 +36,8 @@ setup(
     data_files=[('share/omnikdataloggerproxy', [
         'iptables_setup_example.sh',
         'omnikproxy_example_startup.sh',
-        'config.ini_example.txt'])
+        'config.ini_example.txt',
+        'omnikdataloggerproxy.service'])
                 ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
