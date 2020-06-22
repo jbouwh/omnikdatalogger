@@ -8,5 +8,5 @@ RUN pip3 install -r requirements.txt --upgrade && \
 
 USER omnik
 
-ENTRYPOINT ["omnik-logger"]
+ENTRYPOINT ["omniklogger.py"]
 CMD ["--help"]

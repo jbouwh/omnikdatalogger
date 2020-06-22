@@ -1,7 +1,8 @@
 # omnik-data-logger
 > The `Docker` way
+## NOTE: Docker support is not yet available !!
 
-This directory contains all artefacts to run the `omnik-data-logger` as a `Docker` container.
+This directory contains all artefacts to run the `omnikdatalogger` as a `Docker` container.
 
 Use the included `Makefile` to build and push the `Docker` image yourself.
 
@@ -20,7 +21,7 @@ login                          Login to Docker Hub
 The following command wil pull the `Docker` image, mount the `config.ini` and create the `Docker` container. Omnik PV data will be pushed to [PVOutput](https://pvoutput.org/) every 300 seconds (5 minutes).
 
 ```
-$ docker run --name omnik-data-logger -d -v ${PWD}/config.ini:/home/omnik/.omnik/config.ini pprins/omnik-data-logger --every 300
+$ docker run --name omnik-data-logger -d -v ${PWD}/config.ini:/home/omnik/.omnik/config.ini jbouwh/omnikdatalogger --interval 360
 ```
 
 I also added a `docker-compose.yml` that can be used.
@@ -43,7 +44,7 @@ The `config.ini` should look something like this:
 
 ```
 [default]
-timezone = Europe/Amsterdam
+City = Amsterdam
 
 [omnikportal]
 username = john.doe@example.com
@@ -51,6 +52,7 @@ password = S3cret!
 
 [plugins]
 output=pvoutput
+client = omnikportal
 
 [pvoutput]
 api_key = <YOUR API KEY>
