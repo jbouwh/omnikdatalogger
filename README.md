@@ -461,17 +461,8 @@ key | optional | type | default | description
 
 ## Client settings
 Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
-### LocalProxy client settings in the section `client.localproxy` of `apps.yaml` or `config.ini`
-key | optional | type | default | description
--- | --| -- | -- | --
-`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
 
-### TCPclient client settings in the section `client.tcpclient` of `apps.yaml` or `config.ini`
-key | optional | type | default | description
--- | --| -- | -- | --
-`plant_id_list` | False | list | _(none)_ | List with the plant id's you want to be monitored. Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
-
-#### Plant specific settings in the section `plant.*plant_id*` of `apps.yaml` or `config.ini`
+### Plant specific settings in the section `plant.*plant_id*` of `apps.yaml` or `config.ini`
 Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by logging in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -480,6 +471,16 @@ key | optional | type | default | description
 `inverter_port` | True | int | _8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
 `inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant_id' to validate/filter the raw data messages received.
 `sys_id` | True | int | _`sys_id` setting under [pvoutput] section_ | Your unique system id, generated when creating an account at pvoutput.org. See `pvoutput` settings for more information.
+
+### TCPclient client settings in the section `client.tcpclient` of `apps.yaml` or `config.ini`
+key | optional | type | default | description
+-- | --| -- | -- | --
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you want to be monitored. Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
+
+### LocalProxy client settings in the section `client.localproxy` of `apps.yaml` or `config.ini`
+key | optional | type | default | description
+-- | --| -- | -- | --
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section.
 
 The LocalProxy client uses input plugins that are used to collect the data.
 The `omnikloggerproxy.py` script (under the folder `/scripts/proxy`) enable to proxy the raw logger data to MQTT and can help to forward your data to omnikdatalogger and still support forwarding the logging to the the legacy portal of Omnik/Solarman.

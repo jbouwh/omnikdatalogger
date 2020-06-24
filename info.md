@@ -190,13 +190,9 @@ key | optional | type | default | description
 `output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
 
 ### Client settings (required, optional and defaults)
+Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
 
-#### LocalProxy client settings in the section `client.localproxy` of `apps.yaml`
-key | optional | type | default | description
--- | --| -- | -- | --
-`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set in section `plant.{plant id}]`. Every plant has its own section.
-
-##### Plant settings in the section `plant.*plant_id*` of `apps.yaml`
+#### Plant settings in the section `plant.*plant_id*` of `apps.yaml`
 Details for each plant are set in section `plant.{plant id}]`. Every plant has its own section. Possible keys are:
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -204,6 +200,11 @@ key | optional | type | default | description
 `logger_sn` | True | int | _(none)_ | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.
 `inverter_port` | True | int | _8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
 `inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant_id' to validate/filter the raw data messages received.
+
+#### LocalProxy client settings in the section `client.localproxy` of `apps.yaml`
+key | optional | type | default | description
+-- | --| -- | -- | --
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set in section `plant.{plant id}]`. Every plant has its own section.
 
 The LocalProxy client uses input plugins that are used to collect the data.
 The `omnikloggerproxy.py` script (under the folder `/scripts/proxy`) enable to proxy the raw logger data to MQTT and can help to forward your data to omnikdatalogger and still support forwarding the logging to the the legacy portal of Omnik/Solarman.
