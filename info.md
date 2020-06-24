@@ -194,10 +194,10 @@ key | optional | type | default | description
 #### LocalProxy client settings in the section `client.localproxy` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Every plant has its own section.
+`plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set in section `plant.{plant id}]`. Every plant has its own section.
 
 ##### Plant settings in the section `plant.*plant_id*` of `apps.yaml`
-Details for the plant are set under `[plant_id]`. Every plant has its own section. Possible keys are:
+Details for each plant are set in section `plant.{plant id}]`. Every plant has its own section. Possible keys are:
 key | optional | type | default | description
 -- | --| -- | -- | --
 `inverter_address` | True | string | _(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.
