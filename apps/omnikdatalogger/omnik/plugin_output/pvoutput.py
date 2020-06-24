@@ -17,8 +17,8 @@ class pvoutput(Plugin):
         self.process_aggregates = True
 
     def _get_temperature(self, msg, data):
-        if self.config.getboolean('pvoutput', 'use_temperature', fallback=False):
-            if self.config.getboolean('pvoutput', 'use_inverter_temperature', fallback=False) and \
+        if self.config.getboolean('output.pvoutput', 'use_temperature', fallback=False):
+            if self.config.getboolean('output.pvoutput', 'use_inverter_temperature', fallback=False) and \
                     ('inverter_temperature' in msg):
                 data['v5'] = msg['inverter_temperature']
             else:
@@ -27,7 +27,7 @@ class pvoutput(Plugin):
                 data['v5'] = weather['main']['temp']
 
     def _get_voltage(self, msg, data):
-        voltage_field = self.config.get('pvoutput', 'publish_voltage', fallback=None)
+        voltage_field = self.config.get('output.pvoutput', 'publish_voltage', fallback=None)
         if voltage_field:
             if voltage_field in msg:
                 data['v6'] = msg[voltage_field]
@@ -42,7 +42,7 @@ class pvoutput(Plugin):
 
             self.logger.debug(json.dumps(msg, indent=2))
 
-            if not self.config.has_option('pvoutput', 'api_key'):
+            if not self.config.has_option('output.pvoutput', 'api_key'):
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                     f'[{__name__}] No api_key found in configuration')
                 return
@@ -54,7 +54,7 @@ class pvoutput(Plugin):
                 return
 
             headers = {
-                "X-Pvoutput-Apikey": self.config.get('pvoutput', 'api_key'),
+                "X-Pvoutput-Apikey": self.config.get('output.pvoutput', 'api_key'),
                 "X-Pvoutput-SystemId": str(msg['sys_id']),
                 "Content-type": "application/x-www-form-urlencoded",
                 "Accept": "text/plain"

@@ -18,18 +18,18 @@ class mqtt(Plugin):
         #                      fallback='Europe/Amsterdam')
         # self.timezone = pytz.timezone(tz)
 
-        self.mqtt_client_name = self.config.get('mqtt', 'client_name_prefix',
+        self.mqtt_client_name = self.config.get('output.mqtt', 'client_name_prefix',
                                                 fallback='ha-mqtt-omniklogger') + "_" + uuid.uuid4().hex
-        self.mqtt_host = self.config.get('mqtt', 'host', fallback='localhost')
-        self.mqtt_port = int(self.config.get('mqtt', 'port', fallback='1833'))
-        self.mqtt_retain = self.config.getboolean('mqtt', 'retain', fallback=False)
+        self.mqtt_host = self.config.get('output.mqtt', 'host', fallback='localhost')
+        self.mqtt_port = int(self.config.get('output.mqtt', 'port', fallback='1833'))
+        self.mqtt_retain = self.config.getboolean('output.mqtt', 'retain', fallback=False)
         self.mqtt_config_published = {}
-        if not self.config.has_option('mqtt', 'username') or not self.config.has_option('mqtt', 'password'):
+        if not self.config.has_option('output.mqtt', 'username') or not self.config.has_option('output.mqtt', 'password'):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 "Please specify MQTT username and password in the configuration")
         else:
-            self.mqtt_username = self.config.get('mqtt', 'username')
-            self.mqtt_password = self.config.get('mqtt', 'password')
+            self.mqtt_username = self.config.get('output.mqtt', 'username')
+            self.mqtt_password = self.config.get('output.mqtt', 'password')
 
         # mqtt setup
         self.mqtt_client = mqttclient.Client(self.mqtt_client_name)
@@ -42,14 +42,14 @@ class mqtt(Plugin):
         self.mqtt_client.connect(self.mqtt_host, self.mqtt_port)
         # start processing messages
         self.mqtt_client.loop_start()
-        if self.config.has_option('mqtt', 'discovery_prefix'):
-            self.discovery_prefix = self.config.get('mqtt', 'discovery_prefix')
+        if self.config.has_option('output.mqtt', 'discovery_prefix'):
+            self.discovery_prefix = self.config.get('output.mqtt', 'discovery_prefix')
         else:
             self.discovery_prefix = "homeassistant"
         # The mqtt name of the inverter device
         # use the configured device name or the device name from the omnik portal
-        if self.config.has_option('mqtt', 'device_name'):
-            self.device_name = self.config.get('mqtt', 'device_name')
+        if self.config.has_option('output.mqtt', 'device_name'):
+            self.device_name = self.config.get('output.mqtt', 'device_name')
         else:
             self.device_name = None
         # self.config.mqtt_fields['<field_name>']['name'] can have an override
@@ -112,7 +112,7 @@ class mqtt(Plugin):
 
         # Determine plant appendix
         plant_appendix = ""
-        if self.config.getboolean('mqtt', 'append_plant_id', False):
+        if self.config.getboolean('output.mqtt', 'append_plant_id', False):
             plant_appendix = f" [{msg['plant_id']}]"
 
         # Device payload
@@ -140,8 +140,8 @@ class mqtt(Plugin):
                 # skip publishing non exitent values
                 continue
             # field: name, dev_cla, ic, unit, filter
-            if self.config.has_option('mqtt', f'{field}_name'):
-                fieldname = self.config.get('mqtt', f'{field}_name')
+            if self.config.has_option('output.mqtt', f'{field}_name'):
+                fieldname = self.config.get('output.mqtt', f'{field}_name')
             else:
                 fieldname = self.config.data_field_config[field]['name']
             config_pl[field] = {

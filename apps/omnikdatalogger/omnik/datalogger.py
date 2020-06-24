@@ -264,7 +264,7 @@ class DataLogger(object):
     def _validate_client_data(self, plant, data):
         # Insert defaults for missing fields
         # data['data']['plant_id']
-        self._validate_field(data, 'inverter', self.config.get(str(plant), 'inverter_sn', 'n/a'))
+        self._validate_field(data, 'inverter', self.config.get(f"plant.{plant}", 'inverter_sn', 'n/a'))
         return data
 
     def _output_update(self, plant, data):
@@ -312,14 +312,14 @@ class DataLogger(object):
 
     def _aggregate_data(self, aggregated_data, data):
         # Check for pvoutput sys_id override in config
-        sys_id = int(self.config.get(data['plant_id'], 'sys_id', '0'))
-        global_sys_id = int(self.config.get('pvoutput', 'sys_id', '0'))
+        sys_id = int(self.config.get(f"plant.{data['plant_id']}", 'sys_id', '0'))
+        global_sys_id = int(self.config.get('output.pvoutput', 'sys_id', '0'))
         if sys_id and (sys_id != global_sys_id):
             # Do no aggegate: add sys_id to data set
             data['sys_id'] = sys_id
         else:
             # Get sys_id from pvoutput section, cannot aggregate without sys_id
-            sys_id = self.config.get('pvoutput', 'sys_id', '')
+            sys_id = self.config.get('output.pvoutput', 'sys_id', '')
             if sys_id:
                 # Aggerate data (initialize dict and set sys_id)
                 self._init_aggregated_data(aggregated_data, sys_id)

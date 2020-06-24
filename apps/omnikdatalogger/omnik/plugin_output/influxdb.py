@@ -10,23 +10,23 @@ class influxdb(Plugin):
         super().__init__()
         self.name = 'influxdb'
         self.description = 'Write output to InfluxDB'
-        self.host = self.config.get('influxdb', 'host', fallback='localhost')
-        self.port = self.config.get('influxdb', 'port', fallback='8086')
-        self.database = self.config.get('influxdb', 'database', fallback='omnikdatalogger')
+        self.host = self.config.get('output.influxdb', 'host', fallback='localhost')
+        self.port = self.config.get('output.influxdb', 'port', fallback='8086')
+        self.database = self.config.get('output.influxdb', 'database', fallback='omnikdatalogger')
 
         self.headers = {
             "Content-type": "application/x-www-form-urlencoded"
         }
         # Add JWT authentication token
-        if self.config.has_option('influxdb', 'jwt_token'):
+        if self.config.has_option('output.influxdb', 'jwt_token'):
             self.auth = None
-            self.headers['Authorization'] = f"Bearer {self.config.get('influxdb', 'jwt_token')}"
-        elif self.config.has_option('influxdb', 'username') and self.config.has_option('influxdb', 'password'):
-            self.auth = requests.auth.HTTPBasicAuth(self.config.get('influxdb', 'username'),
-                                                    self.config.get('influxdb', 'password'))
+            self.headers['Authorization'] = f"Bearer {self.config.get('output.influxdb', 'jwt_token')}"
+        elif self.config.has_option('output.influxdb', 'username') and self.config.has_option('output.influxdb', 'password'):
+            self.auth = requests.auth.HTTPBasicAuth(self.config.get('output.influxdb', 'username'),
+                                                    self.config.get('output.influxdb', 'password'))
 
     def _get_temperature(self, values):
-        if self.config.getboolean('influxdb', 'use_temperature', fallback=False):
+        if self.config.getboolean('output.influxdb', 'use_temperature', fallback=False):
             weather = self.get_weather()
             values['temperature'] = str(weather['main']['temp'])
 

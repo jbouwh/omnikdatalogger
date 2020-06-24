@@ -25,7 +25,7 @@ class HASSAPI(LocalProxyPlugin):
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "ERROR", "No HassAPI detected. Use AppDaemon with Home Assistent for this plugin")
             return
-        self.logger_entity = self.config.get('hassapi', 'logger_entity', 'binary_sensor.datalogger')
+        self.logger_entity = self.config.get('client.localproxy.hassapi', 'logger_entity', 'binary_sensor.datalogger')
 
     def stop(self):
         if self.hass_handle:

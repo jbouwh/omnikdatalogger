@@ -28,7 +28,7 @@ class LocalProxy(Client):
             }
 
         # Get plant_id_list
-        self.plant_id_list = self.config.getlist('localproxy', 'plant_id_list', fallback=[''])
+        self.plant_id_list = self.config.getlist('client.localproxy'', 'plant_id_list', fallback=[''])
         if self.plant_id_list[0] == '':
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "plant_id_list was not specified for client localproxy")
             raise Exception('plant_id_list was not specified')
@@ -67,7 +67,7 @@ class LocalProxy(Client):
         data = []
         inverterdata = {}
         for plant in self.plant_id_list:
-            inverter_sn = self.config.get(plant, 'inverter_sn', fallback=None)
+            inverter_sn = self.config.get(f"plant.{plant}", 'inverter_sn', fallback=None)
             if not inverter_sn:
                 hybridlogger.ha_log(self.logger, self.hass_api,
                                     "ERROR", "inverter_sn (The serial number of the inverter) for "

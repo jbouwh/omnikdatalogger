@@ -12,14 +12,14 @@ class OmnikPortalClient(Client):
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "Client enabled: omnikportalclient")
 
         # API Key's
-        self.app_id = self.config.get('omnikportal', 'app_id', fallback='10038')
-        self.app_key = self.config.get('omnikportal', 'app_key', fallback='Ox7yu3Eivicheinguth9ef9kohngo9oo')
+        self.app_id = self.config.get('client.omnikportal', 'app_id', fallback='10038')
+        self.app_key = self.config.get('client.omnikportal', 'app_key', fallback='Ox7yu3Eivicheinguth9ef9kohngo9oo')
         self.user_id = -1
 
-        self.base_url = self.config.get('omnikportal', 'base_url', fallback='https://api.omnikportal.com/v1')
+        self.base_url = self.config.get('client.omnikportal', 'base_url', fallback='https://api.omnikportal.com/v1')
 
-        self.username = self.config.get('omnikportal', 'username')
-        self.password = self.config.get('omnikportal', 'password')
+        self.username = self.config.get('client.omnikportal', 'username')
+        self.password = self.config.get('client.omnikportal', 'password')
 
     def initialize(self):
         url = f'{self.base_url}/user/account_validate'

@@ -80,8 +80,8 @@ class MQTTproxy(LocalProxyPlugin):
                                 "WARNING", f"MQTTproxy: invalid data received on topic: {message.topic}. Error {e}")
 
     def mqttconfig(self, parameter, fallback):
-        return self.config.get('mqtt_proxy', parameter,
-                               self.config.get('mqtt', parameter, fallback=fallback))
+        return self.config.get('client.localproxy.mqtt_proxy', parameter,
+                               self.config.get('output.mqtt', parameter, fallback=fallback))
 
     def stop(self):
         self.mqtt_client.loop_stop()

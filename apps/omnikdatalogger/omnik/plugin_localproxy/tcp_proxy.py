@@ -23,8 +23,8 @@ class TCPproxy(LocalProxyPlugin):
     def __init__(self):
         super().__init__()
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "localproxy client plugin: TCPproxy")
-        self.listen_address = self.config.get('tcp_proxy', 'listen_address', fallback='0.0.0.0')
-        self.listen_port = int(self.config.get('tcp_proxy', 'listen_port', fallback='10004'))
+        self.listen_address = self.config.get('client.localproxy.tcp_proxy', 'listen_address', fallback='0.0.0.0')
+        self.listen_port = int(self.config.get('client.localproxy.tcp_proxy', 'listen_port', fallback='10004'))
         self.listenaddress = (self.listen_address, int(self.listen_port))
 
     def stop(self):

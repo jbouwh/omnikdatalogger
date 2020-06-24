@@ -4,11 +4,11 @@
     "\\apps",
     "\\apps\\omnikdatalogger",
     "\\apps\\omnikdatalogger\\omnik",
-    "\\scripts",
+    "\\docker",
+    "\\docker\\img",
     "\\scripts\\proxy",
-    "\\scripts\\systemd",
-    "\\tests"
+    "\\scripts\\systemd"
   ],
-  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\__init__.py",
+  "SelectedNode": "\\docker\\README.md",
   "PreviewInSolutionExplorer": false
 }

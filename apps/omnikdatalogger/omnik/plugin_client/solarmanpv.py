@@ -14,15 +14,15 @@ class SolarmanPVClient(Client):
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "Client enabled: solarmanpvclient")
 
         # API Key
-        self.api_key = self.config.get('solarmanpv', 'api_key', fallback='apitest')
+        self.api_key = self.config.get('client.solarmanpv', 'api_key', fallback='apitest')
         self.user_id = -1
         self.token = None
 
-        self.base_url = self.config.get('solarmanpv', 'base_url',
+        self.base_url = self.config.get('client.solarmanpv', 'base_url',
                                         fallback='http://www.solarmanpv.com:18000/SolarmanApi/serverapi/')
 
-        self.username = self.config.get('solarmanpv', 'username')
-        self.password = self.config.get('solarmanpv', 'password')
+        self.username = self.config.get('client.solarmanpv', 'username')
+        self.password = self.config.get('client.solarmanpv', 'password')
 
     def initialize(self):
         pwhash = hashlib.md5(self.password.encode('utf-8')).hexdigest()
@@ -64,7 +64,7 @@ class SolarmanPVClient(Client):
     def getPlants(self):
 
         data = []
-        for plant in self.config.getlist('solarmanpv', 'plant_id_list'):
+        for plant in self.config.getlist('client.solarmanpv', 'plant_id_list'):
             data.append({'plant_id': plant})
 
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"plant list from config {data}")

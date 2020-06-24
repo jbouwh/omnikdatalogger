@@ -15,7 +15,7 @@ class TCPclient(Client):
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "Client enabled: TCPclient")
 
         # Get plant_id_list
-        self.plant_id_list = self.config.getlist('tcpclient', 'plant_id_list', fallback=[])
+        self.plant_id_list = self.config.getlist('client.tcpclient', 'plant_id_list', fallback=[])
         if not self.plant_id_list:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "plant_id_list was not specified for client TCPclient")
             raise Exception('plant_id_list was not specified')
@@ -26,19 +26,19 @@ class TCPclient(Client):
         data = []
         inverterdata = {}
         for plant in self.plant_id_list:
-            inverter_address = self.config.get(plant, 'inverter_address', fallback=None)
+            inverter_address = self.config.get(f"plant.{plant}", 'inverter_address', fallback=None)
             if not inverter_address:
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                     f"inverter_address for plant {plant} was not specified [TCPclient]")
                 raise Exception('an inverter_address was not specified')
-            inverter_port = int(self.config.get(plant, 'inverter_port', fallback='8899'))
+            inverter_port = int(self.config.get(f"plant.{plant}", 'inverter_port', fallback='8899'))
             inverter_connection = (inverter_address, int(inverter_port))
-            logger_sn = self.config.get(plant, 'logger_sn', fallback=None)
+            logger_sn = self.config.get(f"plant.{plant}", 'logger_sn', fallback=None)
             if not logger_sn:
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "logger_sn (The serial number of the "
                                     "Wi-Fi datalogger) for plant {plant} was not specified for [TCPclient]")
                 raise Exception('logger_sn (a serial number f the Wi-Fi datalogger) was not specified')
-            inverter_sn = self.config.get(plant, 'inverter_sn', fallback=None)
+            inverter_sn = self.config.get(f"plant.{plant}", 'inverter_sn', fallback=None)
             if not inverter_sn:
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "inverter_sn (The serial number of the inverter) "
                                     "for plant {plant} was not specified for [TCPclient]")
