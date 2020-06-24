@@ -499,12 +499,12 @@ key | optional | type | default | description
 key | optional | type | default | description
 -- | --| -- | -- | --
 `logger_sensor_name` | True | string | _(Datalogger)_ | The mqtt topic is assembled as {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
-`discovery_prefix` | True | string | (key under the `output.mqtt`section`) | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
-`host` | True | string | (key under the `output.mqtt`section`) | Hostname or fqdn of the MQTT server for publishing.
-`port` | True | integer | (key under the `output.mqtt`section`) | MQTT port to be used. 
-`client_name_prefix` | True | string | (key under the `output.mqtt`section`) then `ha-mqttproxy-omniklogger` | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
-`username`* | False | string | _(key under the `output.mqtt`section`)_ | The MQTT username used for authentication
-`password`* | False | string | _(key under the `output.mqtt`section`)_ | The MQTT password used for authentication
+`discovery_prefix` | True | string | (key under the `output.mqtt` section) | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
+`host` | True | string | (key under the `output.mqtt` section) | Hostname or fqdn of the MQTT server for publishing.
+`port` | True | integer | (key under the `output.mqtt` section`) | MQTT port to be used. 
+`client_name_prefix` | True | string | (key under the `output.mqtt` section) then `ha-mqttproxy-omniklogger` | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
+`username`* | False | string | _(key under the `output.mqtt` section)_ | The MQTT username used for authentication
+`password`* | False | string | _(key under the `output.mqtt` section)_ | The MQTT password used for authentication
 
 #### `hassapi` plugin for the `localproxy` client in the section `client.localproxy.hassapi` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
