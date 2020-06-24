@@ -182,7 +182,7 @@ key | optional | type | default | description
 `interval` | True | integer | `360` | The number of seconds of the onterval between the last update timestamp and the next poll. At normal conditions the omnik portal produces a new report approx. every 300 sec. With an interval of 360 a new pol is done with max 60 delay. This enabled fluctuation in the update frequency of the omnik portal. If there is not enough time left to wait (less than 10 sec) and no new report was found at the omnik portal another period of _interval_ seconds will be waited. After an error calling the omnik API another half _interval_ will be waited before the next poll will be done.
 `data_config` | True | string | `{path to installed data_fields.json}` | The path to the `data_fields.json`. De default is looking in the folder of the executable. When installed using *pip* `data_fields.json` is installd in the folder `./shared/omnikdatalogger/data_fields.json`. With this parameter you can savely make your own copy and customize it.
     
-#### Enable plugins under `plugins:`
+#### Enable plugins in the section `plugins`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
@@ -191,12 +191,12 @@ key | optional | type | default | description
 
 ### Client settings (required, optional and defaults)
 
-#### LocalProxy client settings under `client.localproxy:` in `apps.yaml`
+#### LocalProxy client settings in the section `client.localproxy` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set under `[plant_id]`. Every plant has its own section.
 
-##### Plant settings under `plant.*plant_id*:` in `apps.yaml`
+##### Plant settings in the section `plant.*plant_id*` of `apps.yaml`
 Details for the plant are set under `[plant_id]`. Every plant has its own section. Possible keys are:
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -213,13 +213,13 @@ The plugings for the `localproxy` client are:
 * `mqtt_proxy`: Listens to a MQTT topic to retreive the data. Use `omnikloggerproxy.py` to forward to your MQTT server.
 * `hassapi`: Listens to a homeassitant entity (ascociated with MQTT) using the HASSAPI in AppDaemon. This plugin is prefered for use in combination with Home Assistant.
 
-##### `tcp_proxy` plugin for the `localproxy` client under `client.localproxy.tcp_proxy:` in `apps.yaml`
+##### `tcp_proxy` plugin for the `localproxy` client in the section `client.localproxy.tcp_proxy:` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `listen_address` | True | string | _(0.0.0.0)_ | The IP-adres to listen to.
 `listen_port` | True | string | _(10004)_ | The port to listen to.
 
-##### `mqtt_proxy` plugin for the `localproxy` client under `client.localproxy.mqtt_proxy:` in `apps.yaml`
+##### `mqtt_proxy` plugin for the `localproxy` client in the section `client.localproxy.mqtt_proxy` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `logger_sensor_name` | True | string | _(Datalogger)_ | The mqtt topic is assembled as {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
@@ -230,12 +230,12 @@ key | optional | type | default | description
 `username`* | False | string | _(key under the `mqtt`section`)_ | The MQTT username used for authentication
 `password`* | False | string | _(key under the `mqtt`section`)_ | The MQTT password used for authentication
 
-##### `hassapi` plugin for the `localproxy` client under `client.localproxy.hassapi:` in `apps.yaml`
+##### `hassapi` plugin for the `localproxy` client in the section `client.localproxy.hassapi:` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script
 
-#### SolarmanPV client settings under `client.solarmanpv:` in `apps.yaml`
+#### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
@@ -246,7 +246,7 @@ key | optional | type | default | description
 
 This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section mentioned earlier.
 
-#### OmnikPortal client settings under `client.omnikportal:` in `apps.yaml`
+#### OmnikPortal client settings in the section `client.omnikportal` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
@@ -269,7 +269,7 @@ Restart Mosquito after changing the config.
 
 ### Output plugin settings (required, optional and defaults)
 
-#### MQTT settings under `output.mqtt:`
+#### MQTT settings in the section `output.mqtt` of `apps.yaml`
 
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -321,7 +321,7 @@ key | optional | type | default | description
 The unit of measurement the used icon, MQTT device_class and value template file can be customized by updating the file 'data_fields.json`.
 Make a copy of the original file and configure the path under the `data_config` key in the general setting.
 
-#### PVoutput plugin settings under `output.pvoutput:`
+#### PVoutput plugin settings in the section `output.pvoutput` of `apps.yaml`
 
 Register a free acount and API key at https://pvoutput.org/register.jsp
 
@@ -333,7 +333,7 @@ key | optional | type | default | description
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 `publish_voltage ` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac1'`, the inverter AC voltage of fase 1 is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
 
-### InfluxDB plugin settings under `output.influxdb:`
+### InfluxDB plugin settings in the section `output.influxdb` of `apps.yaml`
 key | optional | type | default | description
 -- | --| -- | -- | --
 `host` | True | string | `localhost` | Hostname or fqdn of the InfluxDB server for logging.
@@ -346,7 +346,7 @@ key | optional | type | default | description
 
 Logging to InfluxDB is supported with configuration settings from `data_fields.json` The file allows to customize measurement header and allows setting additional tags.
 
-##### OpenWeatherMap settings under `openweathermap:`
+##### OpenWeatherMap settings in the section `openweathermap` of `apps.yaml`
 _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify `use__inverter_temperature`)_
 
 Visit https://openweathermap.org/price to obtain a (free) api key. The weather data is cached with een TTL of 300 seconds.

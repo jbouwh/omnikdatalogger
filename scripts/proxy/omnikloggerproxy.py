@@ -24,7 +24,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.0.3'
+__version__ = '1.1.0'
 listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -427,14 +427,14 @@ if __name__ == '__main__':
     if args.config:
         c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
         c.read([args.config], encoding='utf-8')
-        args.mqtt_host = c.get('mqtt', 'host', fallback=args.mqtt_host)
-        args.mqtt_port = c.get('mqtt', 'port', fallback=args.mqtt_port)
-        args.mqtt_retain = True if c.get('mqtt', 'retain', fallback='true') == 'true' else args.mqtt_retain
-        args.mqtt_discovery_prefix = c.get('mqtt', 'discovery_prefix ', fallback=args.mqtt_discovery_prefix)
-        args.mqtt_client_name_prefix = c.get('mqtt', 'client_name_prefix', fallback=args.mqtt_client_name_prefix)
-        args.mqtt_username = c.get('mqtt', 'username', fallback=args.mqtt_username)
-        args.mqtt_password = c.get('mqtt', 'password', fallback=args.mqtt_password)
-        args.mqtt_device_name = c.get('mqtt', 'device_name', fallback=args.mqtt_device_name)
-        args.logger_sensor_name = c.get('mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
+        args.mqtt_host = c.get('output.mqtt', 'host', fallback=args.mqtt_host)
+        args.mqtt_port = c.get('output.mqtt', 'port', fallback=args.mqtt_port)
+        args.mqtt_retain = True if c.get('output.mqtt', 'retain', fallback='true') == 'true' else args.mqtt_retain
+        args.mqtt_discovery_prefix = c.get('output.mqtt', 'discovery_prefix ', fallback=args.mqtt_discovery_prefix)
+        args.mqtt_client_name_prefix = c.get('output.mqtt', 'client_name_prefix', fallback=args.mqtt_client_name_prefix)
+        args.mqtt_username = c.get('output.mqtt', 'username', fallback=args.mqtt_username)
+        args.mqtt_password = c.get('output.mqtt', 'password', fallback=args.mqtt_password)
+        args.mqtt_device_name = c.get('output.mqtt', 'device_name', fallback=args.mqtt_device_name)
+        args.logger_sensor_name = c.get('output.mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
 
     main(args)

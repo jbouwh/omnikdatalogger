@@ -28,6 +28,9 @@ usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
                            [--mqtt_device_name MQTT_DEVICE_NAME]
                            [--mqtt_logger_sensor_name MQTT_LOGGER_SENSOR_NAME]
 ```
+### Configuration file
+The MQTT parameters will fallback to the `config.ini` settings in the section [output.mqtt]. Specify a configfile using the --config option.
+For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt-settings-under-outputmqtt-in-appsyaml-or-outputmqtt-in-configini-configuration-options)
 
 ## Using the proxy script with Synology
 
