@@ -92,6 +92,37 @@ localproxy = mqtt_proxy
 #valid output plugins are pvoutput, mqtt and influxdb
 output=pvoutput,mqtt,influxdb
 
+
+[dsmr]
+# The DSRM function enables to fetch netdata and enables calculation of bruto and netto energy
+# You can add (multiple) dsmr terminals to Omnik Data Logger to be able to process mutiple DSMR compliant enery meters
+terminals = term1
+# These keys translate the tarif DSMR tarif value (ELECTRICITY_ACTIVE_TARIFF) to the text of your choice
+# tarif = 0001, 0002
+# tarif.0001 = laag
+# tarif.0002 = normaal
+
+[dsmr.term1]
+# Plant the DSMR meter is asscoiated with
+plant_id = 123
+# Mode of DSRM terminal. Can be tcp or device (default device)
+# mode = device
+# Serial port to which Smartmeter is connected via USB. For remote (i.e., ser2net) connections, use TCP port number to connect to (i.e., 2001).
+# device = /dev/ttyUSB0
+# Host to which Smartmeter is connected via serial or USB, see port. For remote connections, use IP address or hostname of host to connect to (i.e., 192.168.1.13).
+# host = localhost
+# TCP port (default 3333)
+# port = 3333
+# Version of DSMR used by meter. Choices: 2.2, 4, 5, 5B (For Belgian Meter). Default 5
+# dsmr_version = 5
+
+# To sync the direct use with installation date of the smart meter you can configure the Solar Energy Offset (total_energy_offset)
+# to avoid negative values for direct use. This is usuale the solar total_energy counter at the the date the Smart meter was installed.
+# When your solar system is installed afterwards suply a negative value indicating the total_deliverd counters of your smart_meter
+# total_energy_offset = 12345.0
+# gas_meter = true. This option is enabled by default. This Enables gas meter measuements. This will add the fields {gas_consumption_hour} {gas_consumption_total} {identifier_gas} {timestamp_gas}}
+# gas_meter = true
+
 # localproxy client settings
 [client.localproxy]
 # plant_id_list: comma seperated list of plant_id's
