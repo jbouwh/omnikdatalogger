@@ -1,22 +1,23 @@
 ﻿# omnikdatalogger
 ![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
 ![PyPI version](https://badge.fury.io/py/omnikdatalogger.svg) 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 ## See also
 - [Omnik data logger Wiki](https://github.com/jbouwh/omnikdatalogger/wiki)
 - [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
 
 ## Introduction
 The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the by Pascal Prins Omniksol-5k-TL2 but have been tested with a
-first generation inverter (Omniksol-3K-TL) as well.
-This datalogger can use data collected at the [omnikportal](https://www.omnikportal.com/) or at [solarmanpv](https://www.solarmanpv.com/portal)
-to fetch data pushed by the inverter. Pascal tried using the inverter directly, but the firmware seems _very_ buggy: it either spontanious reboots,
-hangs or returns random data. I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
+first generation inverter (Omniksol-3K-TL) as well. This datalogger can use data collected at the [omnikportal](https://www.omnikportal.com/) or at [solarmanpv](https://www.solarmanpv.com/portal)
+to fetch data pushed by the inverter I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
 Support has been added for MQTT and the integration with Home Assistent using the AppDaemon addon.
 Now the new version it also makes possible to process intercepted logger messages and integrate the processing with Home Assistant (`localproxy` client). Polling the inverter directly is also possible
 using the tcpclient, but this client is not tested directly yet, since my inverter does not support this method.
 Special thanks to Wouter van der Zwan for his code (https://github.com/Woutrrr/Omnik-Data-Logger) and t3kpunk (https://github.com/t3kpunk/Omniksol-PV-Logger)
 Also special thanks to [lepirlouit](https://github.com/lepirlouit/omnik-data-logger) for creating the basis for the new influxdb output plugin.
+The latest version supports integration of enery logging conform the Dutch Smart Meter Requirements (DSRM). These meters can be connected using the P1 port of your smart meter.
+Omnik data logger can either read the port using a USB-based serial ports or over tcp, using Nigel Dokters DSMR parser (https://github.com/ndokter/dsmr_parser). The integration gives live output at mqtt an influx db
+and calculates energy consumption against the solar data for the integration on pvoutput.org.
 
 ## How can I use Omnik Data Logger
 You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
@@ -41,9 +42,9 @@ My inverter presents updates approximately updates every 300 seconds. Fore times
 ## Installation
 The application can be installed:
 -   Install with the Home Assistant Community Store [HACS](https://hacs.xyz/).
-    -   Open the settings menu
-    -   Enter `https://github.com/jbouwh/omnikdatalogger` at `ADD CUSTOM REPOSITORY`
-    -   Select `AppDaemon` as _Category_
+    -   Omnik data logger is include in the default repository. Open the Automation tab. Click on de big orange **+** 
+    -   Search for 'Omnik data logger' and select it.
+    -   Choose 'Install this repository in HACS'
 -   Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
 -   Clone using git: `git clone https://gihub.com/jbouwh/omnikdatalogger`. Optional install with `pip3 install ./omnikdatalogger`.
 -   Install using pip (pip3) as user: `pip3 install omnikdatalogger`
@@ -145,12 +146,12 @@ password = S3cret!
 [client.solarmanpv]
 username = john.doe@example.com
 password = S3cret!
-plant_id_list = 123
 
 # Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal
 # and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
 # Multiple numbers can be supplied like 123,124
-plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc 
+plant_id_list = 123
+# plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc 
 
 [output.pvoutput]
 api_key = <YOUR API KEY>
@@ -195,39 +196,94 @@ append_plant_id = false
 # Sensor name (omnikproxylogger only)
 logger_sensor_name = Datalogger
 
-#Entities name override
-current_power_name = Vermogen
-total_energy_name = Gegenereerd totaal
-today_enery_name = Gegenereerd vandaag
-last_update_time_name = Laatste statusupdate
 
 # Following keys are only avaiable used when processing inverter data directly
 # See also data_fields.json for additional customization
-inverter_temperature_name = Temperatuur omvormer
-current_ac1_name = Stroom AC 
-current_ac2_name = Stroom AC fase 2
-current_ac3_name = Stroom AC fase 3
-voltage_ac1_name = Spanning AC fase 1
-voltage_ac2_name = Spanning AC fase 2
-voltage_ac3_name = Spanning AC fase 3
-voltage_ac_max_name Spanning AC max
-frequency_ac1_name = Netfrequentie
-frequency_ac2_name = Netfrequentie fase 2
-frequency_ac3_name = Netfrequentie fase 3
-power_ac1_name = Vermogen AC
-power_ac2_name = Vermogen AC fase 2
-power_ac3_name = Vermogen AC fase 3
-voltage_pv1_name = Spanning DC 1
-voltage_pv2_name = Spanning DC 2
-voltage_pv3_name = Spanning DC 3
-current_pv1_name = Stroom DC 1
-current_pv2_name = Stroom DC 2
-current_pv3_name = Stroom DC 3
-power_pv1_name = Vermogen DC 1
-power_pv2_name = Vermogen DC 2
-power_pv3_name = Vermogen DC 3
-current_power_pv_name = Vermogen DC
-operation_hours_name = Actieve uren
+
+# Omnik fields
+
+# current_power_name = Vermogen zonnepanelen
+# total_energy_name = Gegenereerd totaal
+# today_energy_name = Gegenereerd vandaag
+# last_update_name = Laatste statusupdate
+# inverter_temperature_name = Temperatuur omvormer
+# current_ac1_name = Stroom AC 
+# current_ac2_name = Stroom AC fase 2
+# current_ac3_name = Stroom AC fase 3
+# voltage_ac_max_name = Spanning AC max
+# voltage_ac1_name = Spanning AC
+# voltage_ac2_name = Spanning AC fase 2
+# voltage_ac3_name = Spanning AC fase 3
+# frequency_ac1_name = Netfrequentie
+# frequency_ac2_name = Netfrequentie fase 2
+# frequency_ac3_name = Netfrequentie fase 3
+# power_ac1_name = Vermogen AC
+# power_ac2_name = Vermogen AC fase 2
+# power_ac3_name = Vermogen AC fase 3
+# voltage_pv1_name = Spanning DC 1
+# voltage_pv2_name = Spanning DC 2
+# voltage_pv3_name = Spanning DC 3
+# current_pv1_name = Stroom DC 1
+# current_pv2_name = Stroom DC 2
+# current_pv3_name = Stroom DC 3
+# power_pv1_name = Vermogen DC 1
+# power_pv2_name = Vermogen DC 2
+# power_pv3_name = Vermogen DC 3
+# current_power_pv_name = Vermogen DC
+# operation_hours_name = Actieve uren
+
+# DSMR
+
+# timestamp_name = Update slimme meter
+# ELECTRICITY_USED_TARIFF_1_name = Verbruik (laag)
+# ELECTRICITY_USED_TARIFF_2_name = Vebruik (normaal)
+# ELECTRICITY_DELIVERED_TARIFF_1_name = Genereerd (laag)
+# ELECTRICITY_DELIVERED_TARIFF_2_name = Gegenereerd (normaal)
+# energy_used_net_name = Verbruikt (net)
+# energy_delivered_net_name = Gegenereerd (net)
+# CURRENT_ELECTRICITY_USAGE_name = Verbruik (net)
+# CURRENT_ELECTRICITY_DELIVERY_name = Teruglevering (net)
+# ELECTRICITY_ACTIVE_TARIFF_name = Tarief
+# LONG_POWER_FAILURE_COUNT_name = Onderbrekingen (lang)
+# SHORT_POWER_FAILURE_COUNT_name = Onderbrekingen (kort)
+# VOLTAGE_SAG_L1_COUNT_name = Net dips L1
+# VOLTAGE_SAG_L2_COUNT_name = Net dips L2
+# VOLTAGE_SAG_L3_COUNT_name = Net dips L3
+# VOLTAGE_SWELL_L1_COUNT_name = Net pieken L1
+# VOLTAGE_SWELL_L2_COUNT_name = Net pieken L2
+# VOLTAGE_SWELL_L3_COUNT_name = Net pieken L3
+# INSTANTANEOUS_ACTIVE_POWER_L1_POSITIVE_name = Gebruik L1
+# INSTANTANEOUS_ACTIVE_POWER_L2_POSITIVE_name = Gebruik L2
+# INSTANTANEOUS_ACTIVE_POWER_L3_POSITIVE_name = Gebruik L3
+# INSTANTANEOUS_ACTIVE_POWER_L1_NEGATIVE_name = Teruglevering L1
+# INSTANTANEOUS_ACTIVE_POWER_L2_NEGATIVE_name = Teruglevering L2
+# INSTANTANEOUS_ACTIVE_POWER_L3_NEGATIVE_name = Teruglevering L3
+# current_net_power_name = Vermogen (net)
+# current_net_power_l1_name = Vermogen L1
+# current_net_power_l2_name = Vermogen L2
+# current_net_power_l3_name = Vermogen L3
+# INSTANTANEOUS_VOLTAGE_L1_name = Spanning L1
+# INSTANTANEOUS_VOLTAGE_L2_name = Spanning L2
+# INSTANTANEOUS_VOLTAGE_L3_name = Spanning L3
+# INSTANTANEOUS_CURRENT_L1_name = Stroom L1 DSMR
+# INSTANTANEOUS_CURRENT_L2_name = Stroom L2 DSMR
+# INSTANTANEOUS_CURRENT_L3_name = Stroom L3 DSMR
+# net_current_l1_name = Stroom L1
+# net_current_l3_name = Stroom L2
+# net_current_l2_name = Stroom L3
+# net_voltage_max_name = Netspanning max
+
+# DSMR gas
+
+#timestamp_gas_name = Update gasmeter
+# gas_consumption_total_name = Verbruik gas totaal
+# gas_consumption_hour_name = Verbruik gas
+
+# omnik_DSMR (combined)
+# energy_used_name = Verbruikt totaal
+# energy_direct_use_name = Direct verbruikt
+# power_consumption_name = Verbruik
+# power_direct_use_name = Direct verbruik
 
 ```
 
@@ -321,6 +377,32 @@ omnik_datalogger:
 # valid clients are localproxy, omnikportal, solarmanpv and tcpclient
     client: localproxy
 
+# attributes override
+  attributes:
+    devicename.omnik: Omvormer
+#   model.omnik: Omnik data logger
+
+#DSMR support
+  dsmr:
+    terminals:
+      - term1
+    tarif:
+      - '0001'
+      - '0002'
+    tarif.0001: laag
+    tarif.0002: normaal
+
+  dsmr.term1:
+# use mode tcp or device
+    mode: tcp
+    host: 172.17.0.1
+    port: 3333
+    device: /dev/ttyUSB0
+    dsmr_version: '5'
+    plant_id: '123'
+    total_energy_offset: 15338.0
+    gas_meter: true
+
 # Section for your inverters specific settings
   plant.123:
     inverter_address: 192.168.1.1
@@ -354,18 +436,18 @@ omnik_datalogger:
   client.solarmanpv:
     username: john.doe@example.com
     password: some_password
-    api_key: apitest
+#   api_key: apitest
     plant_id_list:
       - 123
 
 # Omnik portal options
-  client.localproxy.omnikportal:
+  client.omnikportal:
     username: john.doe@example.com
     password: some_password
-    base_url: https://api.omnikportal.com/v1
+#   base_url: https://api.omnikportal.com/v1
 
 # Influxdb output plugin configuration options
-  client.localproxy.influxdb:
+  output.influxdb:
     host: localhost
     port: 8086
     database: omnikdatalogger
@@ -375,7 +457,7 @@ omnik_datalogger:
     use_temperature=true  
 
 # PVoutput output plugin configuration options
-  client.localproxy.pvoutput:
+  output.pvoutput:
     sys_id: 12345
     api_key: jadfjlasexample0api0keykfjasldfkajdflasd
     use_temperature: true
@@ -391,28 +473,24 @@ omnik_datalogger:
     units: metric
 
 # MQTT output plugin configuration options
-  client.localproxy.mqtt:
+  output.mqtt:
     username: mqttuername
     password: mqttpasswordabcdefgh
-    discovery_prefix: homeassistant
-    host: homeassistant.example.com
-    port: '1883'
-    retain: True
-    client_name_prefix: ha-mqtt-omniklogger
-    device_name: Converter
+    device_name: Omvormer
     append_plant_id: false
-    current_power_name: Current power
-    total_energy_name: Generated total
-    todat_energy_name: Generated today
-    last_update_time_name: Last status update
+    # Omnik
+    current_power_name: Vermogen zonnepanelen
+    total_energy_name: Gegenereerd totaal
+    today_energy_name: Gegenereerd vandaag
+    last_update_name: Laatste statusupdate
     inverter_temperature_name: Temperatuur omvormer
-    current_ac1_name: Stroom AC fase 1
+    current_ac1_name: Stroom AC 
     current_ac2_name: Stroom AC fase 2
     current_ac3_name: Stroom AC fase 3
-    voltage_ac1_name: Spanning AC
+    voltage_ac_max_name: Spanning AC max
+    voltage_ac1_name: Spanning AC fase 1
     voltage_ac2_name: Spanning AC fase 2
     voltage_ac3_name: Spanning AC fase 3
-    voltage_ac_max: Spanning AC max
     frequency_ac1_name: Netfrequentie
     frequency_ac2_name: Netfrequentie fase 2
     frequency_ac3_name: Netfrequentie fase 3
@@ -430,6 +508,56 @@ omnik_datalogger:
     power_pv3_name: Vermogen DC 3
     current_power_pv_name: Vermogen DC
     operation_hours_name: Actieve uren
+    # DSMR
+    timestamp_name: Update slimme meter
+    ELECTRICITY_USED_TARIFF_1_name: Verbruik (laag)
+    ELECTRICITY_USED_TARIFF_2_name: Vebruik (normaal)
+    ELECTRICITY_DELIVERED_TARIFF_1_name: Genereerd (laag)
+    ELECTRICITY_DELIVERED_TARIFF_2_name: Gegenereerd (normaal)
+    energy_used_net_name: Verbruikt (net)
+    energy_delivered_net_name: Gegenereerd (net)
+    CURRENT_ELECTRICITY_USAGE_name: Verbruik (net)
+    CURRENT_ELECTRICITY_DELIVERY_name: Teruglevering (net)
+    ELECTRICITY_ACTIVE_TARIFF_name: Tarief
+    LONG_POWER_FAILURE_COUNT_name: Onderbrekingen (lang)
+    SHORT_POWER_FAILURE_COUNT_name: Onderbrekingen (kort)
+    VOLTAGE_SAG_L1_COUNT_name: Net dips L1
+    VOLTAGE_SAG_L2_COUNT_name: Net dips L2
+    VOLTAGE_SAG_L3_COUNT_name: Net dips L3
+    VOLTAGE_SWELL_L1_COUNT_name: Net pieken L1
+    VOLTAGE_SWELL_L2_COUNT_name: Net pieken L2
+    VOLTAGE_SWELL_L3_COUNT_name: Net pieken L3
+    INSTANTANEOUS_ACTIVE_POWER_L1_POSITIVE_name: Gebruik L1
+    INSTANTANEOUS_ACTIVE_POWER_L2_POSITIVE_name: Gebruik L2
+    INSTANTANEOUS_ACTIVE_POWER_L3_POSITIVE_name: Gebruik L3
+    INSTANTANEOUS_ACTIVE_POWER_L1_NEGATIVE_name: Teruglevering L1
+    INSTANTANEOUS_ACTIVE_POWER_L2_NEGATIVE_name: Teruglevering L2
+    INSTANTANEOUS_ACTIVE_POWER_L3_NEGATIVE_name: Teruglevering L3
+    current_net_power_name: Vermogen (net)
+    current_net_power_l1_name: Vermogen L1
+    current_net_power_l2_name: Vermogen L2
+    current_net_power_l3_name: Vermogen L3
+    INSTANTANEOUS_VOLTAGE_L1_name: Spanning L1
+    INSTANTANEOUS_VOLTAGE_L2_name: Spanning L2
+    INSTANTANEOUS_VOLTAGE_L3_name: Spanning L3
+    INSTANTANEOUS_CURRENT_L1_name: Stroom L1 DSMR
+    INSTANTANEOUS_CURRENT_L2_name: Stroom L2 DSMR
+    INSTANTANEOUS_CURRENT_L3_name: Stroom L3 DSMR
+    net_current_l1_name: Stroom L1
+    net_current_l3_name: Stroom L2
+    net_current_l2_name: Stroom L3
+    net_voltage_max_name: Netspanning max
+    # DSMR gas
+    timestamp_gas_name: Update gasmeter
+    gas_consumption_total_name: Verbruik gas totaal
+    gas_consumption_hour_name: Verbruik gas
+    # omnik_DSMR (combined)
+    last_update_calc_name: Update berekening
+    energy_used_name: Verbruikt totaal
+    energy_direct_use_name: Direct verbruikt
+    power_consumption_name: Verbruik
+    power_direct_use_name: Direct verbruik
+
 ```
 ## Configuration keys (required, optional and defaults)
 As mentioned command line and AppDaemon configuration override settings the `config.ini` (if used).
@@ -457,7 +585,26 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
-`output` |  True | list | _(empty list)_ | A yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
+`output` |  True | list | _(empty list)_ | A (yaml) list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
+
+#### DSMR settings in the section `dsmr` of `apps.yaml` or `config.ini`
+key | optional | type | default | description
+-- | --| -- | -- | --
+`terminals ` | False | list | _(empty list)_ | List of DSMR terminals. Eacht termial has settings at section [dsrm.{terminal_name}]. An empty list disables the DSMR integration.
+`tarif.0001` |  True | string | _low_ | Tarif value override for tarif 0001 (low). If yoy need outher tarifs then 0001 or 0002 the configure the tarif key.
+`tarif.0002` |  True | string | _normal_ | Tarif value override for tarif 0002 (normal)
+`tarif` | True"| list | _['0001', '0002']_ | Use only if your meter has other tarifs then 0001 and 0002 and you want to override the name. (Not needed in the Netherlands I suppose)
+
+##### DSMR settings in the section `dsmr.{terminal_name}` of `apps.yaml` or `config.ini`
+key | optional | type | default | description
+-- | --| -- | -- | --
+`mode` | True | string | _device_ | Mode for the DSMR terminal. Mode can be `device` (default) or `tcp`)
+`host ` | True | string | _localhost_ | When using tcp, the host or IP-address to connect to (e.g. a ser2net instance).
+`port ` | True | int | _3333_ | When using tcp, the port to connect to (e.g. a ser2net instance).
+`plant_id` | True | string | _(none)_ | Associates the DSMR data with the Omnik plant data. Needed for influxdb plugin to calculate energy consumption. Without this key omnik data logger wil produce a warning but can still log to influx db and mqtt.
+`dsmr_version` | True | string | _'5'_ | The DSMR version of your smart meter. Choices: '2.2', '4', '5', '5B' (For Belgian Meter). Default = '5'.'
+`gas_meter` | True | boolean | _true_ | The DSMR meter has a connected gas meter to read out.
+`total_energy_offset` | True | float | _0.0_ | The start value of your solar system used to calculated the total energy consumption.
 
 ## Client settings
 Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
@@ -551,7 +698,7 @@ Restart Mosquito after changing the config.
 key | optional | type | default | description
 -- | --| -- | -- | --
 `discovery_prefix` | True | string | `homeassistant` | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
-`device_name` | True | string | _(the name of the plant in the omnik portal)_ | Overrides the name of the plant in the omnik portal.
+`device_name` | True | string | _Inverter_ | Omnik data logger proxy only setting. Overrides the name of the datalogger in the omnik portal. See also the `attributes` section below.
 `append_plant_id` | True | bool | `false` | When a device_name is specified the plant id can be added to the name te be able to identify the plant.
 `host` | True | string | `localhost` | Hostname or fqdn of the MQTT server for publishing.
 `port` | True | integer | `1883` | MQTT port to be used. 
@@ -563,6 +710,7 @@ key | optional | type | default | description
 #### Renaming entities. (Keys are like {fieldname}_name)
 _For every solar plant, 4 entities are added to the mqtt auto discovery. The default name can be configured._
 
+##### Omnik solar data - entity name override
 key | optional | type | default | description
 -- | --| -- | -- | --
 `current_power_name` | True | string | `Current power` | Name override for the entity that indicates the current power in Watt the solar plant is producing.
@@ -595,6 +743,49 @@ key | optional | type | default | description
 `power_pv3_name` | True | string | `DC Power string 3` | Name override for PV Power string 3. Only the clients `tcpclient` and `localproxy` are supported.
 `current_power_pv_name` | True | string | `DC Current power` | Name override for PV total power. Only the clients `tcpclient` and `localproxy` are supported.
 `operation_hours_name` | True | string | `Hours active` | Name override for the oprational hours of the inverter. Only the clients `tcpclient` and `localproxy` are supported.
+##### DSMR and Omnik solar combined data - entity name override
+key | optional | type | default | description
+-- | --| -- | -- | --
+`last_update_calc` | True | string | _'Last update calculations'_ | Timestamp for calculated combined values of DSMR and solar data
+`energy_used` | True | string | _'Energy used'_ | Total energy used since installation of the smart meter. The `total_energy_offset` setting enables is meant to configure the `total energy` of your solar system at the installation of the smart meter. 
+`energy_direct_use` | True | string | _'Energy used directly'_ | The direct used energy (consumed and not delivered to the net) since installation of the smart meter. The `total_energy_offset` setting enables is meant to configure the `total energy` of your solar system at the installation of the smart meter.  
+`power_consumption` | True | string | _'Current consumption'_ | The current power consumption (direct and imported power).
+`power_direct_use` | True | string | _'Direct consumption'_ | The direct power consumption (directly used from your generated power and not deliverd to the net).
+
+##### DSMR data - entity name override
+key | optional | type | default | description
+-- | --| -- | -- | --
+`timestamp` | True | string | _'Last update smart meter'_ | Timestamp of the last smart meter data published.
+`ELECTRICITY_USED_TARIFF_1` | True | string | _'Energy used tariff 1'_ | Total energy consumption at low tariff (kWh)
+`ELECTRICITY_USED_TARIFF_2` | True | string | _'Energy used tariff 2'_ | Total energy consumption at normal tariff (kWh)
+`ELECTRICITY_DELIVERED_TARIFF_1` | True | string | _'Energy delivered tariff 1'_ | Total energy delivery at low tariff (kWh)
+`ELECTRICITY_DELIVERED_TARIFF_2` | True | string | _'Energy delivered tariff 2'_ | Total energy delivery at normal tariff (kWh)
+`energy_used_net` | True | string | _'Energy used net'_ | Total energy used (net) tarrif 1 + tarrif 2 (kWh)
+`energy_delivered_net` | True | string | _'Energy delivered net'_ | | Total energy used (net) tarrif 1 + tarrif 2 (kWh)
+`CURRENT_ELECTRICITY_USAGE` | True | string | _'Net power usage'_ | Current net power used (zero during delivery) in kWatt
+`CURRENT_ELECTRICITY_DELIVERY` | True | string | _'Net power delivery'_ | Current net power delivered (zero during import) in kWatt
+`ELECTRICITY_ACTIVE_TARIFF` | True | string | _'Active tariff'_ | The active tarrif (low of normal) values can be customized in `dsmr` section
+`LONG_POWER_FAILURE_COUNT` | True | string | _'Long power failure count'_ | The number of 'long' power failures counted.
+`SHORT_POWER_FAILURE_COUNT` | True | string | _'Short power failure count'_ | The number of 'shorted' power failures counted. 
+`VOLTAGE_SAG_L1_COUNT` | True | string | _'Voltage sag count L1'_ | The number of power sags for fase L1 counted.
+`VOLTAGE_SWELL_L1_COUNT` | True | string | _'Voltage swell count L1'_ | The number of power swells for fase L1 counted.
+`INSTANTANEOUS_ACTIVE_POWER_L1_POSITIVE`* | True | string | _'Net power usage L1'_ | Current net power used for fase L1 (zero during delivery) in Watt
+`INSTANTANEOUS_ACTIVE_POWER_L1_NEGATIVE`* | True | string | _'Net power delivery L1'_ | Current net power delivered for fase L1 (zero during import) in Watt
+`current_net_power` | True | string | _'Current net power'_ | The current net power (can be negative) in Watt
+`current_net_power_l1`* | True | string | _'Current net power L1'_ | The current net power for fase L1 (can be negative) in Watt 
+`INSTANTANEOUS_VOLTAGE_L1`* | True | string | _'Net voltage L1'_ | The current net voltage in Volts for Fase L1 (rounded to an integer)
+`net_voltage_max` | True | string | _'Net voltage max'_ | The current maximum net voltage in Volts over all fases (rounded to an integer). Can be used as `net_voltage_fallback` key to publish voltage to pvoutput when no solar voltage data is available.
+`INSTANTANEOUS_CURRENT_L1`* | True | string | _'Net current L1 DSMR'_ | The current for fase L1 in Ampère (rounded to a positive integer) directly from your smart meter.
+`net_current_l1`* | True | string | _'Net current L1'_ | The current for fase L1 in Ampère calculated using `current_net_power_l1` / `INSTANTANEOUS_VOLTAGE_L1`. This gives a more precise current. Value is negative during enery delivery.  
+
+> *applicable for fase L2 and L3 as well if the data is available`
+
+##### DSMR gas data - entity name override
+key | optional | type | default | description
+-- | --| -- | -- | --
+`timestamp_gas` | True | string | _'Last update gas meter'_ | Timestamp of the last gas meter data published.
+`gas_consumption_total` | True | string | _'Gas total'_ | The total amount of m3 gas delivered since installation of the meter.
+`gas_consumption_hour` | True | string | _'Gas consumption'_ | The current consumption of gas in m3/hour.
 
 The unit of measurement the used icon, MQTT device_class and value template file can be customized by updating the file `data_fields.json`.
 Make a copy of the original file and configure the path under the `data_config` key in the general setting.
@@ -609,7 +800,8 @@ key | optional | type | default | description
 `api_key`* | False | string | _(none)_ | Unique API access key generated at pvoutput.org
 `use_temperature` | True | bool | `false` | When set to true and `use_inverter_temperature` is not set, the temperature is obtained from OpenWeatherMap is submitted to pvoutput.org when logging the data.
 `use__inverter_temperature` | True | bool | `false` | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.
-`publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac_max'`, the maximal inverter AC voltage over all fases is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max`. The field `voltage_ac_max` holds the highest voltages measures over all fases.
+`publish_voltage` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac_max'`, the maximal inverter AC voltage over all fases is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max` or one ofe the DSMR voltage fields (INSTANTANEOUS_VOLTAGE_L1 / _L2, _L3 or net_voltage_max) if DSMR is available. The field `net_voltage_max` holds the highest voltage over all available fases.
+`net_voltage_fallback ` | True | string | _(none)_ | The *fieldname* key of the voltage property to use for pvoutput 'addstatus' publishing in case no solar data is available during sun down. When set to `'net_voltage_max'`, the maximal net voltage over all fases is submitted as alternative to pvoutput.org. This key only makes sens when using the DSMR integration.
 ### InfluxDB plugin settings in the section `output.influxdb` in  of `apps.yaml` or `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -634,6 +826,44 @@ key | optional | type | default | description
 `lon`* | False | float | _(none)_ | Longitude for the weather location
 `lat`* | False | float | _(none)_ | Latitude for the weather location
 `units` | True | string | `metric` | Can be _metric_ (for deg. Celsius) or _imperial_ (for deg. Fahrenheit)
+
+### Device attribute settings and relation with `data_fields.json`
+Over MQTT the MQTT output advertizes the data of inverter, DSMR data, DSMR gas data and combined data. These groups bound to device attributes that wil be associated withe entities that are being published.
+In Home Assistant throug MQTT auto discovery this will show as seperate devices for 'Omnik' entities, 'DSMR' entities, 'DSMR gas' entities and 'DSMR_omnik' (combined) entities.
+All fields are configured with the pre installed `data_fields.json` file. This file holds an `asset` property for each field which corresponds with the asset class.
+Each asset class must have one field with `"dev_cla": "timestamp"` which is the timestamp field for that class.
+If you want to omit field in your output you can personalize `data_fields.json`. Do NOT customize the shared version of `data_fields.json` but make a copy and configure the aternative path
+using the [`data_config` key in get general section](https://github.com/jbouwh/omnikdatalogger#general-settings-of-appsyaml-or-configini).
+The `attributes` section allows to customize some asset class settings.
+
+key | optional | type | default | description
+-- | --| -- | -- | --
+`asset_classes` | True  | list | _omnik, omnik_dsmr, dsmr, dsmr_gas_ | Access classes for device payload and grouping of entities.
+`asset.{asset_class}` | True | string | _see below_ | Customize attribute payload for an asset class
+`asset.omnik`  | True | string | _inverter, plant_id, last_update_ | Standard attributes for published Omnik inverter data
+`asset.omnik_dsmr` | True | string | _inverter, plant_id, EQUIPMENT_IDENTIFIER, terminal, last_update_ | Standard attributes for published combined DSMR and Omnik inverter data
+`asset.dsmr | True | string | _EQUIPMENT_IDENTIFIER, terminal, timestamp_ | Standard attributes for published DSMR data
+`asset.dsmr_gas` | True | string | _EQUIPMENT_IDENTIFIER_GAS, terminal, timestamp_gas_ | Standard attributes for published DSMR gas data
+`model.{asset_class}` | True | string | _see below_ | Customize the model property of the device payload for an asset class
+`model.omnik` | True | string | _Omniksol_ | Customize the model property of the device payload for the asset class `omnik` (Solar data)
+`model.omnik_dsmr` | True | string | _Omnik data logger_ | Customize the model property of the device payload for the asset class `omnik_dsmr` (DSMR + Solar combined data)
+`model.dsmr` | True | string | _DSRM electricity meter_ | Customize the model property of the device payload for the asset class `dsmr` (DSMR electricity data)
+`model.dsmr_gas` | True | string | _DSRM gas meter_ | Customize the model property of the device payload for the asset class `dsmr_gas` (DSMR gas data)
+`mf.{asset_class}` | True | string | _see below_ | Customize the manufacturer property of the device payload for an asset class
+`mf.omnik` | True | string | _Omnik_ | Customize the manufacturer property of the device payload for the asset class `omnik` (Solar data)
+`mf.omnik_dsmr` | True | string | _JBsoft_ | Customize the manufacturer property of the device payload for the asset class `omnik_dsmr` (DSMR + Solar combined data)
+`mf.dsmr` | True | string | _Netbeheer Nederland_ | Customize the manufacturer property of the device payload for the asset class `dsmr` (DSMR electricity data)
+`mf.dsmr_gas` | True | string | _Netbeheer Nederland_ | Customize mthe anufacturer property of the device payload for the asset class `dsmr_gas` (DSMR gas data)
+`identifier.{asset_class}` | True | string | _see below_ | Customize the identifier property of the device payload for an asset class. This property should be unique when using a configuration with more DSMR meters or plants The identifier will have the format {asset_class}_{identifier}.
+`identifier.omnik` | True | string | _plant_id_ | Customize the identifier property of the device payload for the asset class `omnik` (Solar data)
+`identifier.omnik_dsmr` | True | string | _plant_id_ | Customize the identifier property of the device payload for the asset class `omnik_dsmr` (DSMR + Solar combined data)
+`identifier.dsmr` | True | string | _EQUIPMENT_IDENTIFIER_ | Customize the identifier property of the device payload for the asset class `dsmr` (DSMR electricity data)
+`identifier.dsmr_gas` | True | string | _EQUIPMENT_IDENTIFIER_GAS_ | Customize the property of the device payload for the asset class `dsmr_gas` (DSMR gas data)
+`devicename.{asset_class}` | True | string | _see below_ | Customize the device name for an asset class. This attribute replaces the previous decrepated `device_name` setting in the `output.mqtt` section.
+`devicename.omnik` | True | string | _Inverter_ | Customize the device name for the asset class `omnik` (Solar data)
+`devicename.omnik_dsmr` | True | string | _Omnik_data_logger_ | Customize the device name for the asset class `omnik_dsmr` (DSMR + Solar combined data)
+`devicename.dsmr` | True | string | _DSMR_electicity_meter_ | Customize the device name the device payload for the asset class `dsmr` (DSMR electricity data)
+`devicename.dsmr_gas` | True | string | _DSMR_gasmeter_ | Customize the device name the device payload for the asset class `dsmr_gas` (DSMR gas data)
 
 ## Scheduled Run (commandline or using systemd)
 
@@ -694,7 +924,6 @@ $ systemd status omnikdatalogger
 ## Plugins in development
 Working on a couple of plugins to customize processing of the omnik inverter data:
 
-* `P1` ~ support for the the Dutch Smart Meter (DSRM) with mqtt, pvoutput and influxdb integration
 * `mariadb` ~ mariadb/mysql output plugin
 * `csv` ~ csv output plugin
 

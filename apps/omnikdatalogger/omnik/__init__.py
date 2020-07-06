@@ -3,7 +3,7 @@ import sys
 import logging
 from omnik.ha_logger import hybridlogger
 
-import datetime
+from datetime import datetime, timedelta, timezone
 import threading
 
 logging.basicConfig(stream=sys.stdout,
@@ -51,19 +51,19 @@ class RepeatedJob(object):
         if self.last_update_time:
             # Reset retry counter
             self.retries = 0
-            if self.last_update_time <= datetime.datetime.now(datetime.timezone.utc):
+            if self.last_update_time <= datetime.now(timezone.utc):
                 # If last report time + 2x interval is less than the current time then increase
-                self.new_report_expected_at = self.last_update_time + datetime.timedelta(seconds=self.interval)
+                self.new_report_expected_at = self.last_update_time + timedelta(seconds=self.interval)
                 # Check if we have at least 60 seconds for the next cycle
-                if (self.new_report_expected_at + datetime.timedelta(seconds=-10) <
-                        datetime.datetime.now(datetime.timezone.utc)):
+                if (self.new_report_expected_at + timedelta(seconds=-10) <
+                        datetime.now(timezone.utc)):
                     # No recent update of missing update: wait {interval} from now()
-                    self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
-                        datetime.timedelta(seconds=self.interval)
+                    self.new_report_expected_at = datetime.now(timezone.utc) + \
+                        timedelta(seconds=self.interval)
             else:
                 # Skipping dark period
                 self.new_report_expected_at = self.last_update_time
-            self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
+            self.calculated_interval = (self.new_report_expected_at - datetime.now(timezone.utc)).seconds
         else:
             # An error occured calculate retry interval
             retry_interval = self.half_interval
@@ -76,9 +76,9 @@ class RepeatedJob(object):
             if self.retries < 3:
                 self.retries += 1
             # Calculate new report time
-            self.new_report_expected_at = datetime.datetime.now(datetime.timezone.utc) + \
-                datetime.timedelta(seconds=retry_interval)
-            self.calculated_interval = (self.new_report_expected_at - datetime.datetime.now(datetime.timezone.utc)).seconds
+            self.new_report_expected_at = datetime.now(timezone.utc) + \
+                timedelta(seconds=retry_interval)
+            self.calculated_interval = (self.new_report_expected_at - datetime.now(timezone.utc)).seconds
         # Make sure we have at least 15 seconds on the time to prevent a deadlocked timer loop
         if self.calculated_interval < 15:
             self.calculated_interval = 15

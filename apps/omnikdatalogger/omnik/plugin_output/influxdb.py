@@ -2,6 +2,7 @@ import requests
 from omnik.ha_logger import hybridlogger
 
 from omnik.plugin_output import Plugin
+import threading
 
 
 class influxdb(Plugin):
@@ -24,23 +25,31 @@ class influxdb(Plugin):
         elif self.config.has_option('output.influxdb', 'username') and self.config.has_option('output.influxdb', 'password'):
             self.auth = requests.auth.HTTPBasicAuth(self.config.get('output.influxdb', 'username'),
                                                     self.config.get('output.influxdb', 'password'))
+        self.timestamp_field = {}
+        for field in self.config.data_field_config:
+            if not self.config.data_field_config[field]['dev_cla'] == 'timestamp':
+                continue
+            self.timestamp_field[self.config.data_field_config[field]['asset']] = field
+        self.access = threading.Condition(threading.Lock(  ))
 
     def _get_temperature(self, values):
         if self.config.getboolean('output.influxdb', 'use_temperature', fallback=False):
             weather = self.get_weather()
             values['temperature'] = str(weather['main']['temp'])
+            values['timestamp_ow'] = weather['main']['dt']
 
-    def _get_attributes(self, values):
-        attributes = {"plant_id": values['plant_id']}
-        if 'inverter' in values:
-            if values['inverter'] == 'n/a':
-                values.pop('inverter')
-            else:
-                attributes['inverter'] = values.pop('inverter')
+    def _get_attributes(self, values, asset_class):
+        attributes = {}
+        for att in self.config.attributes['asset'][asset_class]:
+            if att in self.config.data_field_config:
+                if self.config.data_field_config[att]['dev_cla'] == 'timestamp':
+                    continue
+            attributes[att] = values[att] 
         return attributes.copy()
 
-    def _get_tags(self, field, attributes):
+    def _get_tags(self, field, attributes, asset_class):
         tags = attributes.copy()
+        tags['asset'] = asset_class
         tags['entity'] = field
         tags['name'] = str(self.config.data_field_config[field]['name']).replace(' ', '\\ ')
         if self.config.data_field_config[field]['dev_cla']:
@@ -50,10 +59,26 @@ class influxdb(Plugin):
         tags.update(self.config.data_field_config[field]['tags'])
         return tags.copy()
 
-    def _format_output(self, field, attributes, values, nanoepoch):
-        if field in values:
+    def _format_output(self, field, values):
+        if not field in self.config.data_field_config:
+            return ''
+        if not self.config.data_field_config[field]['measurement']:
+            # no measurement, exclude
+            return ''
+
+        if self.config.data_field_config[field]['dev_cla'] == 'timestamp':
+            # skip the epoch fields
+            return ''
+
+        asset_class = self.config.data_field_config[field]['asset']
+        attributes = self._get_attributes(values, asset_class)
+        nanoepoch = int(
+            values[self.timestamp_field[asset_class]] * 1000000000
+        )
+
+        if field in values and self.config.data_field_config:
             # Get tags
-            tags = self._get_tags(field, attributes)
+            tags = self._get_tags(field, attributes, asset_class)
             # format output data using the InfluxDB line protocol
             # https://v2.docs.influxdata.com/v2.0/write-data/#line-protocol
             return f'{self.config.data_field_config[field]["measurement"]},' \
@@ -65,22 +90,17 @@ class influxdb(Plugin):
     def process(self, **args):
         # Send data to influxdb
         try:
+            self.access.acquire()
             msg = args['msg']
-
+            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                f"Loggin data to InfluxDB: {msg}")
             values = msg.copy()
-            self._get_temperature(values)
+            # self._get_temperature(values)
 
-            if 'last_update_time' in values:
-                values.pop('last_update_time')
-
-            nanoepoch = int(
-                values.pop('last_update') * 1000000000
-            )
             # Build structure
-            attributes = self._get_attributes(values)
             encoded = ""
-            for field in self.config.data_field_config:
-                encoded += self._format_output(field, attributes, values, nanoepoch)
+            for field in values:
+                encoded += self._format_output(field, values)
 
             # Influx has no tables! Use measurement prefix
             # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value)
@@ -97,7 +117,12 @@ class influxdb(Plugin):
                                 f"Submit to Influxdb {url} successful.")
         except requests.exceptions.HTTPError as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                f"Got error from influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
+                                f"Got error from influxdb: {e.args} (ignoring: if this happens a lot ... fix it)")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                                f"Got unknown submitting to influxdb: {str(e)} (ignoring: if this happens a lot ... fix it)")
+                                f"Got unknown submitting to influxdb: {e.args} (ignoring: if this happens a lot ... fix it)")
+            raise e
+        finally:
+            self.access.release()
+
+

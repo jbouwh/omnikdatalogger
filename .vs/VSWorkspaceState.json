@@ -3,12 +3,13 @@
     "",
     "\\apps",
     "\\apps\\omnikdatalogger",
-    "\\apps\\omnikdatalogger\\omnik",
-    "\\docker",
-    "\\docker\\img",
-    "\\scripts\\proxy",
-    "\\scripts\\systemd"
+    "\\apps\\omnikdatalogger\\omnik\\dsmr",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_client",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_output",
+    "\\scripts",
+    "\\tests"
   ],
-  "SelectedNode": "\\docker\\README.md",
+  "SelectedNode": "\\README.md",
   "PreviewInSolutionExplorer": false
 }

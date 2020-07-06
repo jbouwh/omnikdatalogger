@@ -5,6 +5,8 @@ from omnik.ha_logger import hybridlogger
 import urllib.parse
 import requests
 from omnik.plugin_output import Plugin
+from decimal import *
+import threading
 
 
 class pvoutput(Plugin):
@@ -15,32 +17,38 @@ class pvoutput(Plugin):
         self.description = 'Write output to PVOutput'
         # Enable support for aggregates
         self.process_aggregates = True
+        # Make instance to run exclusively
+        self.access = threading.Condition(threading.Lock(  ))
+
 
     def _get_temperature(self, msg, data):
-        if self.config.getboolean('output.pvoutput', 'use_temperature', fallback=False):
-            if self.config.getboolean('output.pvoutput', 'use_inverter_temperature', fallback=False) and \
-                    ('inverter_temperature' in msg):
-                data['v5'] = msg['inverter_temperature']
-            else:
-                weather = self.get_weather()
-
-                data['v5'] = weather['main']['temp']
+        if self.config.getboolean('output.pvoutput', 'use_temperature', fallback=True) and self.config.getboolean('output.pvoutput', 'use_inverter_temperature', fallback=False):
+            if 'inverter_temperature' in msg:
+                data['v5'] = float(msg['inverter_temperature'])
+            return
+        if self.config.getboolean('output.pvoutput', 'use_temperature', fallback=False) and not self.config.getboolean('output.pvoutput', 'use_inverter_temperature', fallback=False):
+            weather = self.get_weather()
+            data['v5'] = weather['main']['temp']
 
     def _get_voltage(self, msg, data):
         voltage_field = self.config.get('output.pvoutput', 'publish_voltage', fallback=None)
-        if voltage_field:
-            if voltage_field in msg:
-                data['v6'] = msg[voltage_field]
+        net_voltage_field = self.config.get('output.pvoutput', 'net_voltage_fallback', fallback=None)
+        if voltage_field and voltage_field in msg:
+            data['v6'] = float(msg[voltage_field])
+        elif net_voltage_field and net_voltage_field in msg:
+            data['v6'] = float(msg[net_voltage_field])
 
     def process(self, **args):
         """
         Send data to pvoutput
         """
         try:
+            self.access.acquire()
+
             msg = args['msg']
             reporttime = time.localtime(msg['last_update'])
 
-            self.logger.debug(json.dumps(msg, indent=2))
+            # self.logger.debug(json.dumps(msg, indent=2))
 
             if not self.config.has_option('output.pvoutput', 'api_key'):
                 hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
@@ -62,16 +70,41 @@ class pvoutput(Plugin):
 
             # see: https://pvoutput.org/help.html
             # see: https://pvoutput.org/help.html#api-addstatus
+            # report cumulative values to enable power usage
             data = {
                 'd': time.strftime('%Y%m%d', reporttime),
                 't': time.strftime('%H:%M', reporttime),
-                'v1': (msg['today_energy'] * 1000.0),
-                'v2': msg['current_power'],
                 'c1': 0
-            }
+                }
+                # v1 = energy_generated (Wh) * 1000 ; this value is on a dayly basis
+                # v2 = bruto power_generated (W)
+                # v3 = energy_used (Wh) * 1000 ; this value is cumulative
+                # v4 = bruto power_consumption (W)
+                # c1 = 1 ; v3 is cumulative so the c1 flag is set
+                # see note about Cumulative Enery at https://pvoutput.org/help.html#api-addstatus
 
-            # Publish inverter temperature is available or use the temperature from openweather
-            self._get_temperature(msg, data)
+            if 'energy_used' in msg and 'power_consumption' in msg:
+                data.update({
+                    'v3': f"{msg['energy_used'] * Decimal('1000')}",
+                    'v4': f"{msg['power_consumption']}",
+                    'c1': 1
+                    })
+                    # v3 = energy_used (Wh) * 1000 ; this value is cumulative
+                    # v4 = bruto power_consumption (W)
+                    # c1 = 1 ; v3 is cumulative so the c1 flag is set
+                    # see note about Cumulative Enery at https://pvoutput.org/help.html#api-addstatus
+            if 'current_power' in msg:
+                data.update({
+                    'v1': f"{msg['today_energy'] * Decimal('1000')}",
+                    'v2': f"{msg['current_power']}",
+                    })
+                    # v1 = energy_generated (Wh) * 1000 ; this value is on a dayly basis
+                    # v2 = bruto power_generated (W)
+                    # c1 = 0 ; v1 is not cumulative so the c1 flag not is set
+                    # see note about Cumulative Enery at https://pvoutput.org/help.html#api-addstatus
+    
+                # Publish (inverter) temperature if solar data is published and a temperature is available. alternatively use the temperature from openweather
+                self._get_temperature(msg, data)
 
             # Publish voltage (if available)
             self._get_voltage(msg, data)
@@ -95,3 +128,5 @@ class pvoutput(Plugin):
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
+        finally:
+            self.access.release()

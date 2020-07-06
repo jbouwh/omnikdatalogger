@@ -107,8 +107,10 @@ class HA_OmnikDataLogger(hass.Hass):
         self.rt = RepeatedJob(c, self.datalogger, hass_api=self)
 
     def terminate(self):
-        hybridlogger.ha_log(logger, self, "INFO", "Daemon was stopped.")
+        self.datalogger.terminate()
+        hybridlogger.ha_log(logger, self, "INFO", "DSMR Daemon was stopped.")
         self.rt.stop()
+        hybridlogger.ha_log(logger, self, "INFO", "Daemon was stopped.")
 
 
 # Initialization from the commandline
@@ -135,10 +137,12 @@ def main(c: ha_ConfigParser, hass_api=None):
             except KeyboardInterrupt:
                 hybridlogger.ha_log(logger, hass_api, "INFO", '> stopping all threads')
                 rt.stop()
+                datalogger.terminate()
+
     else:
         # running only once
         datalogger.process()
-
+        datalogger.terminate()
 
 def set_data_config_path(config):
     config.data_config_file_path = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"

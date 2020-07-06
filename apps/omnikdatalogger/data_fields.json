@@ -6,7 +6,8 @@
         "unit": "W",
         "measurement": "power",
         "tags": { "power_class": "ac" },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "total_energy": {
         "name": "Energy total",
@@ -14,8 +15,11 @@
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
-        "tags": {},
-        "filter": "|round(1)"
+        "tags": {
+            "power_class": "ac"
+        },
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "today_energy": {
         "name": "Energy today",
@@ -23,17 +27,21 @@
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
-        "tags": {},
-        "filter": "|round(2)"
+        "tags": {
+            "power_class": "ac"
+        },
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "last_update": {
-        "name": "Last Update",
+        "name": "Last update",
         "dev_cla": "timestamp",
         "ic": "calendar-clock",
         "unit": "",
         "measurement": null,
         "tags": {},
-        "filter": "|timestamp_local"
+        "filter": "|timestamp_local",
+        "asset": "omnik"
     },
     "inverter_temperature": {
         "name": "Inverter temperature",
@@ -41,8 +49,9 @@
         "ic": "thermometer-lines",
         "unit": "\u00b0C",
         "measurement": "temperature",
-        "tags": { "source": "inverter" },  
-        "filter": "|round(1)"
+        "tags": { "source": "inverter" },
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "temperature": {
         "name": "Temperature",
@@ -51,79 +60,96 @@
         "unit": "\u00b0C",
         "measurement": "temperature",
         "tags": { "source": "openweather.org" },
-        "filter": null
+        "filter": null,
+        "asset": "openweather"
+    },
+    "timestamp_ow": {
+        "name": "Last update openweather",
+        "dev_cla": "timestamp",
+        "ic": "calendar-clock",
+        "unit": "",
+        "measurement": null,
+        "tags": { "source": "openweather.org" },
+        "filter": "|timestamp_local",
+        "asset": "openweather"
     },
     "current_ac1": {
-        "name": "AC Current fase R",
+        "name": "AC Current L1",
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
         "tags": {
             "power_class": "ac",
-            "fase": "R"
+            "fase": "L1"
         },
-        "filter": "|round(2)"
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "current_ac2": {
-        "name": "AC Current fase S",
+        "name": "AC Current L2",
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
         "tags": {
             "power_class": "ac",
-            "fase": "S"
+            "fase": "L2"
         },
-        "filter": "|round(2)"
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "current_ac3": {
-        "name": "AC Current fase T",
+        "name": "AC Current L3",
         "dev_cla": "",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
         "tags": {
             "power_class": "ac",
-            "fase": "T"
+            "fase": "L3"
         },
-        "filter": "|round(2)"
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "voltage_ac1": {
-        "name": "AC Voltage fase R",
+        "name": "AC Voltage L1",
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
         "tags": {
             "power_class": "ac",
-            "fase": "R"
+            "fase": "L1"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "voltage_ac2": {
-        "name": "AC Voltage fase S",
+        "name": "AC Voltage L2",
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
         "tags": {
             "power_class": "ac",
-            "fase": "S"
+            "fase": "L2"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "voltage_ac3": {
-        "name": "AC Voltage fase T",
+        "name": "AC Voltage L3",
         "dev_cla": "",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
         "tags": {
             "power_class": "ac",
-            "fase": "T"
+            "fase": "L3"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "voltage_ac_max": {
         "name": "AC Voltage max",
@@ -134,79 +160,86 @@
         "tags": {
             "power_class": "ac"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "frequency_ac1": {
-        "name": "AC Frequency fase R",
+        "name": "AC Frequency L1",
         "dev_cla": "",
         "ic": "pulse",
         "unit": "Hz",
         "measurement": "frequency",
         "tags": {
             "power_class": "ac",
-            "fase": "R"
+            "fase": "L1"
         },
-        "filter": "|round(2)"
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "frequency_ac2": {
-        "name": "AC Frequency fase S",
+        "name": "AC Frequency L2",
         "dev_cla": "",
         "ic": "pulse",
         "unit": "Hz",
         "measurement": "frequency",
         "tags": {
             "power_class": "ac",
-            "fase": "S"
+            "fase": "L2"
         },
-        "filter": "|round(2)"
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "frequency_ac3": {
-        "name": "AC Frequency fase T",
+        "name": "AC Frequency L3",
         "dev_cla": "",
         "ic": "pulse",
         "unit": "Hz",
         "measurement": "frequency",
         "tags": {
             "power_class": "ac",
-            "fase": "T"
+            "fase": "L3"
         },
-        "filter": "|round(2)"
+        "filter": "|round(2)",
+        "asset": "omnik"
     },
     "power_ac1": {
-        "name": "AC Power fase R",
+        "name": "AC Power L1",
         "dev_cla": "power",
         "ic": "flash-circle",
         "unit": "W",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
-            "fase": "R"
+            "fase": "L1"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "power_ac2": {
-        "name": "AC Power fase S",
+        "name": "AC Power L2",
         "dev_cla": "power",
         "ic": "flash-circle",
         "unit": "W",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
-            "fase": "S"
+            "fase": "L2"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "power_ac3": {
-        "name": "AC Power fase T",
+        "name": "AC Power L3",
         "dev_cla": "power",
         "ic": "flash-circle",
         "unit": "W",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
-            "fase": "T"
+            "fase": "L3"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "voltage_pv1": {
         "name": "DC Voltage string 1",
@@ -216,9 +249,10 @@
         "measurement": "voltage",
         "tags": {
             "power_class": "dc",
-            "fase": "1"
+            "fase": "pv1"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "voltage_pv2": {
         "name": "DC Voltage string 2",
@@ -228,9 +262,10 @@
         "measurement": "voltage",
         "tags": {
             "power_class": "dc",
-            "fase": "2"
+            "fase": "pv2"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "voltage_pv3": {
         "name": "DC Voltage string 3",
@@ -240,9 +275,10 @@
         "measurement": "voltage",
         "tags": {
             "power_class": "dc",
-            "fase": "3"
+            "fase": "pv3"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "current_pv1": {
         "name": "DC Current string 1",
@@ -252,9 +288,10 @@
         "measurement": "current",
         "tags": {
             "power_class": "dc",
-            "fase": "1"
+            "fase": "pc1"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "current_pv2": {
         "name": "DC Current string 2",
@@ -264,9 +301,10 @@
         "measurement": "current",
         "tags": {
             "power_class": "dc",
-            "fase": "2"
+            "fase": "pc2"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "current_pv3": {
         "name": "DC Current string 3",
@@ -276,9 +314,10 @@
         "measurement": "current",
         "tags": {
             "power_class": "dc",
-            "fase": "3"
+            "fase": "pv3"
         },
-        "filter": "|round(1)"
+        "filter": "|round(1)",
+        "asset": "omnik"
     },
     "power_pv1": {
         "name": "DC Power string 1",
@@ -288,9 +327,10 @@
         "measurement": "power",
         "tags": {
             "power_class": "dc",
-            "fase": "1"
+            "fase": "pv1"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "power_pv2": {
         "name": "DC Power string 2",
@@ -300,9 +340,10 @@
         "measurement": "power",
         "tags": {
             "power_class": "dc",
-            "fase": "2"
+            "fase": "pv2"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "power_pv3": {
         "name": "DC Power string 3",
@@ -312,9 +353,10 @@
         "measurement": "power",
         "tags": {
             "power_class": "dc",
-            "fase": "3"
+            "fase": "pv3"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "current_power_pv": {
         "name": "DC Current power",
@@ -325,7 +367,8 @@
         "tags": {
             "power_class": "dc"
         },
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
     },
     "operation_hours": {
         "name": "Hours active",
@@ -334,6 +377,547 @@
         "unit": "Hours",
         "measurement": "operation_time",
         "tags": {},
-        "filter": ""
+        "filter": "",
+        "asset": "omnik"
+    },
+    "timestamp_gas": {
+        "name": "Last update gas meter",
+        "dev_cla": "timestamp",
+        "ic": "calendar-clock",
+        "unit": "",
+        "measurement": null,
+        "tags": {},
+        "filter": "|timestamp_local",
+        "asset": "dsmr_gas"
+    },
+    "gas_consumption_total": {
+        "name": "Gas total",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "m3",
+        "measurement": "gas",
+        "tags": { "power_class": "gas" },
+        "filter": "|round(3)",
+        "asset": "dsmr_gas"
+    },
+    "gas_consumption_hour": {
+        "name": "Gas consumption",
+        "dev_cla": "",
+        "ic": "fire",
+        "unit": "m3/h",
+        "measurement": "flow",
+        "tags": { "power_class": "gas" },
+        "filter": "|round(3)",
+        "asset": "dsmr_gas"
+    },
+    "timestamp": {
+        "name": "Last update smart meter",
+        "dev_cla": "timestamp",
+        "ic": "calendar-clock",
+        "unit": "",
+        "measurement": null,
+        "tags": {},
+        "filter": "|timestamp_local",
+        "asset": "dsmr"
+    },
+    "ELECTRICITY_USED_TARIFF_1": {
+        "name": "Energy used tariff 1",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kwh",
+        "measurement": "energy",
+        "tags": { "power_class": "ac" },
+        "filter": "|round(3)",
+        "asset": "dsmr"
+    },
+    "ELECTRICITY_USED_TARIFF_2": {
+        "name": "Energy used tariff 2",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kwh",
+        "measurement": "energy",
+        "tags": { "power_class": "ac" },
+        "filter": "|round(3)",
+        "asset": "dsmr"
+    },
+    "ELECTRICITY_DELIVERED_TARIFF_1": {
+        "name": "Energy delivered tariff 1",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kwh",
+        "measurement": "energy",
+        "tags": { "power_class": "ac" },
+        "filter": "|round(3)",
+        "asset": "dsmr"
+    },
+    "ELECTRICITY_DELIVERED_TARIFF_2": {
+        "name": "Energy delivered tariff 2",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kwh",
+        "measurement": "energy",
+        "tags": { "power_class": "ac" },
+        "filter": "|round(3)",
+        "asset": "dsmr"
+    },
+    "energy_used_net": {
+        "name": "Energy used net",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kwh",
+        "measurement": "energy",
+        "tags": { "power_class": "ac" },
+        "filter": "|round(3)",
+        "asset": "dsmr"
+    },
+    "energy_delivered_net": {
+        "name": "Energy delivered net",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kwh",
+        "measurement": "energy",
+        "tags": { "power_class": "ac" },
+        "filter": "|round(3)",
+        "asset": "dsmr"
+    },
+    "CURRENT_ELECTRICITY_USAGE": {
+        "name": "Net power usage",
+        "dev_cla": "power",
+        "ic": "flash-alert",
+        "unit": "kW",
+        "measurement": "power",
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "CURRENT_ELECTRICITY_DELIVERY": {
+        "name": "Net power delivery",
+        "dev_cla": "power",
+        "ic": "flash-alert-outline",
+        "unit": "kW",
+        "measurement": "power",
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "ELECTRICITY_ACTIVE_TARIFF": {
+        "name": "Active tariff",
+        "dev_cla": "",
+        "ic": "coin-outline",
+        "unit": "",
+        "measurement": null,
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "LONG_POWER_FAILURE_COUNT": {
+        "name": "Long power failure count",
+        "dev_cla": "",
+        "ic": "flash-off",
+        "unit": "",
+        "measurement": "count",
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "SHORT_POWER_FAILURE_COUNT": {
+        "name": "Short power failure count",
+        "dev_cla": "",
+        "ic": "flash-red-eye",
+        "unit": "",
+        "measurement": "count",
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "VOLTAGE_SAG_L1_COUNT": {
+        "name": "Voltage sag count L1",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "",
+        "measurement": "count",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "VOLTAGE_SAG_L2_COUNT": {
+        "name": "Voltage sag count L2",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "",
+        "measurement": "count",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "VOLTAGE_SAG_L3_COUNT": {
+        "name": "Voltage sag count L3",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "",
+        "measurement": "count",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "VOLTAGE_SWELL_L1_COUNT": {
+        "name": "Voltage swell count L1",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "",
+        "measurement": "count",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "VOLTAGE_SWELL_L2_COUNT": {
+        "name": "Voltage swell count L2",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "",
+        "measurement": "count",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "VOLTAGE_SWELL_L3_COUNT": {
+        "name": "Voltage swell count L3",
+        "dev_cla": "",
+        "ic": "pulse",
+        "unit": "",
+        "measurement": "count",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_ACTIVE_POWER_L1_POSITIVE": {
+        "name": "Net power usage L1",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_ACTIVE_POWER_L2_POSITIVE": {
+        "name": "Net power usage L2",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_ACTIVE_POWER_L3_POSITIVE": {
+        "name": "Net power usage L3",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_ACTIVE_POWER_L1_NEGATIVE": {
+        "name": "Net power delivery L1",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_ACTIVE_POWER_L2_NEGATIVE": {
+        "name": "Net power delivery L2",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_ACTIVE_POWER_L3_NEGATIVE": {
+        "name": "Net Power delivery L3",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "current_net_power": {
+        "name": "Current net power",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "current_net_power_l1": {
+        "name": "Current net power L1",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "current_net_power_l2": {
+        "name": "Current net power L2",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "current_net_power_l3": {
+        "name": "Current net power L3",
+        "dev_cla": "power",
+        "ic": "flash-circle",
+        "unit": "W",
+        "measurement": "power",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_VOLTAGE_L1": {
+        "name": "Net voltage L1",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "measurement": "voltage",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_VOLTAGE_L2": {
+        "name": "Net voltage L2",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "measurement": "voltage",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_VOLTAGE_L3": {
+        "name": "Net voltage L3",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "measurement": "voltage",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "net_voltage_max": {
+        "name": "Net voltage max",
+        "dev_cla": "",
+        "ic": "alert-outline",
+        "unit": "V",
+        "measurement": "voltage",
+        "tags": {
+            "power_class": "ac"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_CURRENT_L1": {
+        "name": "Net current L1 DSMR",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "measurement": "current",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_CURRENT_L2": {
+        "name": "Net current L2 DSMR",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "measurement": "current",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "INSTANTANEOUS_CURRENT_L3": {
+        "name": "Net current L3 DSMR",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "measurement": "current",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "net_current_l1": {
+        "name": "Net current L1",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "measurement": "current",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L1"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "net_current_l2": {
+        "name": "Net Current L2",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "measurement": "current",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L2"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "net_current_l3": {
+        "name": "Net Current L3",
+        "dev_cla": "",
+        "ic": "flash-auto",
+        "unit": "A",
+        "measurement": "current",
+        "tags": {
+            "power_class": "ac",
+            "fase": "L3"
+        },
+        "filter": "",
+        "asset": "dsmr"
+    },
+    "last_update_calc": {
+        "name": "Last update calculations",
+        "dev_cla": "timestamp",
+        "ic": "calendar-clock",
+        "unit": "",
+        "measurement": null,
+        "tags": {},
+        "filter": "|timestamp_local",
+        "asset": "omnik_dsmr"
+    },
+    "energy_used": {
+        "name": "Energy used",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kWh",
+        "measurement": "energy",
+        "tags": {
+            "power_class": "ac"
+        },
+        "filter": "|round(1)",
+        "asset": "omnik_dsmr"
+    },
+    "energy_direct_use": {
+        "name": "Energy used directly",
+        "dev_cla": "",
+        "ic": "counter",
+        "unit": "kWh",
+        "measurement": "energy",
+        "tags": {
+            "power_class": "ac"
+        },
+        "filter": "|round(1)",
+        "asset": "omnik_dsmr"
+    },
+    "power_consumption": {
+        "name": "Current consumption",
+        "dev_cla": "power",
+        "ic": "chart-bell-curve",
+        "unit": "W",
+        "measurement": "power",
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "omnik_dsmr"
+    },
+    "power_direct_use": {
+        "name": "Direct consumption",
+        "dev_cla": "power",
+        "ic": "chart-bell-curve",
+        "unit": "W",
+        "measurement": "power",
+        "tags": { "power_class": "ac" },
+        "filter": "",
+        "asset": "omnik_dsmr"
     }
 }

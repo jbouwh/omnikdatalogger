@@ -19,7 +19,7 @@ class SolarmanPVClient(Client):
         self.token = None
 
         self.base_url = self.config.get('client.solarmanpv', 'base_url',
-                                        fallback='http://www.solarmanpv.com:18000/SolarmanApi/serverapi/')
+                                        fallback='http://www.solarmanpv.com:18000/SolarmanApi/serverapi')
 
         self.username = self.config.get('client.solarmanpv', 'username')
         self.password = self.config.get('client.solarmanpv', 'password')

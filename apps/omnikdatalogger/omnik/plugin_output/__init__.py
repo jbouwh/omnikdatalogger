@@ -1,6 +1,7 @@
 import requests
 from cachetools import TTLCache
 from omnik.ha_logger import hybridlogger
+from decimal import *
 
 # TODO: Create Abstract Base Class
 
@@ -25,6 +26,23 @@ class Plugin(object, metaclass=BasePlugin):
     process_aggregates = False
 
     cache = TTLCache(maxsize=1, ttl=300)
+
+    def jsonval(self, value):
+        if isinstance(value, Decimal):
+            if float(value) == int(value):
+                return int(value)
+            else:
+                return float(value)
+        elif isinstance(value, float):
+            return value
+        elif isinstance(value, int):
+            return value
+        elif isinstance(value, bool):
+            return value
+        elif isinstance(value, str):
+            return value
+        else:
+            return str(value)
 
     def get_weather(self):
         try:
@@ -51,3 +69,7 @@ class Plugin(object, metaclass=BasePlugin):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", 'Unable to get weather data. [{0}]: {1}'.format(
                                 type(e).__name__, str(e)))
             raise e
+
+    def process(self, **args):
+        pass
+

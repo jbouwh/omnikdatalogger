@@ -6,6 +6,7 @@ import paho.mqtt.client as mqttclient
 import uuid
 
 from omnik.plugin_output import Plugin
+import threading
 
 
 class mqtt(Plugin):
@@ -27,6 +28,8 @@ class mqtt(Plugin):
         if not self.config.has_option('output.mqtt', 'username') or not self.config.has_option('output.mqtt', 'password'):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 "Please specify MQTT username and password in the configuration")
+            self.mqtt_username = None
+            self.mqtt_password = None
         else:
             self.mqtt_username = self.config.get('output.mqtt', 'username')
             self.mqtt_password = self.config.get('output.mqtt', 'password')
@@ -48,33 +51,43 @@ class mqtt(Plugin):
             self.discovery_prefix = "homeassistant"
         # The mqtt name of the inverter device
         # use the configured device name or the device name from the omnik portal
-        if self.config.has_option('output.mqtt', 'device_name'):
-            self.device_name = self.config.get('output.mqtt', 'device_name')
-        else:
-            self.device_name = None
+        # if self.config.has_option('output.mqtt', 'device_name'):
+        #    self.device_name = self.config.get('output.mqtt', 'device_name')
+        # else:
+        #    self.device_name = None
         # self.config.mqtt_fields['<field_name>']['name'] can have an override
-        self.mqtt_field_name_override_init = {}
+        # self.mqtt_field_name_override_init = {}
         # Init topics dict
         self.topics = {}
         # Init config dict
         self.config_pl = {}
+        # Make instance to run exclusively
+        self.access = threading.Condition(threading.Lock(  ))
+
 
     def _init_config(self, msg):
         # Check if init is needed
-        if msg['plant_id'] in self.mqtt_field_name_override_init:
-            return
+        asset_classes = set()
+        for field in msg:
+            if field in self.config.data_field_config:
+                asset_class = self.config.data_field_config[field]['asset']
+                if not asset_class in asset_classes:
+                    asset_classes.add(asset_class)
+        # if msg['plant_id'] in self.mqtt_field_name_override_init:
+        #    return
         # Init from using mqtt field config (loaded from json)
         # self.config.data_field_config
-        # field: name, dev_cla, ic, unit, filter
+        # field: name, dev_cla, ic, unit, measurement, filter, asset
 
         # Assemble topics
-        self.topics[msg['plant_id']] = self._topics(msg)
+        self.topics[msg['plant_id']] = self._topics(msg, asset_classes)
 
         # Assemble config
-        self.config_pl[msg['plant_id']] = self._config_payload(msg, self.topics[msg['plant_id']])
+        self.config_pl[msg['plant_id']] = self._config_payload(msg, self.topics[msg['plant_id']], asset_classes)
 
         # Flag init as done
-        self.mqtt_field_name_override_init[msg['plant_id']] = True
+        # self.mqtt_field_name_override_init[msg['plant_id']] = True
+        return asset_classes
 
     def _mqtt_on_connect(self, client, userdata, flags, rc):
         if rc == 0:
@@ -85,48 +98,49 @@ class mqtt(Plugin):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
 
-    def _topics(self, msg):
+    def _topics(self, msg, asset_classes):
         # Init from using mqtt field config (loaded from json)
         # self.config.data_field_config
         # field: name, dev_cla, ic, unit, filter
 
         topics = {}
-        topics['main'] = f"{self.discovery_prefix}/sensor/{self.device_name}_{msg['plant_id']}"
-        topics['state'] = f"{topics['main']}/state"
-        topics['attr'] = f"{topics['main']}/attr"
-        topics['config'] = {}
-        for field in self.config.data_field_config:
-            if field in msg:
-                topics['config'][field] = f"{topics['main']}/{field}/config"
+        for asset_class in asset_classes:
+            topics[asset_class] = {}
+            topics[asset_class]['main'] = f"{self.discovery_prefix}/sensor/{self.config.attributes['devicename'][asset_class]}_{msg['plant_id']}"
+            topics[asset_class]['state'] = f"{topics[asset_class]['main']}/state"
+            topics[asset_class]['attr'] = f"{topics[asset_class]['main']}/attr"
+            topics[asset_class]['config'] = {}
+            for field in self.config.data_field_config:
+                if field in msg:
+                    topics[asset_class]['config'][field] = f"{topics[asset_class]['main']}/{field}/config"
         return topics
 
-    def _device_payload(self, msg):
-        # Determine model
-        model = "Omnik data logger"
-
-        # Set device_name
-        if self.device_name:
-            device_name = self.device_name
-        else:
-            device_name = msg['name']
-
-        # Determine plant appendix
-        plant_appendix = ""
-        if self.config.getboolean('output.mqtt', 'append_plant_id', False):
-            plant_appendix = f" [{msg['plant_id']}]"
-
-        # Device payload
-        device_pl = {
-            "identifiers": [f"omnik_{msg['plant_id']}"],
-            "name": f"{device_name}{plant_appendix}",
-            "mdl": model,
-            "mf": 'Omnik'
-            }
+    def _device_payload(self, msg, asset_classes):
+        device_pl = {}
+        for asset_class in asset_classes:
+            device_pl[asset_class] = {}
+            # Set device_name
+            device_name = self.config.attributes['devicename'][asset_class]
+            # Determine appendixes
+            name_appendix = ""
+            identifier = self.config.attributes['identifier'][asset_class]
+            if identifier in msg and self.config.getboolean('output.mqtt', 'append_plant_id', False):
+                name_appendix = f" {msg[identifier]}"
+            id_prefix = ""
+            if identifier in msg:
+                id_appendix = f"{msg[identifier]}_"
+            # Device payload
+            device_pl[asset_class] = {
+                "identifiers": [f"{id_appendix}{asset_class}"],
+                "name": f"{device_name}{name_appendix}",
+                "mdl": self.config.attributes['model'][asset_class],
+                "mf": self.config.attributes['mf'][asset_class]
+                }
         return device_pl
 
-    def _config_payload(self, msg, topics):
+    def _config_payload(self, msg, topics, asset_classes):
         # Get device payload
-        device_pl = self._device_payload(msg)
+        device_pl = self._device_payload(msg, asset_classes)
 
         # Fill config_pl dict
         # Init from using mqtt field config (loaded from json)
@@ -139,19 +153,24 @@ class mqtt(Plugin):
             if field not in msg:
                 # skip publishing non exitent values
                 continue
-            # field: name, dev_cla, ic, unit, filter
+            asset_class = self.config.data_field_config[field]['asset']
+            if not asset_class:
+                # skip publication
+                continue
+            # field: name, dev_cla, ic, unit, measurent, filter, asset
             if self.config.has_option('output.mqtt', f'{field}_name'):
                 fieldname = self.config.get('output.mqtt', f'{field}_name')
             else:
                 fieldname = self.config.data_field_config[field]['name']
+            identifier = self.config.attributes['identifier'][asset_class]
             config_pl[field] = {
-                "~": f"{topics['main']}",
-                "uniq_id": f"{msg['plant_id']}_{field}",
+                "~": f"{topics[asset_class]['main']}",
+                "uniq_id": f"{msg[identifier]}_{field}",
                 "name": f"{fieldname}",
                 "stat_t": "~/state",
                 "json_attr_t": "~/attr",
                 "val_tpl": f"{{{{(value_json.{field}{self.config.data_field_config[field]['filter']})}}}}",
-                "dev": device_pl
+                "dev": device_pl[asset_class]
                 }
             # Set device class if configured
             if self.config.data_field_config[field]['dev_cla']:
@@ -171,31 +190,69 @@ class mqtt(Plugin):
         for field in self.config.data_field_config:
             # field: name, dev_cla, ic, unit, filter
             # Only generate payload for available data
+            asset_class = self.config.data_field_config[field]['asset']
+            if not asset_class:
+                # skip publication
+                continue
+            if asset_class not in value_pl:
+                value_pl[asset_class] = {}
             if field in msg:
-                value_pl[field] = msg[field]
+                value_pl[asset_class][field] = self.jsonval(msg[field])
 
         return value_pl
 
-    def _attribute_payload(self, msg):
-        attr_pl = {
-            "inverter": msg['inverter'],
-            "plant_id": int(msg['plant_id']),
-            "last_update": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(msg['last_update']))
-            }
+    def _attribute_payload(self, msg, asset_classes):
+        attr_pl = {}
+        for asset_class in asset_classes:
+            apl = self._attribute_payload_asset_class(msg, asset_class)
+            if apl:
+                attr_pl[asset_class] = apl
         return attr_pl
 
+        # attr_pl[asset_class] = {
+        # "inverter": msg['inverter'],
+        # "plant_id": msg['plant_id'],
+        # "last_update": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(msg['last_update']))
+        # }
+
+    def _attribute_payload_asset_class(self, msg, asset_class):
+        attr_pl_class = {}
+        for attr in self.config.attributes['asset'][asset_class]:
+            attr_pl = self._encode_attribute(msg, attr)
+            if attr_pl:
+                attr_pl_class[attr] = self._encode_attribute(msg, attr)
+        return attr_pl_class
+
+    def _encode_attribute(self, msg, attr):
+        if attr not in msg:
+            return None
+        if attr in self.config.data_field_config:
+            return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(msg[attr])) \
+                if self.config.data_field_config[attr]['dev_cla'] == 'timestamp' \
+                else self.jsonval(msg[attr])
+        else:
+            return self.jsonval(msg[attr])
+
     def _publish_config(self, msg):
-        if self.mqtt_retain and msg['plant_id'] in self.mqtt_config_published:
-            # Do not republish config if retain flag is used
-            return
+        new_asset_classes = set()
+        if msg['plant_id'] not in self.mqtt_config_published:
+            # init mqtt_config_published flag cache
+            self.mqtt_config_published[msg['plant_id']] = set()
+
         for entity in self.config_pl[msg['plant_id']]:
-            self._publish_config_entity(self.topics[msg['plant_id']], self.config_pl[msg['plant_id']], entity)
-        # Flag config as published
-        self.mqtt_config_published[msg['plant_id']] = True
+            asset_class = self.config.data_field_config[entity]['asset']
+            if asset_class in self.mqtt_config_published[msg['plant_id']] and self.mqtt_retain:
+                continue
+            else:
+                self._publish_config_entity(self.topics[msg['plant_id']][asset_class], self.config_pl[msg['plant_id']], entity)
+                new_asset_classes.add(asset_class)
+        for item in new_asset_classes: 
+            self.mqtt_config_published[msg['plant_id']].add(item)
 
     def _publish_config_entity(self, topics, config_pl, entity):
         try:
             # publish config
+            asset_class = self.config.data_field_config[entity]['asset']
             if self.mqtt_client.publish(topics['config'][entity], json.dumps(config_pl[entity]), retain=self.mqtt_retain):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                                     f"Publishing config {json.dumps(config_pl[entity])} "
@@ -208,55 +265,65 @@ class mqtt(Plugin):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Unhandled error publishing config for entity {entity}: {e}")
 
-    def _publish_attributes(self, topics, attr_pl):
-        try:
-            # publish attributes
-            if self.mqtt_client.publish(topics['attr'], json.dumps(attr_pl), retain=self.mqtt_retain):
-                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing attributes {json.dumps(attr_pl)} to "
-                                    f"{topics['attr']} successful.")
-            else:
-                hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing attributes {json.dumps(attr_pl)} to "
-                                    f"{topics['attr']} failed!")
-        except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing attributes: {e}")
+    def _publish_attributes(self, msg, asset_classes):
 
-    def _publish_state(self, topics, value_pl):
-        try:
-            # publish state
-            if self.mqtt_client.publish(topics['state'], json.dumps(value_pl), retain=self.mqtt_retain):
-                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                    f"Publishing state {json.dumps(value_pl)} to "
-                                    f"{topics['state']} successful.")
-            else:
-                hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                    f"Publishing state {json.dumps(value_pl)} to "
-                                    f"{topics['state']} failed!")
-        except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing states: {e}")
+        attr_pl = self._attribute_payload(msg, asset_classes)
+        for asset_class in asset_classes:
+            try:
+                # publish attributes
+                if self.mqtt_client.publish(self.topics[msg['plant_id']][asset_class]['attr'], json.dumps(attr_pl[asset_class]), retain=self.mqtt_retain):
+                    hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                        f"Publishing attributes {json.dumps(attr_pl[asset_class])} to "
+                                        f"{self.topics[msg['plant_id']][asset_class]['attr']} successful.")
+                else:
+                    hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
+                                        f"Publishing attributes {json.dumps(attr_pl[asset_class])} to "
+                                        f"{self.topics[msg['plant_id']][asset_class]['attr']} failed!")
+            except Exception as e:
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing attributes: {e}")
+
+    def _publish_state(self, topics, value_pl, asset_classes):
+        for asset_class in asset_classes:
+            if asset_class == 'omnik':
+                n = 0
+            try:
+                # publish state
+                if self.mqtt_client.publish(topics[asset_class]['state'], json.dumps(value_pl[asset_class]), retain=self.mqtt_retain):
+                    hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                                        f"Publishing state {json.dumps(value_pl[asset_class])} to "
+                                        f"{topics[asset_class]['state']} successful.")
+                else:
+                    hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
+                                        f"Publishing state {json.dumps(value_pl[asset_class])} to "
+                                        f"{topics[asset_class]['state']} failed!")
+            except Exception as e:
+                hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unhandled error publishing states: {e}")
 
     def process(self, **args):
         """
         Send data to over mqtt (compliant with Home Assistant MQTT discovery standard
         See: https://www.home-assistant.io/docs/mqtt/discovery/)
         """
+
+        self.access.acquire()
+
         # Get argument
         msg = args['msg']
 
         # Set report time in local timezone
-        msg['reporttime'] = time.localtime(msg['last_update'])
+        # msg['reporttime'] = time.localtime(msg['last_update'])
 
         # Assemble config
-        self._init_config(msg)
+        asset_classes = self._init_config(msg)
 
         # Publish config
         self._publish_config(msg)
 
         # publish attributes
-        attr_pl = self._attribute_payload(msg)
-        self._publish_attributes(self.topics[msg['plant_id']], attr_pl)
+        self._publish_attributes(msg, asset_classes)
 
         # publish state
         value_pl = self._value_payload(msg)
-        self._publish_state(self.topics[msg['plant_id']], value_pl)
+        self._publish_state(self.topics[msg['plant_id']], value_pl, asset_classes)
+
+        self.access.release()
