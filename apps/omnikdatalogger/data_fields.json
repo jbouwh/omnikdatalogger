@@ -903,7 +903,7 @@
     "power_consumption": {
         "name": "Current consumption",
         "dev_cla": "power",
-        "ic": "chart-bell-curve",
+        "ic": "chart-line",
         "unit": "W",
         "measurement": "power",
         "tags": { "power_class": "ac" },
@@ -913,7 +913,7 @@
     "power_direct_use": {
         "name": "Direct consumption",
         "dev_cla": "power",
-        "ic": "chart-bell-curve",
+        "ic": "chart-line",
         "unit": "W",
         "measurement": "power",
         "tags": { "power_class": "ac" },
