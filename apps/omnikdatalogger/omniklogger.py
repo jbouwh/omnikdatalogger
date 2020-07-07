@@ -144,6 +144,7 @@ def main(c: ha_ConfigParser, hass_api=None):
         datalogger.process()
         datalogger.terminate()
 
+
 def set_data_config_path(config):
     config.data_config_file_path = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
     config.data_config_file_shared = f"{pathlib.Path(__file__).parent.parent.absolute()}" \

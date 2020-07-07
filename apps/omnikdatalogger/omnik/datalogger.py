@@ -7,7 +7,7 @@ import json
 from .daylight import daylight
 import threading
 import time
-from decimal import *
+from decimal import Decimal
 from datetime import date, datetime, timedelta, timezone
 
 from .plugin_output import Plugin
@@ -32,11 +32,60 @@ class DataLogger(object):
         self.cache = Cache(maxsize=10)
         self.start_total_energy = {}
         self.pasttime = datetime.combine(date.today(), datetime.min.time()).timestamp()
-        self.dsmr_access = threading.Condition(threading.Lock(  ))
+        self.dsmr_access = threading.Condition(threading.Lock())
 
         if self.config.get('default', 'debug', fallback=False):
             logger.setLevel(logging.DEBUG)
 
+        if not self._init_data_fields():
+            sys.exit(1)
+        # init energy cache
+        # total_energy_cache.json
+        self.persistant_cache_file = self.config.get('default', 'persistant_cache_file', fallback='persistant_cache.json')
+        self._load_persistant_cache()
+        # read data_fields
+        try:
+            with open(self.data_config_file) as json_file_config:
+                self.config.data_field_config = json.load(json_file_config)
+        except Exception as e:
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
+                                f"Error reading configuration file (data_fields.json). Exiting!. Error: {e.args}")
+            raise e
+            sys.exit(1)
+
+        # read attributes
+        if not self._read_attributes():
+            sys.exit(1)
+
+        self.every = self._get_interval()
+        self.interval_aggregated = self._get_interval_aggregated()
+
+        # Make sure we check for a recent update first
+        self.last_update_time = datetime.now(timezone.utc) - timedelta(seconds=self.interval_aggregated)
+
+        # Initialize plugin paths
+        sys.path.append(self.__expand_path('plugin_output'))
+        sys.path.append(self.__expand_path('plugin_client'))
+        sys.path.append(self.__expand_path('plugin_localproxy'))
+
+        self.city = self.config.get('default', 'city', fallback='Amsterdam')
+        try:
+            self.dl = daylight(self.city)
+        except Exception as e:
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"City '{self.city}' not recognized. Error: {e}")
+            sys.exit(1)
+
+        # Initialize client
+        self._init_client()
+        # Initialize output plugins
+        self._init_output_plugins()
+
+        self.omnik_api_level = 0
+
+        # Init dsmr
+        self._init_dsmr()
+
+    def _init_data_fields(self):
         self.config.data_config_file_args = self.config.get('default', 'data_config', fallback='')
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                             f"Data configuration [args]: '{self.config.data_config_file_args}'.")
@@ -62,22 +111,10 @@ class DataLogger(object):
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 "No valid data configuration file (data_fields.json) found. Exiting!")
-            sys.exit(1)
-        # init energy cache
-        # total_energy_cache.json
-        self.persistant_cache_file  = self.config.get('default', 'persistant_cache_file', fallback='persistant_cache.json')
-        self._load_persistant_cache()
-        # read data_fields
-        try:
-            with open(self.data_config_file) as json_file_config:
-                self.config.data_field_config = json.load(json_file_config)
-        except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                                f"Error reading configuration file (data_fields.json). Exiting!. Error: {e.args}")
-            raise e
-            sys.exit(1)
+            return False
+        return True
 
-        # read attributes
+    def _init_attribute_dict(self):
         self.config.attributes = {}
         asset_classes = list(['omnik', 'omnik_dsmr', 'dsmr', 'dsmr_gas'])
         self.config.attributes['asset'] = {
@@ -110,63 +147,33 @@ class DataLogger(object):
             'dsmr': 'DSMR_electicity_meter',
             'dsmr_gas': 'DSMR_gasmeter'
             }
+        return asset_classes
+
+    def _init_attribute_set(self, attribute, asset_class, type='string'):
+        if attribute not in self.config.attributes:
+            self.config.attributes[attribute] = {}
+        if self.config.has_option('attributes', f'asset.{asset_class}'):
+            self.config.attributes['asset'][asset_class] = self.config.getlist(
+                'attributes', f'asset.{asset_class}') if type == 'list' else \
+                    self.config.get('attributes', f'asset.{asset_class}')
+
+    def _read_attributes(self):
+        asset_classes = self._init_attribute_dict()
         try:
             if self.config.has_option('attributes', 'asset_classes'):
-                asset_classes += list(set(self.config.getlist('attributes', 'asset_classes')) - set(asset_classes)) 
+                asset_classes += list(set(self.config.getlist('attributes', 'asset_classes')) - set(asset_classes))
             for asset_class in asset_classes:
-                if 'asset' not in self.config.attributes:
-                    self.config.attributes['asset'] = {}
-                if 'model' not in self.config.attributes:
-                    self.config.attributes['model'] = {}
-                if 'mf' not in self.config.attributes:
-                    self.config.attributes['mf'] = {}
-                if 'identifier' not in self.config.attributes:
-                    self.config.attributes['identifier'] = {}
-                if 'devicename' not in self.config.attributes:
-                    self.config.attributes['devicename'] = {}
-                if self.config.has_option('attributes', f'asset.{asset_class}'):
-                    self.config.attributes['asset'][asset_class] = self.config.getlist('attributes', f'asset.{asset_class}')
-                if self.config.has_option('attributes', f'model.{asset_class}'):
-                    self.config.attributes['model'][asset_class] = self.config.get('attributes', f'model.{asset_class}')
-                if self.config.has_option('attributes', f'mf.{asset_class}'):
-                    self.config.attributes['mf'][asset_class] = self.config.get('attributes', f'mf.{asset_class}')
-                if self.config.has_option('attributes', f'identifier.{asset_class}'):
-                    self.config.attributes['identifier'][asset_class] = self.config.get('attributes', f'identifier.{asset_class}')
-                if self.config.has_option('attributes', f'devicename.{asset_class}'):
-                        self.config.attributes['devicename'][asset_class] = self.config.get('attributes', f'devicename.{asset_class}')
+                self._init_attribute_set('asset', asset_class, 'list')
+                self._init_attribute_set('model', asset_class)
+                self._init_attribute_set('mf', asset_class)
+                self._init_attribute_set('identifier', asset_class)
+                self._init_attribute_set('devicename', asset_class)
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Error reading attributes from config. Error: {e.args}")
             raise e
-            sys.exit(1)
-
-        self.every = self._get_interval()
-        self.interval_aggregated = self._get_interval_aggregated()
-
-        # Make sure we check for a recent update first
-        self.last_update_time = datetime.now(timezone.utc) - timedelta(seconds=self.interval_aggregated) # int(self.config.get('default', 'interval', fallback='360'))
-
-        # Initialize plugin paths
-        sys.path.append(self.__expand_path('plugin_output'))
-        sys.path.append(self.__expand_path('plugin_client'))
-        sys.path.append(self.__expand_path('plugin_localproxy'))
-
-        self.city = self.config.get('default', 'city', fallback='Amsterdam')
-        try:
-            self.dl = daylight(self.city)
-        except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"City '{self.city}' not recognized. Error: {e}")
-            sys.exit(1)
-
-        # Initialize client
-        self._init_client()
-        # Initialize output plugins
-        self._init_output_plugins()
-
-        self.omnik_api_level = 0
-
-        # Init dsmr
-        self._init_dsmr()
+            return False
+        return True
 
     def terminate(self):
         if self.dsmr:
@@ -212,7 +219,7 @@ class DataLogger(object):
 
     def _init_dsmr(self):
         terminals = self.config.getlist('dsmr', 'terminals', fallback=[])
-        if terminals[0]:                                        
+        if terminals[0]:
             self.dsmr = DSRM()
             self.dsmr.config = self.config
             self.dsmr.logger = self.logger
@@ -248,7 +255,7 @@ class DataLogger(object):
     def _calculate_consumption(self, data):
         # Calculate cumulative energy direct used
         data['energy_direct_use'] = data['total_energy_recalc'] - data['total_energy_offset'] - data['energy_delivered_net']
-        data['energy_used'] = data['energy_used_net'] + data['energy_direct_use'] # use as v3 * 1000 for pvoutput 
+        data['energy_used'] = data['energy_used_net'] + data['energy_direct_use']  # use as v3 * 1000 for pvoutput
         # Calculate the actual power used
         if 'current_power' in data:
             data['power_direct_use'] = data['current_power'] - (data['CURRENT_ELECTRICITY_DELIVERY'] * Decimal('1000'))
@@ -261,8 +268,8 @@ class DataLogger(object):
         data['last_update_calc'] = time.time()
 
     def dsmr_callback(self, terminal, dsmr_message):
-
-        # print(f"{dsmr_message['gas_consumption_totall']} m3 {dsmr_message['gas_consumption_hour']} m3/h - {dsmr_message['timestamp_gas']}")
+        # print(f"{dsmr_message['gas_consumption_totall']} =
+        # m3 {dsmr_message['gas_consumption_hour']} m3/h - {dsmr_message['timestamp_gas']}")
         if dsmr_message['plant_id']:
             plant_id = dsmr_message.pop('plant_id')
             # Get last total energy form cache (if available) and ad to the dataset
@@ -284,12 +291,11 @@ class DataLogger(object):
         self.dsmr_data[plant_id].append(dsmr_message)
 
     def _dsmr_cache(self, plant_id, timestamp):
-        best_ts = -1
         max_delta = -1
         best_data = None
         for data in reversed(self.dsmr_data[plant_id]):
             dsmr_ts = data['timestamp']
-            delta = abs(timestamp  - dsmr_ts)
+            delta = abs(timestamp - dsmr_ts)
             if delta < max_delta or max_delta < 0:
                 max_delta = delta
                 best_data = data
@@ -475,7 +481,7 @@ class DataLogger(object):
         if not aggregated_data:
             # Initialize
             aggregated_data['sys_id'] = sys_id
-            self._init_aggregated_data_field(aggregated_data, data, 'last_update') 
+            self._init_aggregated_data_field(aggregated_data, data, 'last_update')
             self._init_aggregated_data_field(aggregated_data, data, 'current_power')
             self._init_aggregated_data_field(aggregated_data, data, 'today_energy')
             self._init_aggregated_data_field(aggregated_data, data, 'total_energy')
@@ -576,9 +582,14 @@ class DataLogger(object):
         for field in data:
             if field in digitize_fields:
                 data[field] = Decimal(f'{data[field]}')
-        # Re calculate total enery for today accuracy (TODO per plant_id!) update after every measurement store in cache and make persistant
+        # Re calculate total enery for today accuracy (TODO per plant_id!) update after every measurement
+        # store in cache and make persistant
         # Also store the last current power to the cache
-        data['total_energy_recalc'] = self.total_energy(data['plant_id'], today_energy=data['today_energy'], total_energy=data['total_energy'], current_power=data['current_power'])
+        data['total_energy_recalc'] = self.total_energy(data['plant_id'],
+                                                        today_energy=data['today_energy'],
+                                                        total_energy=data['total_energy'],
+                                                        current_power=data['current_power']
+                                                        )
 
     def _load_persistant_cache(self):
         try:
@@ -630,7 +641,8 @@ class DataLogger(object):
                 # No accurate total energy is available, use total_energy cache
                 if last_today_energy in self.cache and last_total_energy in self.cache:
                     self.start_total_energy[plant] = self.cache[last_total_energy] - self.cache[last_today_energy]
-                    return self.start_total_energy[plant] + self.cache[last_today_energy] if lifetime else self.cache[last_today_energy]
+                    return self.start_total_energy[plant] + self.cache[last_today_energy] if lifetime \
+                        else self.cache[last_today_energy]
                 else:
                     return None
         else:
@@ -641,7 +653,8 @@ class DataLogger(object):
                 return self.start_total_energy[plant] + today_energy
             else:
                 if last_today_energy in self.cache and last_total_energy in self.cache:
-                    return self.start_total_energy[plant] + self.cache[last_today_energy] if lifetime else self.cache[last_today_energy]
+                    return self.start_total_energy[plant] + self.cache[last_today_energy] if lifetime \
+                        else self.cache[last_today_energy]
                 else:
                     return None
 

@@ -30,7 +30,7 @@ class influxdb(Plugin):
             if not self.config.data_field_config[field]['dev_cla'] == 'timestamp':
                 continue
             self.timestamp_field[self.config.data_field_config[field]['asset']] = field
-        self.access = threading.Condition(threading.Lock(  ))
+        self.access = threading.Condition(threading.Lock())
 
     def _get_temperature(self, values):
         if self.config.getboolean('output.influxdb', 'use_temperature', fallback=False):
@@ -44,7 +44,7 @@ class influxdb(Plugin):
             if att in self.config.data_field_config:
                 if self.config.data_field_config[att]['dev_cla'] == 'timestamp':
                     continue
-            attributes[att] = values[att] 
+            attributes[att] = values[att]
         return attributes.copy()
 
     def _get_tags(self, field, attributes, asset_class):
@@ -60,7 +60,7 @@ class influxdb(Plugin):
         return tags.copy()
 
     def _format_output(self, field, values):
-        if not field in self.config.data_field_config:
+        if field not in self.config.data_field_config:
             return ''
         if not self.config.data_field_config[field]['measurement']:
             # no measurement, exclude
@@ -124,5 +124,3 @@ class influxdb(Plugin):
             raise e
         finally:
             self.access.release()
-
-

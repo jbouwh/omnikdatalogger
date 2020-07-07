@@ -14,17 +14,16 @@ class P1test(hass.Hass):
         self.thr.start()
 
     def terminate(self):
-        self.stop = True 
+        self.stop = True
         self.thr.join()
-
 
     def test(self):
         self.log("P1 test started")
         serial_reader = SerialReader(
-        device='/dev/ttyUSB0',
-        serial_settings=SERIAL_SETTINGS_V5,
-        telegram_specification=telegram_specifications.V5
-        )
+            device='/dev/ttyUSB0',
+            serial_settings=SERIAL_SETTINGS_V5,
+            telegram_specification=telegram_specifications.V5
+            )
 
         for telegram in serial_reader.read_as_object():
             self.log(f"{telegram}")  # see 'Telegram object' docs below

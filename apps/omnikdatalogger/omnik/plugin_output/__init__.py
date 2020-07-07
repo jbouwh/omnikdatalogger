@@ -1,7 +1,7 @@
 import requests
 from cachetools import TTLCache
 from omnik.ha_logger import hybridlogger
-from decimal import *
+from decimal import Decimal
 
 # TODO: Create Abstract Base Class
 
@@ -72,4 +72,3 @@ class Plugin(object, metaclass=BasePlugin):
 
     def process(self, **args):
         pass
-
