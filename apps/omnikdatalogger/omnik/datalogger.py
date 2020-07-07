@@ -152,10 +152,13 @@ class DataLogger(object):
     def _init_attribute_set(self, attribute, asset_class, type='string'):
         if attribute not in self.config.attributes:
             self.config.attributes[attribute] = {}
-        if self.config.has_option('attributes', f'asset.{asset_class}'):
-            self.config.attributes['asset'][asset_class] = self.config.getlist(
-                'attributes', f'asset.{asset_class}') if type == 'list' else \
-                    self.config.get('attributes', f'asset.{asset_class}')
+        if not self.config.has_option('attributes', f'{attribute}.{asset_class}'):
+            return
+        if type == 'list':
+            self.config.attributes[attribute][asset_class] = self.config.getlist(
+                'attributes', f'asset.{asset_class}')
+        else:
+            self.config.attributes[attribute][asset_class] = self.config.get('attributes', f'{attribute}.{asset_class}')
 
     def _read_attributes(self):
         asset_classes = self._init_attribute_dict()
