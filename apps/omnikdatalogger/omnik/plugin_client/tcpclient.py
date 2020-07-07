@@ -2,6 +2,7 @@ from omnik.ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
 import socket
+import binascii
 
 
 class TCPclient(Client):
@@ -70,7 +71,8 @@ class TCPclient(Client):
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Connecting to %s port %s'
                                 % self.inverters[plant_id]['inverter_connection'])
             sock.connect(self.inverters[plant_id]['inverter_connection'])
-            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Sending request message')
+            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", "Sending request message with logger_sn: "
+                                f"{omnik.InverterMsg.request_string(self.inverters[plant_id]['logger_sn'])}")
             # Sending request message
             sock.sendall(requestmsg)
             # Wait for response (listen and block thread)
@@ -83,6 +85,9 @@ class TCPclient(Client):
                 if self.inverters[plant_id]['inverter_sn'] == serialnr:
                     data['plant_id'] = plant_id
                     valid = True
+            else:
+                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"data size: {len(rawmsg)}.\n"
+                                    f"Datadump: {str(binascii.b2a_base64(rawmsg))}")
             sock.close()
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Error getting data from inverter. {e}")

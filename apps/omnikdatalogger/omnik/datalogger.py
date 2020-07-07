@@ -751,7 +751,10 @@ class DataLogger(object):
                     # export the data to the output plugins
                     self._output_update(plant, data)
             # Process aggregated data
-            self._output_update_aggregated_data(plant, aggegated_data)
+            if aggegated_data:
+                self._output_update_aggregated_data(plant, aggegated_data)
+            else:
+                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'No valid aggregated data to proces.')
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Timed data logging processed')
