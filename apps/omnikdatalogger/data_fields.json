@@ -24,7 +24,7 @@
     "today_energy": {
         "name": "Energy today",
         "dev_cla": "",
-        "ic": "counter",
+        "ic": "chart-bell-curve-cumulative",
         "unit": "kWh",
         "measurement": "energy",
         "tags": {
