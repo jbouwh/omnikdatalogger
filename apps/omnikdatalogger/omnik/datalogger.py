@@ -254,6 +254,10 @@ class DataLogger(object):
                 time.sleep(1)
             else:
                 break
+        if not tries:
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "WARNING", f"Could not combine DSMR data for plant {plant}. "
+                                "Did you configure plant_id at your dsmr terminal config?")
 
     def _calculate_consumption(self, data):
         # Calculate cumulative energy direct used
@@ -465,7 +469,7 @@ class DataLogger(object):
         data = self._validate_client_data(plant, data)
         # Process for each plugin, but only when valid
         for plugin in Plugin.plugins:
-            if not plugin.process_aggregates:
+            if not plugin.process_aggregates or 'sys_id' in data:
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                                     f"Trigger plugin '{getattr(plugin, 'name')}'.")
                 plugin.process(msg=data)
@@ -524,7 +528,7 @@ class DataLogger(object):
             data['sys_id'] = sys_id
         else:
             # Get sys_id from pvoutput section, cannot aggregate without sys_id
-            sys_id = self.config.get('output.pvoutput', 'sys_id', '')
+            sys_id = global_sys_id
             if sys_id:
                 # Aggerate data (initialize dict and set sys_id)
                 self._init_aggregated_data(aggregated_data, data, sys_id)
@@ -756,8 +760,7 @@ class DataLogger(object):
             # Process aggregated data
             if aggegated_data:
                 self._output_update_aggregated_data(plant, aggegated_data)
-            else:
-                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'No valid aggregated data to proces.')
+                hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Aggregated data processed.')
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Timed data logging processed')
