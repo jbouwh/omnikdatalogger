@@ -12,7 +12,7 @@ first generation inverter (Omniksol-3K-TL) as well. This datalogger can use data
 to fetch data pushed by the inverter I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
 Support has been added for MQTT and the integration with Home Assistent using the AppDaemon addon.
 Now the new version it also makes possible to process intercepted logger messages and integrate the processing with Home Assistant (`localproxy` client). Polling the inverter directly is also possible
-using the tcpclient, but this client is not tested directly yet, since my inverter does not support this method.
+using the tcpclient, thanks to Han Lubach this method is working now as expected.
 Special thanks to Wouter van der Zwan for his code (https://github.com/Woutrrr/Omnik-Data-Logger) and t3kpunk (https://github.com/t3kpunk/Omniksol-PV-Logger)
 Also special thanks to [lepirlouit](https://github.com/lepirlouit/omnik-data-logger) for creating the basis for the new influxdb output plugin.
 The latest version supports integration of enery logging conform the Dutch Smart Meter Requirements (DSRM). These meters can be connected using the P1 port of your smart meter.
