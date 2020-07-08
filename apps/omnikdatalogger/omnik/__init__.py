@@ -9,7 +9,7 @@ import threading
 logging.basicConfig(stream=sys.stdout,
                     level=os.environ.get('LOGLEVEL', logging.INFO))
 
-__version__ = '0.99.18'
+__version__ = '1.0.0'
 
 logger = logging.getLogger(__name__)
 
