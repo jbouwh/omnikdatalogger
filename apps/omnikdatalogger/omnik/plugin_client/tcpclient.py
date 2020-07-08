@@ -78,17 +78,15 @@ class TCPclient(Client):
             # Wait for response (listen and block thread)
             rawmsg = sock.recv(129)
             # Validate the data response. Check length and serial number
-            if len(rawmsg) == 128:
+            if len(rawmsg) >= 99:
                 inverterMsg = omnik.InverterMsg.InverterMsg(rawmsg)
                 serialnr = inverterMsg.getID()
                 # lookup plant_id to see it is in the plants list
                 if self.inverters[plant_id]['inverter_sn'] == serialnr:
                     data['plant_id'] = plant_id
                     valid = True
-            else:
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"data size: {len(rawmsg)}.\n"
                                     f"Datadump: {str(binascii.b2a_base64(rawmsg))}")
-            sock.close()
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Error getting data from inverter. {e}")
             return None
