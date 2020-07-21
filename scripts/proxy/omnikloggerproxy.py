@@ -37,9 +37,6 @@ CHECK_STATUS_INTERVAL = 60
 INVERTER_MAX_IDLE_TIME = 10
 
 global stopflag
-global mqttfw
-mqttfw = None
-
 
 # Generic signal handler
 def signal_handler(signal, frame):
@@ -51,13 +48,7 @@ def signal_handler(signal, frame):
 class ProxyServer(threading.Thread):
 
     def __init__(self, args=[], kwargs={}):
-        self.stopsignal = 0
-        # self.sockwait = threading.Event()
-
         threading.Thread.__init__(self)
-        self.data = None
-        self.connection = None
-        self.sock = None
         if args.mqtt_host:
             logging.info('Enabling MQTT forward to {0}'.format(args.mqtt_host))
             RequestHandler.mqttfw = mqtt(args)
