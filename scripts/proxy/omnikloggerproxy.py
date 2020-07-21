@@ -143,9 +143,8 @@ class tcpforward(threading.Thread):
         self.forwardsock.settimeout(90)
         try:
             self.forwardsock.connect(loggeraddress)
-            logging.info('{0} Forwarding to omnik logger "{1}"'.format(datetime.datetime.now(), args.omniklogger))
             self.forwardsock.sendall(self.data)
-            logging.info('Forwarding succesful.')
+            logging.info('{0} Forwarded to "{1}"'.format(datetime.datetime.now(), args.omniklogger))
             self.forwardsock.close()
         except Exception as e:
             logging.warning("Error forwarding: {0}".format(e))
@@ -246,30 +245,39 @@ class mqtt(object):
             # publish config
             if self.mqtt_client.publish(topics['config'][entity], json.dumps(config_pl[entity]), retain=self.mqtt_retain):
                 logging.debug("Publishing config {0} successful.".format(entity))
+                return True
             else:
                 logging.warning("Publishing config {0} failed!".format(entity))
+                return False
         except Exception as e:
             logging.error("Unhandled error publishing config for entity {0}: {1}".format(entity, e))
+            return False
 
     def _publish_attributes(self, topics, attr_pl):
         try:
             # publish attributes
             if self.mqtt_client.publish(topics['attr'], json.dumps(attr_pl), retain=self.mqtt_retain):
                 logging.debug("Publishing attributes successful.")
+                return True
             else:
                 logging.warning("Publishing attributes failed!")
+                return False
         except Exception as e:
             logging.error("Unhandled error publishing attributes: {0}".format(e))
+            return False
 
     def _publish_state(self, topics, value_pl):
         try:
             # publish state
             if self.mqtt_client.publish(topics['state'], json.dumps(value_pl), retain=self.mqtt_retain):
                 logging.debug("Publishing state {0} successful.".format(json.dumps(value_pl)))
+                return True
             else:
                 logging.warning("Publishing state {0} failed!".format(json.dumps(value_pl)))
+                return False
         except Exception as e:
             logging.error("Unhandled error publishing states: {0}".format(e))
+            return False
 
     def mqttforward(self, data, serial, status):
         # Decode data: base64.b64decode(json.loads(d, encoding='UTF-8'))
@@ -280,8 +288,6 @@ class mqtt(object):
         self.reporttime = datetime.datetime.now()
         # Get topics
         topics = self._topics()
-
-        logging.debug("{0} Forwarding message to MQTT service".format(self.reporttime))
         # publish attributes
         attr_pl = self._attribute_payload()
         self._publish_attributes(topics, attr_pl)
@@ -293,7 +299,8 @@ class mqtt(object):
 
         # publish state
         value_pl = self._value_payload()
-        self._publish_state(topics, value_pl)
+        if self._publish_state(topics, value_pl):
+            logging.info('{0} Message forwarded to MQTT service at "{1}"'.format(datetime.datetime.now(), args.mqtt_host))
 
         self.lock.release()
 
