@@ -5,12 +5,12 @@
     "\\.github\\workflows",
     "\\apps",
     "\\apps\\omnikdatalogger",
+    "\\apps\\omnikdatalogger\\omnik",
     "\\apps\\omnikdatalogger\\omnik\\dsmr",
-    "\\apps\\omnikdatalogger\\omnik\\plugin_client",
-    "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
-    "\\scripts\\ha_dsmr_test",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_output",
+    "\\scripts",
     "\\scripts\\proxy"
   ],
-  "SelectedNode": "\\apps\\omnikdatalogger\\data_fields.json",
+  "SelectedNode": "\\scripts\\proxy\\omnikloggerproxy.py",
   "PreviewInSolutionExplorer": false
 }

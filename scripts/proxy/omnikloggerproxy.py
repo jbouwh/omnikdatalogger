@@ -11,6 +11,7 @@
 #
 
 import socket
+import socketserver
 import argparse
 import configparser
 import threading
@@ -24,7 +25,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -36,6 +37,8 @@ CHECK_STATUS_INTERVAL = 60
 INVERTER_MAX_IDLE_TIME = 10
 
 global stopflag
+global mqttfw
+mqttfw = None
 
 
 # Generic signal handler
@@ -49,22 +52,23 @@ class ProxyServer(threading.Thread):
 
     def __init__(self, args=[], kwargs={}):
         self.stopsignal = 0
-        self.sockwait = threading.Event()
+        # self.sockwait = threading.Event()
 
         threading.Thread.__init__(self)
         self.data = None
         self.connection = None
         self.sock = None
         if args.mqtt_host:
-            self.mqttfw = mqtt(args)
-        else:
-            self.mqttfw = None
-        self.status = {}
-        self.lastupdate = {}
+            logging.info('Enabling MQTT forward to {0}'.format(args.mqtt_host))
+            RequestHandler.mqttfw = mqtt(args)
+        self.status = RequestHandler.status
+        self.lastupdate = RequestHandler.lastupdate
 
         # Check every 60 sec if there is a valid update status aged less than 30 minutes
         self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
         self.statustimer.start()
+        # Create tcp server
+        self.tcpServer = socketserver.TCPServer((args.listenaddress, args.listenport), RequestHandler)
 
     def check_status(self):
         for serial in self.lastupdate:
@@ -81,106 +85,57 @@ class ProxyServer(threading.Thread):
         self.stopsignal = 1
         try:
             self.statustimer.cancel()
+            self.tcpServer.shutdown()
         except Exception as e:
-            logging.debug('Cannot stop status timer. Error: {0}'.format(e))
-        try:
-            # Work-a-round to close listening socket
-            socket.socket(socket.AF_INET,
-                          socket.SOCK_STREAM).connect(self.server_address)
-            self.sock.close()
-        except Exception as e:
-            logging.debug('No open listening socket to close. Error: {0}'.format(e))
-        if self.mqttfw:
-            self.mqttfw.close()
-        self.sockwait.clear()
-
-    def sockaccept(self):
-        # Wait for connection
-        try:
-            self.connection, self.client_address = self.sock.accept()
-            if not self.stopsignal:
-                logging.debug('client connected: {0}'.format(self.client_address))
-                # Process received data
-                self.data = self.connection.recv(1024)
-        except Exception as e:
-            logging.debug('Unable to receive message. Error: {0}'.format(e))
-        self.sockwait.set()
+            logging.debug('Cannot stop proxy server. Error: {0}'.format(e))
+        if RequestHandler.mqttfw:
+            RequestHandler.mqttfw.close()
 
     def run(self):
         # Try to run TCP server
-        # Create a TCP/IP socket to listen
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        logging.info('Start in Omnik proxy server. Listening to {0}:{1}'.format(args.listenaddress, args.listenport))
+        self.tcpServer.serve_forever()
 
-        # Bind the socket to the address given on the command line
-        self.server_address = (args.listenaddress, args.listenport)
-        try:
-            self.sock.bind(self.server_address)
-            self.sock.settimeout(40)
-        except Exception as e:
-            logging.critical('Not able to open socket for listening, exiting! Error: {0}'.format(e))
-            self.cancel()
-            return
 
-        logging.info('starting up on %s port %s' % self.sock.getsockname())
-        # Accept max 1 connection
-        self.sock.listen(1)
+class RequestHandler(socketserver.BaseRequestHandler):
 
-        # Main loop
-        while not self.stopsignal:
-            logging.debug('waiting for a connection')
+    mqttfw = None
+    status = {}
+    lastupdate = {}
 
-            # Initialize event for handling accept socket
-            self.sockwait = threading.Event()
-            # Initialize data var
-            self.data = None
-            self.serial = None
+    def handle(self):
+        msg = self.request.recv(1024)
 
-            acceptthread = threading.Thread(target=self.sockaccept)
-            # Wait for accept
-            acceptthread.start()
-            # The following call will block the thead
-            self.sockwait.wait()
-            if self.connection:
-                if self.data and len(self.data) == 128:
-                    self._processmsg()
-                try:
-                    self.connection.close()
-                    logging.debug('connection closed')
-                except Exception as e:
-                    logging.debug('closing connection failed: {0}'.format(e))
+        if len(msg) >= 99:
+            self._processmsg(msg)
 
-    def _processmsg(self):
-        rawserial = str(self.data[15:31].decode())
+    def _processmsg(self, msg):
+        rawserial = str(msg[15:31].decode())
         # obj dLog transforms de raw data from the photovoltaic Systems converter
         valid = False
         if rawserial in args.serialnumber:
-            self.status[rawserial] = STATUS_ON
-            self.lastupdate[rawserial] = datetime.datetime.now()
+            # TODO: Dit gaat niet werken zo
+            RequestHandler.status[rawserial] = STATUS_ON
+            RequestHandler.lastupdate[rawserial] = datetime.datetime.now()
             valid = True
         if valid:
             # Process data
             logging.info("Processing message for inverter '{0}'".format(rawserial))
-            self.forwardstate(rawserial, self.status[rawserial])
-            if self.connection:
-                try:
-                    self.connection.sendall(b'')
-                except Exception as e:
-                    logging.debug('Unabled to reply to log request: {0}'.format(e))
-                # give replay if connection is not closed yet
+            self.forwardstate(msg, rawserial, self.status[rawserial])
         else:
-            logging.warning("Received incorrect data, ignoring connection!")
+            logging.warning("Ignoring received data!")
 
-    def forwardstate(self, serial, status):
+    def forwardstate(self, msg, serial, status):
         # Forward data to datalogger and MQTT
         # TODO
         # Forward logger message to MTTQ if host is defined
-        if self.mqttfw:
-            self.mqttfw.mqttforward(json.dumps(str(binascii.b2a_base64(self.data), encoding='ascii')),
-                                    serial, status)
+        if RequestHandler.mqttfw:
+            RequestHandler.mqttfw.mqttforward(json.dumps(str(binascii.b2a_base64(msg), encoding='ascii')),
+                                              serial, status)
         # Forward data to proxy or Omnik datalogger
         if args.omniklogger:
             self.fwthread = tcpforward()
-            self.fwthread.forward(self.data)
+            self.fwthread.forward(msg)
             self.fwthread.join(60)
             if self.fwthread.isAlive():
                 # Kill the thread if it is still blocking
@@ -239,8 +194,12 @@ class mqtt(object):
         self.device_name = args.mqtt_device_name
         self.logger_sensor_name = args.mqtt_logger_sensor_name
 
+        # lock
+        self.lock = threading.Condition(threading.Lock())
+
     def close(self):
         self.mqtt_client.disconnect()
+        self.lock.close()
 
     def _topics(self):
         topics = {}
@@ -328,6 +287,7 @@ class mqtt(object):
 
     def mqttforward(self, data, serial, status):
         # Decode data: base64.b64decode(json.loads(d, encoding='UTF-8'))
+        self.lock.acquire()
         self.data = data
         self.serial = serial
         self.status = status
@@ -349,6 +309,8 @@ class mqtt(object):
         value_pl = self._value_payload()
         self._publish_state(topics, value_pl)
 
+        self.lock.release()
+
     def _mqtt_on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             logging.info("MQTT connected")
@@ -365,7 +327,7 @@ def main(args):
     proxy = ProxyServer(args)
     proxy.start()
     try:
-        while not (proxy.stopsignal or stopflag):
+        while not (proxy.stopsignal or stopflag) and proxy.isAlive():
             proxy.join(1)
     except KeyboardInterrupt:
         pass
