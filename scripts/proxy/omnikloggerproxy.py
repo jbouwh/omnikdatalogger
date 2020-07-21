@@ -61,7 +61,7 @@ class ProxyServer(threading.Thread):
         self.tcpServer = socketserver.TCPServer((args.listenaddress, args.listenport), RequestHandler)
 
     def check_status(self):
-        for serial in self.lastupdate:
+        for serial in RequestHandler.lastupdate:
             if RequestHandler.lastupdate[serial] + datetime.timedelta(minutes=INVERTER_MAX_IDLE_TIME) < \
                     datetime.datetime.now():
                 RequestHandler.status[serial] = STATUS_OFF
