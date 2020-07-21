@@ -334,7 +334,6 @@ if __name__ == '__main__':
     home = os.path.expanduser('~')
 
     parser = argparse.ArgumentParser()
-
     parser.add_argument('--serialnumber', default=None, nargs='+', required=True,
                         help='The serial number(s) of your inverter')
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
