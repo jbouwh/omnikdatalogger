@@ -1,8 +1,26 @@
 from omnik.ha_logger import hybridlogger
 from omnik.plugin_localproxy import LocalProxyPlugin
 import threading
-import socket
+import socketserver
 import os
+
+
+class RequestHandler(socketserver.BaseRequestHandler):
+
+    client = None
+
+    def handle(self):
+        data = self.request.recv(1024)
+
+        if self.client and len(data) >= 99:
+            # Fill data structure
+            self.client.semaphore.acquire()
+            self.client.msg['data'] = data
+            self.client.msg['isSet'] = True
+            self.client.msg['plugin'] = __name__
+            self.client.semaphore.release()
+            # Trigger processing the message
+            self.client.msgevent.set()
 
 
 class TCPproxy(LocalProxyPlugin):
@@ -26,15 +44,17 @@ class TCPproxy(LocalProxyPlugin):
         self.listen_address = self.config.get('client.localproxy.tcp_proxy', 'listen_address', fallback='0.0.0.0')
         self.listen_port = int(self.config.get('client.localproxy.tcp_proxy', 'listen_port', fallback='10004'))
         self.listenaddress = (self.listen_address, int(self.listen_port))
+        # Create tcp server
+        RequestHandler.client = self.client
+        self.tcpServer = socketserver.TCPServer(self.listenaddress, RequestHandler)
 
     def stop(self):
         try:
-            # Closing the socket will stop listening
-            if self.sock:
-                self.sock.close()
+            # Shutting down tcp server
+            self.tcpServer.shutdown()
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING",
-                                f"Error closing listening socket. Error: {e}.")
+                                f"Error shutting down tcp_proxy server. Error: {e}.")
             # exit the hard way!
             os.sys.exit(1)
 
@@ -45,30 +65,10 @@ class TCPproxy(LocalProxyPlugin):
 
     def _run(self):
         # TCP listen loop
-        # Create a TCP/IP socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.sock.bind(self.listenaddress)
-            self.sock.listen(1)
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
+                                f"Starting tcp_proxy server. listening at {self.listenaddress[0]}:{self.listenaddress[1]}.")
+            self.tcpServer.serve_forever()
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Error binding to {self.listenaddress}. Error: {e}.")
-            return
-        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Listening to {self.listenaddress}")
-        while not self.client.stoprequest:
-            data = None
-            try:
-                connection, client_address = self.sock.accept()
-                data = connection.recv(129)
-                if len(data) == 128:
-                    # Fill data structure
-                    self.client.semaphore.acquire()
-                    self.client.msg['data'] = data
-                    self.client.msg['isSet'] = True
-                    self.client.msg['plugin'] = __name__
-                    self.client.semaphore.release()
-                    # Trigger processing the message
-                    self.client.msgevent.set()
-            except Exception as e:
-                hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                    f"Reading data from socket was aborted. Error: {e}")
