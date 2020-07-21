@@ -38,6 +38,7 @@ INVERTER_MAX_IDLE_TIME = 10
 
 global stopflag
 
+
 # Generic signal handler
 def signal_handler(signal, frame):
     global stopflag
@@ -312,7 +313,7 @@ def main(args):
     proxy = ProxyServer(args)
     proxy.start()
     try:
-        while not (proxy.stopsignal or stopflag) and proxy.isAlive():
+        while not stopflag and proxy.isAlive():
             proxy.join(1)
     except KeyboardInterrupt:
         pass
