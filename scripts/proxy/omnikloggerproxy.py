@@ -25,7 +25,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -61,34 +61,29 @@ class ProxyServer(threading.Thread):
         if args.mqtt_host:
             logging.info('Enabling MQTT forward to {0}'.format(args.mqtt_host))
             RequestHandler.mqttfw = mqtt(args)
-        self.status = RequestHandler.status
-        self.lastupdate = RequestHandler.lastupdate
+            # Check every 60 sec if there is a valid update status aged less than 30 minutes
+            self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
+            self.statustimer.start()
 
-        # Check every 60 sec if there is a valid update status aged less than 30 minutes
-        self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
-        self.statustimer.start()
         # Create tcp server
         self.tcpServer = socketserver.TCPServer((args.listenaddress, args.listenport), RequestHandler)
 
     def check_status(self):
         for serial in self.lastupdate:
-            if self.lastupdate[serial] + datetime.timedelta(minutes=INVERTER_MAX_IDLE_TIME) < datetime.datetime.now():
-                self.status[serial] = STATUS_OFF
-                self.mqttfw.mqttforward('',
-                                        serial, self.status[serial])
+            if RequestHandler.lastupdate[serial] + datetime.timedelta(minutes=INVERTER_MAX_IDLE_TIME) < \
+                    datetime.datetime.now():
+                RequestHandler.status[serial] = STATUS_OFF
+                RequestHandler.mqttfw.mqttforward('',
+                                                  serial, self.status[serial])
         # Restart timer
         self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
         self.statustimer.start()
 
     def cancel(self):
         # Stop the loop
-        self.stopsignal = 1
-        try:
-            self.statustimer.cancel()
-            self.tcpServer.shutdown()
-        except Exception as e:
-            logging.debug('Cannot stop proxy server. Error: {0}'.format(e))
+        self.tcpServer.shutdown()
         if RequestHandler.mqttfw:
+            self.statustimer.cancel()
             RequestHandler.mqttfw.close()
 
     def run(self):
@@ -199,7 +194,6 @@ class mqtt(object):
 
     def close(self):
         self.mqtt_client.disconnect()
-        self.lock.close()
 
     def _topics(self):
         topics = {}
