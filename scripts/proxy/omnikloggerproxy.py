@@ -25,7 +25,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.3'
+__version__ = '1.1.2'
 listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -91,7 +91,6 @@ class RequestHandler(socketserver.BaseRequestHandler):
     lastupdate = {}
 
     def handle(self):
-        logging.debug("Client connection from {0}.".format(self.client_address[0]))
         msg = self.request.recv(1024)
 
         if len(msg) >= 99:
