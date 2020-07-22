@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # This script can be used to intercept and forward the inverter log messages.
 # The script has been tested with python versions 2.7 and 3.8
@@ -25,16 +25,16 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.2'
-listenaddress = b'127.0.0.1'                       # <<<< change this to your ip address >>>>
+__version__ = '1.1.3'
+listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
-omnikloggerpublicaddress = b'176.58.117.69'        # There is no need to change this if this proxy
+omnikloggerpublicaddress = b'176.58.117.69'        # If you have an aditional omniklogger, change the ip to enlarge the chain
 omnikloggerdestport = 10004                        # This is the port the omnik/SolarmanPV datalogger server listens to
 STATUS_ON = 'ON'
 STATUS_OFF = 'OFF'
 CHECK_STATUS_INTERVAL = 60
-INVERTER_MAX_IDLE_TIME = 10
+INVERTER_MAX_IDLE_TIME = 6
 
 global stopflag
 
@@ -66,7 +66,7 @@ class ProxyServer(threading.Thread):
                     datetime.datetime.now():
                 RequestHandler.status[serial] = STATUS_OFF
                 RequestHandler.mqttfw.mqttforward('',
-                                                  serial, self.status[serial])
+                                                  serial, RequestHandler.status[serial])
         # Restart timer
         self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
         self.statustimer.start()

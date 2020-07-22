@@ -13,14 +13,14 @@
       "name": "omniklogger.py"
     },
     {
-      "type": "python",
-      "interpreter": "(default)",
-      "interpreterArguments": "",
-      "scriptArguments": "--listenaddress 192.168.1.12 --serialnumber NLDN123456789012 --omniklogger 192.168.1.71 --omnikloggerport 10004 --loglevel DEBUG",
-      "nativeDebug": false,
-      "webBrowserUrl": "",
-      "project": "scripts\\proxy\\omnikloggerproxy.py",
-      "name": "omnikloggerproxy.py"
+        "type": "python",
+        "interpreter": "(default)",
+        "interpreterArguments": "",
+        "scriptArguments": "--listenaddress 192.168.1.12 --serialnumber NLDN302012863151 --omniklogger 192.168.1.71 --omnikloggerport 10004 --loglevel DEBUG",
+        "nativeDebug": false,
+        "webBrowserUrl": "",
+        "project": "scripts\\proxy\\omnikloggerproxy.py",
+        "name": "omnikloggerproxy.py"
     }
   ]
 }
