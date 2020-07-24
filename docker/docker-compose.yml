@@ -6,10 +6,6 @@ services:
     image: omnikdatalogger:latest
     volumes:
       - "${PWD}/config.ini:/home/omnik/.omnik/config.ini"
-    command:
-      - --interval 
-      - "360"
-      - --debug
     logging:
       driver: json-file
       

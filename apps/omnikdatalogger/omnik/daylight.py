@@ -1,10 +1,10 @@
-from datetime import datetime, tzinfo, timedelta
+from datetime import datetime, timedelta
 import pytz
 try:
     from astral import sun
     from astral.geocoder import database, lookup
     VERSION = 2
-except:
+except ImportError:
     from astral import Astral
     VERSION = 1
 
@@ -24,7 +24,6 @@ class daylight(object):
             self._a.solar_depression = 'civil'
             self._city = self._a[city_name]
             self._timezone = pytz.timezone(self._city.timezone)
-
 
     def sun(self, t=None):
         if not t:
