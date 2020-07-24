@@ -6,10 +6,14 @@ import configparser
 import pathlib
 import time
 import logging
-import appdaemon.plugins.hass.hassapi as hass
 from omnik.ha_logger import hybridlogger
 from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
+try:
+    # AppDeamon is not needed when run in command mode
+    import appdaemon.plugins.hass.hassapi as hass
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
