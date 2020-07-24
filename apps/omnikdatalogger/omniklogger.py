@@ -84,6 +84,9 @@ class HA_OmnikDataLogger(hass.Hass):
 
     def initialize(self, *args, **kwargs):
         hybridlogger.ha_log(logger, self, "INFO", "Starting Omnik datalogger...")
+        from omnik.daylight import daylight
+        dl = daylight('Amsterdam')
+        hybridlogger.ha_log(logger, self, "INFO", f"Astal base version: {dl.version}")
         hybridlogger.ha_log(logger, self, "DEBUG", f"Arguments from AppDaemon config (self.args): {self.args}")
         if 'config' in self.args:
             c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=self.args)

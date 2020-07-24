@@ -1,104 +1,111 @@
-import datetime
+from datetime import datetime, tzinfo, timedelta
 import pytz
-from astral import Astral
+try:
+    from astral import sun
+    from astral.geocoder import database, lookup
+    VERSION = 2
+except:
+    from astral import Astral
+    VERSION = 1
 
-global default_timezone
 global default_city_name
 
-default_timezone = 'CET'
 default_city_name = 'Amsterdam'
 
 
 class daylight(object):
 
     def __init__(self, city_name=default_city_name):
-        self._a = Astral()
-        self._a.solar_depression = 'civil'
-        self._city = self._a[city_name]
-        self._timezone = pytz.timezone(self._city.timezone)
+        if VERSION == 2:
+            self._city = lookup("Amsterdam", database())
+            self._sun = self.sun(datetime.now())
+        else:
+            self._a = Astral()
+            self._a.solar_depression = 'civil'
+            self._city = self._a[city_name]
+            self._timezone = pytz.timezone(self._city.timezone)
+
+
+    def sun(self, t=None):
+        if not t:
+            t = self.localtime()
+        if VERSION == 2:
+            return sun.sun(self._city.observer, t, tzinfo=self._city.timezone)
+        else:
+            return self._city.sun(t)
+
+    def localtime(self, t=None):
+        if not t:
+            t = datetime.now()
+        return self._city.tzinfo.localize(t)
 
     @property
-    def dawn(self, date=None):
-        if not date:
-            date = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=date)
-        return self.sun['dawn']
+    def version(self):
+        return VERSION
 
     @property
-    def next_dawn(self, date=None):
-        if not date:
-            date = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=date)
-        if (self.sun['dawn'] < date):
-            self.sun = self._city.sun(date=date+datetime.timedelta(days=1))
-        return self.sun['dawn']
+    def dawn(self):
+        return self.sun()['dawn']
 
     @property
-    def sunrise(self, date=None):
-        if not date:
-            date = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=date)
-        return self.sun['sunrise']
+    def next_dawn(self):
+        _sundawn = self.dawn
+        if (_sundawn < self.localtime()):
+            _sundawn = self.sun(self.localtime()+timedelta(days=1))['dawn']
+        return _sundawn
 
     @property
-    def noon(self, date=None):
-        self.sun = self._city.sun(date=date)
-        return self.sun['noon']
+    def sunrise(self):
+        return self.sun()['sunrise']
 
     @property
-    def sunset(self, date=None):
-        if not date:
-            date = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=date)
-        return self.sun['sunset']
+    def noon(self):
+        return self.sun()['noon']
 
     @property
-    def dusk(self, date=None):
-        if not date:
-            date = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=date)
-        return self.sun['dusk']
+    def sunset(self):
+        return self.sun()['sunset']
 
     @property
-    def timezone(self):
-        return self._timezone
+    def dusk(self):
+        return self.sun()['dusk']
 
-    def sun_rising(self, time: datetime.datetime = None):
+    def sun_rising(self, time: datetime = None):
         if not time:
-            time = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=time)
-        return (time > self.sun['dawn']) and (time < self.sun['sunrise'])
+            time = self.localtime()
+        _sun = self.sun(time)
+        return (time > _sun['dawn']) and (time < _sun['sunrise'])
 
-    def sun_up(self, time: datetime.datetime = None):
+    def sun_up(self, time: datetime = None):
         if not time:
-            time = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=time)
-        return (time > self.sun['sunrise']) and (time < self.sun['sunset'])
+            time = self.localtime()
+        _sun = self.sun(time)
+        return (time > _sun['sunrise']) and (time < _sun['sunset'])
 
-    def sun_shine(self, time: datetime.datetime = None):
+    def sun_shine(self, time: datetime = None):
         if not time:
-            time = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=time)
-        return (time > self.sun['dawn']) and (time < self.sun['dusk'])
+            time = self.localtime()
+        _sun = self.sun(time)
+        return (time > _sun['dawn']) and (time < _sun['dusk'])
 
-    def sun_setting(self, time: datetime.datetime = None):
+    def sun_setting(self, time: datetime = None):
         if not time:
-            time = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=time)
-        return (time > self.sun['sunset']) and (time < self.sun['dusk'])
+            time = self.localtime()
+        _sun = self.sun(time)
+        return (time > _sun['sunset']) and (time < _sun['dusk'])
 
-    def sun_down(self, time: datetime.datetime = None):
+    def sun_down(self, time: datetime = None):
         if not time:
-            time = datetime.datetime.now(self.timezone)
-        self.sun = self._city.sun(date=time)
-        return (time < self.sun['dawn']) or (time > self.sun['dusk'])
+            time = self.localtime()
+        _sun = self.sun(time)
+        return (time < _sun['dawn']) or (time > _sun['dusk'])
 
 
 def main():
     dl = daylight('Amsterdam')
-    nu = datetime.datetime.now(tz=dl.timezone)
+    nu = dl.localtime()
+    print('Version: %s' % str(dl.version))
     print('Now:     %s' % str(nu))
-    print('Timezone:%s' % str(dl.timezone))
     print('Dawn:    %s' % str(dl.dawn))
     print('nxtdawn: %s' % str(dl.next_dawn))
     print('Sunrise: %s' % str(dl.sunrise))
