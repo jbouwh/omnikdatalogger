@@ -1,16 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\.github",
     "\\.github\\workflows",
     "\\apps",
     "\\apps\\omnikdatalogger",
     "\\apps\\omnikdatalogger\\omnik",
     "\\apps\\omnikdatalogger\\omnik\\dsmr",
-    "\\apps\\omnikdatalogger\\omnik\\plugin_output",
+    "\\apps\\omnikdatalogger\\omnik\\plugin_localproxy",
+    "\\docker\\img",
     "\\scripts",
-    "\\scripts\\proxy"
+    "\\scripts\\ha_dsmr_test"
   ],
-  "SelectedNode": "\\scripts\\proxy\\omnikloggerproxy.py",
+  "SelectedNode": "\\apps\\omnikdatalogger\\omnik\\__init__.py",
   "PreviewInSolutionExplorer": false
 }
