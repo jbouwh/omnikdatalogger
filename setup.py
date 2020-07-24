@@ -23,6 +23,7 @@ install_requires = [
     'pytz>=2019.1',
     'paho-mqtt>=1.5.0',
     'dsmr-parser>=0.21',
+    'astral>=2.2'
     'omnikdataloggerproxy>=1.1.3'
 ]
 
