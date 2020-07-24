@@ -1,7 +1,7 @@
 .DEFAULT: help
 .PHONY: help build push login
 
-IMAGE_NAME=omnik-data-logger
+IMAGE_NAME=omnikdatalogger
 IMAGE_TAG?=latest
 DOCKER_USER?=$(shell whoami)
 DOCKER_PASS?=$(shell read -s -p "Docker password:"$$'\n' pwd; echo $$pwd)
