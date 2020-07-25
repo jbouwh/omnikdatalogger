@@ -21,7 +21,7 @@ login                          Login to Docker Hub
 The following command wil pull the `Docker` image, mount the `config.ini` and create the `Docker` container. Omnik PV data will be pushed to [PVOutput](https://pvoutput.org/) every 300 seconds (5 minutes).
 
 ```
-$ docker run --name omnikdatalogger -d -v ${PWD}/config.ini:/home/omnik/.omnik/config.ini jbouwh/omnikdatalogger --interval 360
+$ docker run --name omnikdatalogger -d -v ${PWD}/config.ini:/config.ini -p 10004:10004 jbouwh/omnikdatalogger
 ```
 
 I also added a `docker-compose.yml` that can be used.

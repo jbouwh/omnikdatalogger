@@ -65,10 +65,12 @@ usage: [python3] omniklogger.py [-h] [--config FILE] [--interval n] [-d]
 optional arguments:
   -h, --help     show this help message and exit
   --config FILE  path to configuration file
+  --data_config FILE  Path to data_fields.json configuration file
+  --persistant_cache_file FILE  Path to writable cache json file to store last power en total energy
   --interval n  execute every n seconds
   -d, --debug    debug mode
 ```
-
+> De default location for config using the commandline is `~/.omnik/config.ini` other parameters can also be set using the configuration file.
 ### Configuration using config.ini
 
 Example configuration

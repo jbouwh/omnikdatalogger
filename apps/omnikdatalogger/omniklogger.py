@@ -164,9 +164,9 @@ if __name__ == '__main__':
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
                         help='Path to configuration file', metavar="FILE")
     parser.add_argument('--data_config',
-                        help='Path to configuration file', metavar="FILE")
+                        help='Path to data_fields.json configuration file', metavar="FILE")
     parser.add_argument('--persistant_cache_file',
-                        help='Path to configuration file', metavar="FILE")
+                        help='Path to writable cache json file to store last power en total energy', metavar="FILE")
     parser.add_argument('--interval', type=int, help='Execute every n seconds')
 
     parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')

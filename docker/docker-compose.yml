@@ -5,7 +5,9 @@ services:
     build: .
     image: omnikdatalogger:latest
     volumes:
-      - "${PWD}/config.ini:/home/omnik/.omnik/config.ini"
+      - "${PWD}/config.ini:/config.ini"
+    expose:
+      - "10004"
     logging:
       driver: json-file
       
