@@ -24,6 +24,9 @@ The following command wil pull the `Docker` image, mount the `config.ini` and cr
 $ docker run --name omnikdatalogger -d -v ${PWD}/config.ini:/config.ini -p 10004:10004 jbouwh/omnikdatalogger
 ```
 
+If you want to access your P1 USB adapter for direct DSMR measurements you need to have acces to the USB port.
+Add `--device=/dev/ttyUSB0` as option to the docker run command (assuming this is the correct USB device)
+
 I also added a `docker-compose.yml` that can be used.
 
 So, doing exactly the same ... but using `docker-compose`:
