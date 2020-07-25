@@ -163,7 +163,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
                         help='Path to configuration file', metavar="FILE")
+    parser.add_argument('--data_config',
+                        help='Path to configuration file', metavar="FILE")
+    parser.add_argument('--persistant_cache_file',
+                        help='Path to configuration file', metavar="FILE")
     parser.add_argument('--interval', type=int, help='Execute every n seconds')
+
     parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
 
     args = parser.parse_args()
@@ -178,6 +183,10 @@ if __name__ == '__main__':
             ha_args['debug'] = args.debug
         if args.interval:
             ha_args['interval'] = args.interval
+        if args.data_config:
+            ha_args['data_config'] = args.data_config
+        if args.persistant_cache_file:
+            ha_args['persistant_cache_file'] = args.persistant_cache_file
         c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=ha_args)
         c.read([args.config], encoding='utf-8')
         c.configfile = args.config

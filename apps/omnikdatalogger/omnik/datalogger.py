@@ -41,7 +41,7 @@ class DataLogger(object):
             sys.exit(1)
         # init energy cache
         # total_energy_cache.json
-        self.persistant_cache_file = self.config.get('default', 'persistant_cache_file', fallback='persistant_cache.json')
+        self.persistant_cache_file = self.config.get('default', 'persistant_cache_file', fallback='./persistant_cache.json')
         self._load_persistant_cache()
         # read data_fields
         try:
