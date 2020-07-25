@@ -10,4 +10,4 @@ USER omnik
 
 ENTRYPOINT ["omniklogger.py"]
 
-CMD ["--config /config.ini"]
+CMD ["--config", "/config.ini"]
