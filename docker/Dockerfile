@@ -8,6 +8,8 @@ RUN pip3 install -r requirements.txt --upgrade && \
 
 USER omnik
 
+EXPOSE 10004
+
 ENTRYPOINT ["omniklogger.py"]
 
 CMD ["--config", "/config.ini"]
