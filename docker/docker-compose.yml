@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  omnik:
+  omnikdatalogger:
     build: .
     image: omnikdatalogger:latest
     volumes:

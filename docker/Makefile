@@ -3,7 +3,7 @@
 
 IMAGE_NAME=omnikdatalogger
 IMAGE_TAG?=latest
-DOCKER_USER?=$(shell whoami)
+DOCKER_USER?=$(shell read -s -p "Docker username:"$$'\n' usr; echo $$usr)
 DOCKER_PASS?=$(shell read -s -p "Docker password:"$$'\n' pwd; echo $$pwd)
 
 help: ## This help.
