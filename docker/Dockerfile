@@ -1,6 +1,6 @@
 FROM python:3.8.0-alpine
 
-WORKDIR /app
+WORKDIR /home/omnik
 ADD requirements.txt /app
 
 RUN pip3 install -r requirements.txt --upgrade && \
@@ -9,3 +9,5 @@ RUN pip3 install -r requirements.txt --upgrade && \
 USER omnik
 
 ENTRYPOINT ["omniklogger.py"]
+
+CMD ["--config /config.ini"]
