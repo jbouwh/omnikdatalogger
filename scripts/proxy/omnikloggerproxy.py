@@ -317,6 +317,7 @@ class mqtt(object):
 def main(args):
     global stopflag
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     proxy = ProxyServer(args)
     proxy.start()
     try:
