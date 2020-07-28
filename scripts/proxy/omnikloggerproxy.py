@@ -25,7 +25,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -320,7 +320,7 @@ def main(args):
     proxy = ProxyServer(args)
     proxy.start()
     try:
-        while not stopflag and proxy.isAlive():
+        while not stopflag and proxy.is_alive():
             proxy.join(1)
     except KeyboardInterrupt:
         pass
@@ -334,20 +334,20 @@ if __name__ == '__main__':
     home = os.path.expanduser('~')
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--serialnumber', default=None, nargs='+', required=True,
-                        help='The serial number(s) of your inverter')
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
                         help='The config file')
-    parser.add_argument('--loglevel', default='INFO',
+    parser.add_argument('--serialnumber', default=None, nargs='+',
+                        help='The serial number(s) of your inverter (required)')
+    parser.add_argument('--loglevel', default=None,
                         help='The basic loglevel [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
-    parser.add_argument('--listenaddress', default=listenaddress,
+    parser.add_argument('--listenaddress', default=None,
                         help='A local available address to listen to')
-    parser.add_argument('--listenport', default=listenport, type=int,
+    parser.add_argument('--listenport', default=None, type=int,
                         help='The local port to listen to')
     parser.add_argument('--omniklogger', default=None,
                         help='Forward to an address omnik/SolarmanPV datalogger server listens to. '
                              'Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
-    parser.add_argument('--omnikloggerport', default=omnikloggerdestport,
+    parser.add_argument('--omnikloggerport', default=None, type=int,
                         help='The port the omnik/SolarmanPV datalogger server listens to')
     parser.add_argument('--mqtt_host', default=None,
                         help='The mqtt host to forward processed data to. Config overrides.')
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     parser.add_argument('--mqtt_retain', default=True, type=bool,
                         help='The mqtt data message retains. Config overrides.')
     parser.add_argument('--mqtt_discovery_prefix', default='homeassistant',
-                        help='The mqtt topoc prefix (used for MQTT auto discovery). Config overrides.')
+                        help='The mqtt topic prefix (used for MQTT auto discovery). Config overrides.')
     parser.add_argument('--mqtt_client_name_prefix', default='ha-mqtt-omnikloggerproxy',
                         help='The port the omnik/SolarmanPV datalogger server listens to. Config overrides.')
     parser.add_argument('--mqtt_username', default=None,
@@ -376,7 +376,6 @@ if __name__ == '__main__':
         "ERROR": logging.ERROR,
         "CRITICAL": logging.CRITICAL
         }
-    logging.basicConfig(level=loglevel[args.loglevel], format=FORMAT)
 
     if args.config:
         c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
@@ -391,4 +390,21 @@ if __name__ == '__main__':
         args.mqtt_device_name = c.get('output.mqtt', 'device_name', fallback=args.mqtt_device_name)
         args.logger_sensor_name = c.get('output.mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
 
+        # TODO: Try to get from config from no arguments are given. Handle required parameters and defaults
+        if not args.serialnumber:
+            args.serialnumber = c.getlist('proxy', 'serialnumber', fallback=[])
+        if not args.loglevel:
+            args.loglevel = c.get('proxy', 'loglevel', fallback='INFO')
+        if not args.listenaddress:
+            args.listenaddress = c.get('proxy', 'listenaddress', fallback=listenaddress)
+        if not args.listenport:
+            args.listenport = c.getint('proxy', 'listenport', fallback=listenport)
+        if not args.omniklogger:
+            args.omniklogger = c.get('proxy', 'omniklogger', fallback=omnikloggerpublicaddress)
+        if not args.omnikloggerport:
+            args.omnikloggerport = c.getint('proxy', 'omnikloggerport', fallback=omnikloggerdestport)
+    if not args.serialnumber:
+        parser.print_help()
+        os.sys.exit(1)
+    logging.basicConfig(level=loglevel[args.loglevel], format=FORMAT)
     main(args)

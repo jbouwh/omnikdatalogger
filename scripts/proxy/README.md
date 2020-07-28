@@ -29,12 +29,56 @@ usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
                            [--mqtt_logger_sensor_name MQTT_LOGGER_SENSOR_NAME]
 ```
 ### Configuration file
-The MQTT parameters will fallback to the `config.ini` settings in the section [output.mqtt]. Specify a configfile using the --config option.
+The proxy parameters will fallback to the `config.ini` in the section `[proxy]`. Specify a configfile using the --config option.
+This way it easier tot run omnikdatalogger proxy as a docker container.
+```ini
+key | optional | type | default | description
+-- | --| -- | -- | --
+`serialnumber` | False | list | [] | List of serialnumbers of the inverters supported
+`loglevel` | True | string | `INFO` | The basic loglevel [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+`listenaddress` | True | string | `127.0.0.1` | A local available address to listen to
+`listenport` | True | int | `10004` | The local port to listen to
+`omniklogger` | True | string | `176.58.117.69` | Forward to an address omnik/SolarmanPV datalogger server listens to. Set this to `176.58.117.69` as final forwarder.
+`listenport` | True | int | `10004` | The port the omnik/SolarmanPV datalogger server listens to.
+```
+The MQTT parameters will fallback to the `config.ini` settings in the section `[output.mqtt]`. Specify a configfile using the --config option.
 For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt-settings-under-outputmqtt-in-appsyaml-or-outputmqtt-in-configini-configuration-options)
 
-## Using the proxy script with Synology
+There is an example file included `config.ini_example.txt`.
 
-### Prearing your Synology to run run omnikdatalogger the proxy script (manual install)
+## Using Docker
+This directory contains all artefacts to run the `omnikdatalogger` as a `Docker` container.
+
+Use the included `Makefile` to build and push the `Docker` image yourself.
+
+```
+$ make help
+help                           This help.
+build                          Build the Docker image. Use IMAGE_TAG to specify tag (default:latest)
+push                           Tag and push to Docker Hub
+login                          Login to Docker Hub
+```
+
+**PS**: this is already advanced use ... I already build and pushed the image to [Docker Hub](https://hub.docker.com/r/jbouwh/omnikdataloggerproxy).
+
+### Run the docker container
+
+The following command will pull the `Docker` image, mount the `config.ini` and create the `Docker` container.
+
+```
+$ docker run --name omnikdataloggerproxy -d -v ${PWD}/config.ini:/config.ini -p 10004:10004 --name omnikdataloggerproxy jbouwh/omnikdataloggerproxy:latest
+```
+
+I also added a `docker-compose.yml` that can be used. Run it at the folder where your `config.ini` file resites.
+
+So, doing exactly the same ... but using `docker-compose`:
+
+```
+$ docker-compose -f /path/to/docker-compose.yml up -d
+```
+
+
+## Prearing your Synology to run omnikdataloggerproxy.py script (manual install)
 
 * Make sure you have shell access (ssh or telnet).
 * Install pip: `curl -k https://bootstrap.pypa.io/get-pip.py | python3` See: (https://stackoverflow.com/questions/47649902/installing-pip-on-a-dsm-synology)
@@ -53,7 +97,7 @@ Now take the following steps:
 
 You can forward the logger trafic to the omnik servers, but if you rerouted yhe traffic for 176.58.117.69 you need to forward to a linux server elswere in the internet.
 
-### Running omnikdataloggerproxy as a service on a Debian based system
+## Running omnikdataloggerproxy as a service on a Debian based system
 
 You can find the following sample config at `/usr/local/share/omnikdataloggerproxy/omnikdatalogggerproxy.config` after installing `pip3 install omnikdataloggerproxy` as root.
 
