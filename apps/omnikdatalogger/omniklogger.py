@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import os
+import signal
 import argparse
 import configparser
 import pathlib
@@ -22,6 +23,15 @@ logger = logging.getLogger(__name__)
 # customize config parser with dict based lookup for AppDaemon and command line options
 # has_option and get function have been adapted
 ha_args = {}
+
+global stopflag
+
+
+# Generic signal handler
+def signal_handler(signal, frame):
+    global stopflag
+    logging.debug("Signal {:0d} received. Setting stopflag.".format(signal))
+    stopflag = True
 
 
 class ha_ConfigParser(configparser.ConfigParser):
@@ -121,6 +131,9 @@ class HA_OmnikDataLogger(hass.Hass):
 
 # Initialization from the commandline
 def main(c: ha_ConfigParser, hass_api=None):
+    global stopflag
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     # Enabled debugging if the flag is set
     if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)
@@ -138,12 +151,13 @@ def main(c: ha_ConfigParser, hass_api=None):
         else:
             # loop is for commandline execution only
             try:
-                while True:
+                while not stopflag:
                     time.sleep(0.5)
             except KeyboardInterrupt:
-                hybridlogger.ha_log(logger, hass_api, "INFO", '> stopping all threads')
-                rt.stop()
-                datalogger.terminate()
+                pass
+            hybridlogger.ha_log(logger, hass_api, "INFO", '> stopping all threads')
+            rt.stop()
+            datalogger.terminate()
 
     else:
         # running only once
@@ -158,6 +172,7 @@ def set_data_config_path(config):
 
 
 if __name__ == '__main__':
+    stopflag = False
     home = os.path.expanduser('~')
     parser = argparse.ArgumentParser()
 

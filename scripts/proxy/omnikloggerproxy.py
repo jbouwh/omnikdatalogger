@@ -25,7 +25,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.5'
+__version__ = '1.1.6'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
