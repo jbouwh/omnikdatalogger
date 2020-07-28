@@ -25,7 +25,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -124,7 +124,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
             self.fwthread = tcpforward()
             self.fwthread.forward(msg)
             self.fwthread.join(60)
-            if self.fwthread.isAlive():
+            if self.fwthread.is_alive():
                 # Kill the thread if it is still blocking
                 logging.warning("Waiting for forward connection takes a long time...")
                 self.fwthread.join()
