@@ -31,7 +31,7 @@ usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
 ### Configuration file
 The proxy parameters will fallback to the `config.ini` in the section `[proxy]`. Specify a configfile using the --config option.
 This way it easier tot run omnikdatalogger proxy as a docker container.
-```ini
+
 key | optional | type | default | description
 -- | --| -- | -- | --
 `serialnumber` | False | list | [] | List of serialnumbers of the inverters supported
@@ -40,7 +40,7 @@ key | optional | type | default | description
 `listenport` | True | int | `10004` | The local port to listen to
 `omniklogger` | True | string | `176.58.117.69` | Forward to an address omnik/SolarmanPV datalogger server listens to. Set this to `176.58.117.69` as final forwarder.
 `listenport` | True | int | `10004` | The port the omnik/SolarmanPV datalogger server listens to.
-```
+
 The MQTT parameters will fallback to the `config.ini` settings in the section `[output.mqtt]`. Specify a configfile using the --config option.
 For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt-settings-under-outputmqtt-in-appsyaml-or-outputmqtt-in-configini-configuration-options)
 
