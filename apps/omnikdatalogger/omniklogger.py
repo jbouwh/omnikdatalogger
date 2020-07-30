@@ -7,6 +7,7 @@ import configparser
 import pathlib
 import time
 import logging
+import yaml
 from omnik.ha_logger import hybridlogger
 from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
@@ -105,7 +106,7 @@ class HA_OmnikDataLogger(hass.Hass):
                 c.configfile = self.configfile
             except Exception as e:
                 hybridlogger.ha_log(logger, self, "ERROR",
-                                    f"Error parsing 'config.ini' from {self.configfile}. No valid configuration file. {e}.")
+                                    f"Error parsing config.ini '{self.configfile}'. No valid configuration file. {e}.")
                 c.configfile = None
         else:
             c = ha_ConfigParser(ha_args=self.args)
@@ -171,28 +172,59 @@ def set_data_config_path(config):
                                      "/share/omnikdatalogger/data_fields.json"
 
 
-if __name__ == '__main__':
-    stopflag = False
-    home = os.path.expanduser('~')
-    parser = argparse.ArgumentParser()
+def get_yaml_settings(args):
+    with open(args.settings, 'r') as stream:
+        try:
+            settings = yaml.safe_load(stream)
+            for key in settings:
+                index = key
+                break
+            logging.info("Using section '{1}' from config file '{0}'".
+                         format(args.settings, index))
+            return settings[index]
+        except yaml.YAMLError as exc:
+            logging.error("YAML config file '{0}' could not be parsed. Error: {1}".
+                          format(args.settings, exc))
+            os.sys.exit(1)
 
-    parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
-                        help='Path to configuration file', metavar="FILE")
-    parser.add_argument('--data_config',
-                        help='Path to data_fields.json configuration file', metavar="FILE")
-    parser.add_argument('--persistant_cache_file',
-                        help='Path to writable cache json file to store last power en total energy', metavar="FILE")
-    parser.add_argument('--interval', type=int, help='Execute every n seconds')
 
-    parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
-
-    args = parser.parse_args()
-
-    if not os.path.isfile(args.config):
-        logging.critical("Unable to find config at '{}'".format(args.config))
-        parser.print_help()
+def setup_config_parser(args, settings):
+    if not settings:
+        logging.error("Config files '{0}' has no valid index".
+                      format(args.settings))
         os.sys.exit(1)
-    if args.config:
+    elif 'config' in settings:
+        try:
+            configfile = settings['config']
+            c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=settings)
+            c.read(configfile, encoding='utf-8')
+            c.configfile = configfile
+            logging.info("Using config file '{0}' from the 'config' key of YAML file {1}".
+                         format(configfile, args.settings))
+        except Exception as e:
+            logging.error(f"Error parsing config.ini '{configfile}'. No valid configuration file. {e}.")
+            os.sys.exit(1)
+    else:
+        try:
+            c = ha_ConfigParser(ha_args=settings)
+            c.configfile = None
+        except Exception as e:
+            logging.error("Config parser problem '{0}'".
+                          format(e))
+            os.sys.exit(1)
+
+
+def get_config_from_files(args):
+    c = None
+    if os.path.isfile(args.settings):
+        if os.path.isfile(args.config):
+            logging.warning("Multiple config files found at '{0}' or '{1}', "
+                            "using '{0}', ignoring config from command line option '{1}'.'".
+                            format(args.settings, args.config))
+
+        settings = get_yaml_settings(args)
+        c = setup_config_parser(args, settings)
+    if os.path.isfile(args.config) and not os.path.isfile(args.settings):
         ha_args['config'] = args.config
         if args.debug:
             ha_args['debug'] = args.debug
@@ -205,5 +237,38 @@ if __name__ == '__main__':
         c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=ha_args)
         c.read([args.config], encoding='utf-8')
         c.configfile = args.config
+    if not c:
+        logging.error("No valid configuration found. Exiting!")
+        os.sys.exit(1)
+    return c
 
-    main(c, hass_api=None)
+
+if __name__ == '__main__':
+    stopflag = False
+    home = os.path.expanduser('~')
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--settings', default=os.path.join(home, '.omnik/config.yaml'),
+                        help='Path to .yaml configuration file', metavar="FILE")
+    parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
+                        help='Path to configuration file (ini) (DECREPATED!)', metavar="FILE")
+    parser.add_argument('--data_config',
+                        help='Path to data_fields.json configuration file', metavar="FILE")
+    parser.add_argument('--persistant_cache_file',
+                        help='Path to writable cache json file to store last power en total energy', metavar="FILE")
+    parser.add_argument('--interval', type=int, help='Execute every n seconds')
+
+    parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
+
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.settings) and not os.path.isfile(args.config):
+        logging.critical("Unable to find config at '{0}' or {1}".
+                         format(args.settings, args.config))
+        parser.print_help()
+        os.sys.exit(1)
+    elif os.path.isfile(args.config) and os.path.isfile(args.settings):
+        logging.warning("The use of a classig config.ini is decrepated!"
+                        "Use the --settings option. See documentation.")
+
+    main(get_config_from_files(args), hass_api=None)

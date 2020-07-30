@@ -206,13 +206,13 @@ class DataLogger(object):
 
     def _init_output_plugins(self):
         self.plugins = self.config.getlist('plugins', 'output', fallback=[''])
-        if self.plugins[0]:
+        if self.plugins and self.plugins[0]:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Plugins enabled: {self.plugins}.")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "WARNING", "No output plugins configured! Monitoring only.")
         # Import output plugins
-        if self.plugins[0]:
+        if self.plugins and self.plugins[0]:
             Plugin.logger = self.logger
             Plugin.config = self.config
             Plugin.hass_api = self.hass_api
