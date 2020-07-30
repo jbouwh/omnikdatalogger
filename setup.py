@@ -24,7 +24,7 @@ install_requires = [
     'paho-mqtt>=1.5.0',
     'dsmr-parser>=0.21',
     'astral>=1.10.1',
-    'pyyaml>=5.2',
+    'pyyaml>=5.1',
     'omnikdataloggerproxy>=1.1.3'
 ]
 
