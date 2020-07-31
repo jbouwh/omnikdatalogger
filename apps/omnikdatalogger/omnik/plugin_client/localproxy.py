@@ -29,7 +29,7 @@ class LocalProxy(Client):
 
         # Get plant_id_list
         self.plant_id_list = self.config.getlist('client.localproxy', 'plant_id_list', fallback=[''])
-        if self.plant_id_list[0] == '':
+        if not self.plant_id_list or self.plant_id_list[0] == '':
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", "plant_id_list was not specified for client localproxy")
             raise Exception('plant_id_list was not specified')
         # Import localproxy plugins

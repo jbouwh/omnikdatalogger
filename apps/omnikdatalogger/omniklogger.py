@@ -214,6 +214,7 @@ def setup_config_parser(args, settings):
             os.sys.exit(1)
     return c
 
+
 def get_config_from_files(args):
     c = None
     if os.path.isfile(args.settings):
@@ -267,8 +268,8 @@ if __name__ == '__main__':
                          format(args.settings, args.config))
         parser.print_help()
         os.sys.exit(1)
-    elif os.path.isfile(args.config) and os.path.isfile(args.settings):
-        logging.warning("The use of a classig config.ini is decrepated!"
+    elif os.path.isfile(args.config):
+        logging.warning("The use of a classig config.ini is decrepated! "
                         "Use the --settings option. See documentation.")
 
     main(get_config_from_files(args), hass_api=None)
