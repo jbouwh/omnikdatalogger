@@ -31,6 +31,7 @@ usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
 ### Configuration file
 The proxy parameters will fallback to the `config.ini` in the section `[proxy]`. Specify a configfile using the --config option.
 This way it easier tot run omnikdatalogger proxy as a docker container.
+> NOTE: The use of config.ini will be decrepated and be replaces with config.yaml in the future. An update will follow shortly.
 
 key | optional | type | default | description
 -- | --| -- | -- | --
