@@ -176,9 +176,12 @@ def get_yaml_settings(args):
     with open(args.settings, 'r') as stream:
         try:
             settings = yaml.safe_load(stream)
-            for key in settings:
-                index = key
-                break
+            if args.section in settings:
+                index = args.section
+            else:
+                for key in settings:
+                    index = key
+                    break
             logging.info("Using section '{1}' from config file '{0}'".
                          format(args.settings, index))
             return settings[index]
@@ -251,6 +254,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--settings', default=os.path.join(home, '.omnik/config.yaml'),
                         help='Path to .yaml configuration file', metavar="FILE")
+    parser.add_argument('--section', default=None,
+                        help='Section to .yaml configuration file to use. Defaults to the first section found.')
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
                         help='Path to configuration file (ini) (DECREPATED!)', metavar="FILE")
     parser.add_argument('--data_config',

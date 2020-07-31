@@ -6,39 +6,6 @@
 - [Omnik data logger Wiki](https://github.com/jbouwh/omnikdatalogger/wiki)
 - [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
 
-## Introduction
-The original version of this is a Python3 based PV data logger with plugin support, is specifically build for the by Pascal Prins Omniksol-5k-TL2 but have been tested with a
-first generation inverter (Omniksol-3K-TL) as well. This datalogger can use data collected at the [omnikportal](https://www.omnikportal.com/) or at [solarmanpv](https://www.solarmanpv.com/portal)
-to fetch data pushed by the inverter I have adapted this project and tried it in combination with my Omniksol-3k-TL. This model datalogger cannot be accessed directly for data collection, so I started using the portal api.
-Support has been added for MQTT and the integration with Home Assistent using the AppDaemon addon.
-Now the new version it also makes possible to process intercepted logger messages and integrate the processing with Home Assistant (`localproxy` client). Polling the inverter directly is also possible
-using the tcpclient, thanks to Han Lubach this method is working now as expected.
-Special thanks to Wouter van der Zwan for his code (https://github.com/Woutrrr/Omnik-Data-Logger) and t3kpunk (https://github.com/t3kpunk/Omniksol-PV-Logger)
-Also special thanks to [lepirlouit](https://github.com/lepirlouit/omnik-data-logger) for creating the basis for the new influxdb output plugin.
-The latest version supports integration of enery logging conform the Dutch Smart Meter Requirements (DSRM). These meters can be connected using the P1 port of your smart meter.
-Omnik data logger can either read the port using a USB-based serial ports or over tcp, using Nigel Dokters DSMR parser (https://github.com/ndokter/dsmr_parser). The integration gives live output at mqtt an influx db
-and calculates energy consumption against the solar data for the integration on pvoutput.org.
-
-## How can I use Omnik Data Logger
-You can find severals apps for reading out Omnik solar inverters directly. But many inverters are older and cannot be read out directly in an easy way. If your solar system was connected to (https://www.omnikportal.com) then you can now integrate easy with Home Assistant and pvoutput.org.
-Since the omnikportal is having outages many times, an alternative would be welcome. There is an alternative portal at [SolarMAN](https://www.solarmanpv.com/portal) where you can login with your existing account and all of your data is being preserved.
-But as you could read in the introduction you can now also intercept the data traffic of your Omnik Wi-Fi module and optional still forward. 
-The code has a pluggable client module and two new modules (`localproxy` and `tcpclient`) have been developed.
-The existing client modules `solarmanpv` and `omnikportal` now have been expanded with two new modules (`localproxy` and `tcpclient`).
-Make sure to update your configuration and configure the `client` key at the `[plugins]` section. The new module `localproxy` supports local captured logging. Access is not required, but you need accces to your router to add a static route to reroute the loggers traffic.
-This module disables logging to omnikportal or solarmanpv and captures the data in your local network by simulating the backend.
-
-Check my [script `omnikloggerproxy.py` and documentation](/jbouwh/omnikdatalogger/tree/master/scripts/proxy) for the interception of the inverter messages.
-This script makes it possible to intercept and forward at the same time. This meas you can still make use of the classic Omnik portal or Solarman PV portal.
-Forwaring and intercepting requires a server else where out of the intercepted routing, to be still be able to route to the logging servers as log thes are supported.
-
-The Home Assistant output plugin integration requires the MQTT integration is set up. The application uses MQTT auto discovery, so the devices and entities will show up automatically at the MQTT integration.
-If you want to use the [pvoutput](https://pvoutput.org) output plugin, then you need to create an account first. Temperature can also be logged (a [openweathermap](https://openweathermap.org) account is needed).
-If you capture using the localproxy or tcpclient client you can also log the inverters temperature and net voltage.
-The new influxdb output plugin can now be used as well.
-
-My inverter presents updates approximately updates every 300 seconds. Fore times clients the interval defaults to 360 seconds counts from the last valid update time read from the portal. This way you will not miss any updates.
-
 ## Installation
 The application can be installed:
 -   Install with the Home Assistant Community Store [HACS](https://hacs.xyz/).
@@ -65,6 +32,7 @@ usage: [python3] omniklogger.py [-h] [--config FILE] [--interval n] [-d]
 optional arguments:
   -h, --help     show this help message and exit
   --settings FILE  Path to .yaml configuration file
+  --section  Section to .yaml configuration file to use. Defaults to the first section found.
   --config FILE  path to configuration file (ini) (DECREPATED!)
   --data_config FILE  Path to data_fields.json configuration file
   --persistant_cache_file FILE  Path to writable cache json file to store last power en total energy

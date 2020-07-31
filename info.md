@@ -7,12 +7,7 @@
 - [Omnik data logger Website](https://jbsoft.nl/site/omnik-datalogger/)
 
 ## Configuration
-The application can be configured using:
--   Commandline (limited options)
--   Configuration file (config.ini)
--   apps.yaml configuration file (with AppDaemon)
-
-Using apps.yaml there is no need for config.ini.
+We are using AppDaemon's `apps.yaml` to store our config.
 
 See [README.md](https://github.com/jbouwh/omnikdatalogger/blob/master/README.md) for a more detailed description.
 
