@@ -212,7 +212,7 @@ def setup_config_parser(args, settings):
             logging.error("Config parser problem '{0}'".
                           format(e))
             os.sys.exit(1)
-
+    return c
 
 def get_config_from_files(args):
     c = None

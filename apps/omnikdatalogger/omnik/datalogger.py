@@ -222,7 +222,7 @@ class DataLogger(object):
 
     def _init_dsmr(self):
         terminals = self.config.getlist('dsmr', 'terminals', fallback=[])
-        if terminals[0]:
+        if terminals and terminals[0]:
             self.dsmr = DSRM()
             self.dsmr.config = self.config
             self.dsmr.logger = self.logger

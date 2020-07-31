@@ -12,4 +12,4 @@ EXPOSE 10004
 
 ENTRYPOINT ["omniklogger.py"]
 
-CMD ["--config", "/config.ini", "--persistant_cache_file", "/home/omnik/persistant_cache.json"]
+CMD ["--config", "/config.ini","--settings", "/config.yaml", "--persistant_cache_file", "/home/omnik/persistant_cache.json"]
