@@ -99,8 +99,8 @@ The base script is located at:
 
 Next step is to configure AppDaemon to load an instance of the datalogger. It is possible to make multiple instances if you have more omnik accounts.
 
-This configuration is placed in the file: `/config/appdaemon/apps/apps.yaml`. The configuration in apps.yaml is mandantory to the config.ini file if that is used, so it is possible to split the configuration.
-#### Example of `apps.yaml`:
+This configuration is placed in the file: `/config/appdaemon/apps/apps.yaml`. The configuration in config.yaml/apps.yaml is mandantory to the config.ini file if that is used, so it is possible to split the configuration.
+#### Example of `config.yaml`/`apps.yaml`:
 
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
@@ -325,7 +325,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `module` | False | string | _(none)_ | Should be the name of the base script `omniklogger`. A path should not be configured. AppDaemon wil find the module automatically.
 `class` | False | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
-`config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required when using the command line. A sample config.ini [can be found here](/jbouwh/omnikdatalogger#configuration-using-configini)
+`config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required only when using the command line. It is prefered then to use a yaml based config file. Using an config.ini file is decrepated but still possible for now. A sample config.ini [can be found here](/jbouwh/omnikdatalogger#configuration-using-configini)
 
 #### General settings of `apps.yaml` or `config.ini`
 key | optional | type | default | description
