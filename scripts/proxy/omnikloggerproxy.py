@@ -40,6 +40,7 @@ INVERTER_MAX_IDLE_TIME = 6
 global stopflag
 logger = logging.getLogger(__name__)
 
+
 # Generic signal handler
 def signal_handler(signal, frame):
     global stopflag
@@ -342,11 +343,11 @@ def get_yaml_settings(args):
                     index = key
                     break
             logger.info("Using section '{1}' from config file '{0}'".
-                         format(args.settings, index))
+                        format(args.settings, index))
             return settings[index]
         except yaml.YAMLError as exc:
             logger.error("YAML config file '{0}' could not be parsed. Error: {1}".
-                          format(args.settings, exc))
+                         format(args.settings, exc))
             os.sys.exit(1)
 
 
@@ -418,12 +419,15 @@ if __name__ == '__main__':
         args.mqtt_host = get_yaml_setting(settings, 'output.mqtt', 'host', args.mqtt_host)
         args.mqtt_port = get_yaml_setting(settings, 'output.mqtt', 'port', args.mqtt_port)
         args.mqtt_retain = get_yaml_setting(settings, 'output.mqtt', 'retain', args.mqtt_retain)
-        args.mqtt_discovery_prefix = get_yaml_setting(settings, 'output.mqtt', 'discovery_prefix', args.mqtt_discovery_prefix)
-        args.mqtt_client_name_prefix = get_yaml_setting(settings, 'output.mqtt', 'client_name_prefix', args.mqtt_client_name_prefix)
+        args.mqtt_discovery_prefix = get_yaml_setting(settings, 'output.mqtt',
+                                                      'discovery_prefix', args.mqtt_discovery_prefix)
+        args.mqtt_client_name_prefix = get_yaml_setting(settings, 'output.mqtt',
+                                                        'client_name_prefix', args.mqtt_client_name_prefix)
         args.mqtt_username = get_yaml_setting(settings, 'output.mqtt', 'username', args.mqtt_username)
         args.mqtt_password = get_yaml_setting(settings, 'output.mqtt', 'password', args.mqtt_password)
         args.mqtt_device_name = get_yaml_setting(settings, 'output.mqtt', 'device_name', args.mqtt_device_name)
-        args.mqtt_logger_sensor_name = get_yaml_setting(settings, 'output.mqtt', 'logger_sensor_name', args.mqtt_logger_sensor_name)
+        args.mqtt_logger_sensor_name = get_yaml_setting(settings, 'output.mqtt',
+                                                        'logger_sensor_name', args.mqtt_logger_sensor_name)
         args.serialnumber = get_yaml_setting(settings, 'proxy', 'serialnumber', args.serialnumber)
         args.loglevel = get_yaml_setting(settings, 'proxy', 'loglevel', args.loglevel)
         args.listenaddress = get_yaml_setting(settings, 'proxy', 'listenaddress', args.listenaddress)
