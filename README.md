@@ -325,7 +325,7 @@ key | optional | type | default | description
 -- | --| -- | -- | --
 `module` | False | string | _(none)_ | Should be the name of the base script `omniklogger`. A path should not be configured. AppDaemon wil find the module automatically.
 `class` | False | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.
-`config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required only when using the command line. It is prefered then to use a yaml based config file. Using an config.ini file is decrepated but still possible for now. A sample config.ini [can be found here](/jbouwh/omnikdatalogger#configuration-using-configini)
+`config` | True | string | _(none)_ | File path to the config.ini configuration file. The use of a config file is required only when using the command line. It is prefered then to use a yaml based config file. Using an config.ini file is decrepated but still possible for now. A sample config.ini [can be found here](#configuration-using-configini)
 
 #### General settings of `apps.yaml` or `config.ini`
 key | optional | type | default | description
