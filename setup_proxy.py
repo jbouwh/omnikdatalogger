@@ -18,6 +18,7 @@ with open("scripts/proxy/README.md", "r", encoding="UTF-8") as fh:
 
 install_requires = [
     'configparser>=3.7.4',
+    'pyyaml>=5.1',
     'requests>=2.21.0',
     'cachetools>=3.1.1',
     'paho-mqtt>=1.5.0',

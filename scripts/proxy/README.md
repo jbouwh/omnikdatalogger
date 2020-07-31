@@ -14,7 +14,10 @@ The supporting files are installed at the folder */usr/local/share/omnikdatalogg
 ### Command line
 ```
 usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
-                           [--config CONFIG] [--loglevel LOGLEVEL]
+                           [--config FILE  Path to .yaml configuration file]
+                           [--section  Section to .yaml configuration file to use. Defaults to the first section found.]
+                           [--config FILE  Path to configuration file (ini) (DECREPATED!)]
+                           [--loglevel LOGLEVEL]
                            [--listenaddress LISTENADDRESS]
                            [--listenport LISTENPORT]
                            [--omniklogger OMNIKLOGGER]
@@ -31,7 +34,7 @@ usage: omnikloggerproxy.py [-h] --serialnumber SERIALNUMBER [SERIALNUMBER ...]
 ### Configuration file
 The proxy parameters will fallback to the `config.ini` in the section `[proxy]`. Specify a configfile using the --config option.
 This way it easier tot run omnikdatalogger proxy as a docker container.
-> NOTE: The use of config.ini will be decrepated and be replaces with config.yaml in the future. An update will follow shortly.
+> NOTE: The use of config.ini will be decrepated and config.yaml replaces config.ini.
 
 key | optional | type | default | description
 -- | --| -- | -- | --
@@ -42,10 +45,10 @@ key | optional | type | default | description
 `omniklogger` | True | string | `176.58.117.69` | Forward to an address omnik/SolarmanPV datalogger server listens to. Set this to `176.58.117.69` as final forwarder.
 `listenport` | True | int | `10004` | The port the omnik/SolarmanPV datalogger server listens to.
 
-The MQTT parameters will fallback to the `config.ini` settings in the section `[output.mqtt]`. Specify a configfile using the --config option.
+Comfig file settings will overrule the command line settings. The MQTT parameters will fallback to the settings in the section `output.mqtt:`. Specify a config file using the --settings (or --config) option.
 For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt-settings-under-outputmqtt-in-appsyaml-or-outputmqtt-in-configini-configuration-options)
 
-There is an example file included `config.ini_example.txt`.
+There are example config files included [`config.yaml_example.txt`]https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.yaml_example.txt) and [`config.ini_example.txt`](https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.ini_example.txt).
 
 ## Using Docker
 This directory contains all artefacts to run the `omnikdataloggerproxy` as a `Docker` container.

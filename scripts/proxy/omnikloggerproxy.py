@@ -14,6 +14,7 @@ import socket
 import socketserver
 import argparse
 import configparser
+import yaml
 import threading
 import signal
 import json
@@ -25,7 +26,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.1.6'
+__version__ = '1.2.0'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -37,12 +38,12 @@ CHECK_STATUS_INTERVAL = 60
 INVERTER_MAX_IDLE_TIME = 6
 
 global stopflag
-
+logger = logging.getLogger(__name__)
 
 # Generic signal handler
 def signal_handler(signal, frame):
     global stopflag
-    logging.debug("Signal {:0d} received. Setting stopflag.".format(signal))
+    logger.debug("Signal {:0d} received. Setting stopflag.".format(signal))
     stopflag = True
 
 
@@ -51,7 +52,7 @@ class ProxyServer(threading.Thread):
     def __init__(self, args=[], kwargs={}):
         threading.Thread.__init__(self)
         if args.mqtt_host:
-            logging.info('Enabling MQTT forward to {0}'.format(args.mqtt_host))
+            logger.info('Enabling MQTT forward to {0}'.format(args.mqtt_host))
             RequestHandler.mqttfw = mqtt(args)
             # Check every 60 sec if there is a valid update status aged less than 30 minutes
             self.statustimer = threading.Timer(CHECK_STATUS_INTERVAL, self.check_status)
@@ -80,7 +81,7 @@ class ProxyServer(threading.Thread):
 
     def run(self):
         # Try to run TCP server
-        logging.info('Start in Omnik proxy server. Listening to {0}:{1}'.format(args.listenaddress, args.listenport))
+        logger.info('Start in Omnik proxy server. Listening to {0}:{1}'.format(args.listenaddress, args.listenport))
         self.tcpServer.serve_forever()
 
 
@@ -107,10 +108,10 @@ class RequestHandler(socketserver.BaseRequestHandler):
             valid = True
         if valid:
             # Process data
-            logging.info("Processing message for inverter '{0}'".format(rawserial))
+            logger.info("Processing message for inverter '{0}'".format(rawserial))
             self.forwardstate(msg, rawserial, self.status[rawserial])
         else:
-            logging.warning("Ignoring received data!")
+            logger.warning("Ignoring received data!")
 
     def forwardstate(self, msg, serial, status):
         # Forward data to datalogger and MQTT
@@ -126,7 +127,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
             self.fwthread.join(60)
             if self.fwthread.is_alive():
                 # Kill the thread if it is still blocking
-                logging.warning("Waiting for forward connection takes a long time...")
+                logger.warning("Waiting for forward connection takes a long time...")
                 self.fwthread.join()
 
 
@@ -144,10 +145,10 @@ class tcpforward(threading.Thread):
         try:
             self.forwardsock.connect(loggeraddress)
             self.forwardsock.sendall(self.data)
-            logging.info('{0} Forwarded to "{1}"'.format(datetime.datetime.now(), args.omniklogger))
+            logger.info('{0} Forwarded to "{1}"'.format(datetime.datetime.now(), args.omniklogger))
             self.forwardsock.close()
         except Exception as e:
-            logging.warning("Error forwarding: {0}".format(e))
+            logger.warning("Error forwarding: {0}".format(e))
         finally:
             self.forwardsock.close()
 
@@ -160,7 +161,7 @@ class mqtt(object):
         self.mqtt_port = int(args.mqtt_port)
         self.mqtt_retain = args.mqtt_retain
         if not args.mqtt_username or not args.mqtt_password:
-            logging.error("Please specify MQTT username and password in the configuration")
+            logger.error("Please specify MQTT username and password in the configuration")
             return
         else:
             self.mqtt_username = args.mqtt_username
@@ -244,39 +245,39 @@ class mqtt(object):
         try:
             # publish config
             if self.mqtt_client.publish(topics['config'][entity], json.dumps(config_pl[entity]), retain=self.mqtt_retain):
-                logging.debug("Publishing config {0} successful.".format(entity))
+                logger.debug("Publishing config {0} successful.".format(entity))
                 return True
             else:
-                logging.warning("Publishing config {0} failed!".format(entity))
+                logger.warning("Publishing config {0} failed!".format(entity))
                 return False
         except Exception as e:
-            logging.error("Unhandled error publishing config for entity {0}: {1}".format(entity, e))
+            logger.error("Unhandled error publishing config for entity {0}: {1}".format(entity, e))
             return False
 
     def _publish_attributes(self, topics, attr_pl):
         try:
             # publish attributes
             if self.mqtt_client.publish(topics['attr'], json.dumps(attr_pl), retain=self.mqtt_retain):
-                logging.debug("Publishing attributes successful.")
+                logger.debug("Publishing attributes successful.")
                 return True
             else:
-                logging.warning("Publishing attributes failed!")
+                logger.warning("Publishing attributes failed!")
                 return False
         except Exception as e:
-            logging.error("Unhandled error publishing attributes: {0}".format(e))
+            logger.error("Unhandled error publishing attributes: {0}".format(e))
             return False
 
     def _publish_state(self, topics, value_pl):
         try:
             # publish state
             if self.mqtt_client.publish(topics['state'], json.dumps(value_pl), retain=self.mqtt_retain):
-                logging.debug("Publishing state {0} successful.".format(json.dumps(value_pl)))
+                logger.debug("Publishing state {0} successful.".format(json.dumps(value_pl)))
                 return True
             else:
-                logging.warning("Publishing state {0} failed!".format(json.dumps(value_pl)))
+                logger.warning("Publishing state {0} failed!".format(json.dumps(value_pl)))
                 return False
         except Exception as e:
-            logging.error("Unhandled error publishing states: {0}".format(e))
+            logger.error("Unhandled error publishing states: {0}".format(e))
             return False
 
     def mqttforward(self, data, serial, status):
@@ -300,18 +301,18 @@ class mqtt(object):
         # publish state
         value_pl = self._value_payload()
         if self._publish_state(topics, value_pl):
-            logging.info('{0} Message forwarded to MQTT service at "{1}"'.format(datetime.datetime.now(), args.mqtt_host))
+            logger.info('{0} Message forwarded to MQTT service at "{1}"'.format(datetime.datetime.now(), args.mqtt_host))
 
         self.lock.release()
 
     def _mqtt_on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            logging.info("MQTT connected")
+            logger.info("MQTT connected")
             # subscribe listening (not used)
 
     def _mqtt_on_disconnect(self, client, userdata, flags, rc):
         if rc == 0:
-            logging.info("MQTT disconnected")
+            logger.info("MQTT disconnected")
 
 
 def main(args):
@@ -326,8 +327,38 @@ def main(args):
     except KeyboardInterrupt:
         pass
     proxy.cancel()
-    logging.info("Stopping threads...")
+    logger.info("Stopping threads...")
     proxy.join()
+
+
+def get_yaml_settings(args):
+    with open(args.settings, 'r') as stream:
+        try:
+            settings = yaml.safe_load(stream)
+            if args.section in settings:
+                index = args.section
+            else:
+                for key in settings:
+                    index = key
+                    break
+            logger.info("Using section '{1}' from config file '{0}'".
+                         format(args.settings, index))
+            return settings[index]
+        except yaml.YAMLError as exc:
+            logger.error("YAML config file '{0}' could not be parsed. Error: {1}".
+                          format(args.settings, exc))
+            os.sys.exit(1)
+
+
+def get_yaml_setting(settings, section, key, default):
+    if not settings:
+        return default
+    elif section not in settings:
+        return default
+    elif key not in settings[section]:
+        return default
+    else:
+        return settings[section][key]
 
 
 if __name__ == '__main__':
@@ -335,24 +366,28 @@ if __name__ == '__main__':
     home = os.path.expanduser('~')
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--settings', default=os.path.join(home, '.omnik/config.yaml'),
+                        help='Path to .yaml configuration file', metavar="FILE")
+    parser.add_argument('--section', default=None,
+                        help='Section to .yaml configuration file to use. Defaults to the first section found.')
     parser.add_argument('--config', default=os.path.join(home, '.omnik/config.ini'),
-                        help='The config file')
+                        help='Path to configuration file (ini) (DECREPATED!)', metavar="FILE")
     parser.add_argument('--serialnumber', default=None, nargs='+',
                         help='The serial number(s) of your inverter (required)')
-    parser.add_argument('--loglevel', default=None,
+    parser.add_argument('--loglevel', default='INFO',
                         help='The basic loglevel [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
-    parser.add_argument('--listenaddress', default=None,
+    parser.add_argument('--listenaddress', default=listenaddress,
                         help='A local available address to listen to')
-    parser.add_argument('--listenport', default=None, type=int,
+    parser.add_argument('--listenport', default=listenport, type=int,
                         help='The local port to listen to')
-    parser.add_argument('--omniklogger', default=None,
+    parser.add_argument('--omniklogger', default=omnikloggerpublicaddress,
                         help='Forward to an address omnik/SolarmanPV datalogger server listens to. '
                              'Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
-    parser.add_argument('--omnikloggerport', default=None, type=int,
+    parser.add_argument('--omnikloggerport', default=omnikloggerdestport, type=int,
                         help='The port the omnik/SolarmanPV datalogger server listens to')
-    parser.add_argument('--mqtt_host', default=None,
+    parser.add_argument('--mqtt_host', default='localhost',
                         help='The mqtt host to forward processed data to. Config overrides.')
-    parser.add_argument('--mqtt_port', default='1883',
+    parser.add_argument('--mqtt_port', default=1883, type=int,
                         help='The mqtt server port. Config overrides.')
     parser.add_argument('--mqtt_retain', default=True, type=bool,
                         help='The mqtt data message retains. Config overrides.')
@@ -378,11 +413,28 @@ if __name__ == '__main__':
         "CRITICAL": logging.CRITICAL
         }
 
-    if args.config:
+    if os.path.isfile(args.settings):
+        settings = get_yaml_settings(args)
+        args.mqtt_host = get_yaml_setting(settings, 'output.mqtt', 'host', args.mqtt_host)
+        args.mqtt_port = get_yaml_setting(settings, 'output.mqtt', 'port', args.mqtt_port)
+        args.mqtt_retain = get_yaml_setting(settings, 'output.mqtt', 'retain', args.mqtt_retain)
+        args.mqtt_discovery_prefix = get_yaml_setting(settings, 'output.mqtt', 'discovery_prefix', args.mqtt_discovery_prefix)
+        args.mqtt_client_name_prefix = get_yaml_setting(settings, 'output.mqtt', 'client_name_prefix', args.mqtt_client_name_prefix)
+        args.mqtt_username = get_yaml_setting(settings, 'output.mqtt', 'username', args.mqtt_username)
+        args.mqtt_password = get_yaml_setting(settings, 'output.mqtt', 'password', args.mqtt_password)
+        args.mqtt_device_name = get_yaml_setting(settings, 'output.mqtt', 'device_name', args.mqtt_device_name)
+        args.mqtt_logger_sensor_name = get_yaml_setting(settings, 'output.mqtt', 'logger_sensor_name', args.mqtt_logger_sensor_name)
+        args.serialnumber = get_yaml_setting(settings, 'proxy', 'serialnumber', args.serialnumber)
+        args.loglevel = get_yaml_setting(settings, 'proxy', 'loglevel', args.loglevel)
+        args.listenaddress = get_yaml_setting(settings, 'proxy', 'listenaddress', args.listenaddress)
+        args.listenport = get_yaml_setting(settings, 'proxy', 'listenport', args.listenport)
+        args.omniklogger = get_yaml_setting(settings, 'proxy', 'omniklogger', args.omniklogger)
+        args.omnikloggerport = get_yaml_setting(settings, 'proxy', 'omnikloggerport', args.omnikloggerport)
+    elif os.path.isfile(args.config):
         c = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
         c.read([args.config], encoding='utf-8')
         args.mqtt_host = c.get('output.mqtt', 'host', fallback=args.mqtt_host)
-        args.mqtt_port = c.get('output.mqtt', 'port', fallback=args.mqtt_port)
+        args.mqtt_port = c.getint('output.mqtt', 'port', fallback=args.mqtt_port)
         args.mqtt_retain = True if c.get('output.mqtt', 'retain', fallback='true') == 'true' else args.mqtt_retain
         args.mqtt_discovery_prefix = c.get('output.mqtt', 'discovery_prefix ', fallback=args.mqtt_discovery_prefix)
         args.mqtt_client_name_prefix = c.get('output.mqtt', 'client_name_prefix', fallback=args.mqtt_client_name_prefix)
@@ -392,18 +444,12 @@ if __name__ == '__main__':
         args.logger_sensor_name = c.get('output.mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
 
         # TODO: Try to get from config from no arguments are given. Handle required parameters and defaults
-        if not args.serialnumber:
-            args.serialnumber = c.getlist('proxy', 'serialnumber', fallback=[])
-        if not args.loglevel:
-            args.loglevel = c.get('proxy', 'loglevel', fallback='INFO')
-        if not args.listenaddress:
-            args.listenaddress = c.get('proxy', 'listenaddress', fallback=listenaddress)
-        if not args.listenport:
-            args.listenport = c.getint('proxy', 'listenport', fallback=listenport)
-        if not args.omniklogger:
-            args.omniklogger = c.get('proxy', 'omniklogger', fallback=omnikloggerpublicaddress)
-        if not args.omnikloggerport:
-            args.omnikloggerport = c.getint('proxy', 'omnikloggerport', fallback=omnikloggerdestport)
+        args.serialnumber = c.getlist('proxy', 'serialnumber', fallback=args.serialnumber)
+        args.loglevel = c.get('proxy', 'loglevel', args.loglevel)
+        args.listenaddress = c.getint('proxy', 'listenaddress', fallback=args.listenaddress)
+        args.listenport = c.getint('proxy', 'listenport', fallback=args.listenport)
+        args.omniklogger = c.get('proxy', 'omniklogger', fallback=args.omniklogger)
+        args.omnikloggerport = c.getint('proxy', 'omnikloggerport', fallback=args.omnikloggerport)
     if not args.serialnumber:
         parser.print_help()
         os.sys.exit(1)

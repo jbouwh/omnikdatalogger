@@ -13,7 +13,6 @@ omnikloggerport=10004
 # mqtt integration
 # Creates sensor 'binary_sensor.datalogger' with MQTT auto discovery in Home Assistant
 # 
-#override for name field from omnik portal
 discovery_prefix = homeassistant
 host = homeassistant.local
 port = 1883

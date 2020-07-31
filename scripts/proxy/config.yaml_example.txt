@@ -1,0 +1,27 @@
+# Example yaml config file for omnikloggerproxy.py (rename to config.yaml)
+# Encoding: UTF-8
+omnikdatalogger:
+  proxy:
+    loglevel: INFO
+    listenaddress: 0.0.0.0
+    listenport: 10004
+    serialnumber:
+      - NLDN302012863151
+    omniklogger: 192.168.1.71
+    omnikloggerport: 10004
+  output.mqtt:
+    # mqtt integration
+    # Creates sensor 'binary_sensor.datalogger' with MQTT auto discovery in Home Assistant
+    # 
+    discovery_prefix: homeassistant
+    host: homeassistant.local
+    port: 1883
+    retain: true
+    client_name_prefix: ha-mqtt-omniklogger
+    username: username_123
+    password: password_123
+    device_name: Inverter
+    append_plant_id: false
+
+    # Sensor name (omnikproxylogger only)
+    logger_sensor_name: Datalogger
