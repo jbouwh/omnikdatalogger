@@ -48,9 +48,9 @@ For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omni
 There is an example file included `config.ini_example.txt`.
 
 ## Using Docker
-This directory contains all artefacts to run the `omnikdatalogger` as a `Docker` container.
+This directory contains all artefacts to run the `omnikdataloggerproxy` as a `Docker` container.
 
-Use the included `Makefile` to build and push the `Docker` image yourself.
+You can use the included `Makefile` to build and push the `Docker` image yourself.
 
 ```
 $ make help
@@ -79,13 +79,13 @@ $ docker-compose -f /path/to/docker-compose.yml up -d
 ```
 
 
-## Prearing your Synology to run omnikdataloggerproxy.py script (manual install)
+## Prearing to run omnikdataloggerproxy.py script (manual install)
 
 * Make sure you have shell access (ssh or telnet).
 * Install pip: `curl -k https://bootstrap.pypa.io/get-pip.py | python3` See: (https://stackoverflow.com/questions/47649902/installing-pip-on-a-dsm-synology)
 * Install the paho mqtt client: `/volume1/@appstore/py3k/usr/local/bin/pip3 install paho-mqtt`. The path may be diferent. I used a Synology DS218 play
 
-On upgrades it might be neccesare to reïnstall pip and paho-mqtt. Make sure you chack on this after an update for your Synology.
+On upgrades it might be necessary to reinstall pip and paho-mqtt. Make sure you chack on this after an update for your Synology.
 
 Now take the following steps:
 * Place the omnikloggerproxy.py script, the bash script (omnikproxy_example_startup.sh) and `config.ini_example.txt` to a folder that will not be affected by upgrades. E.g. `/volume1/someshare/yourscriptfolder`.
