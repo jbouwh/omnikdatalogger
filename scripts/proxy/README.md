@@ -72,7 +72,7 @@ login                          Login to Docker Hub
 The following command will pull the `Docker` image, mount the `config.yaml` (current directory) and create the `Docker` container.
 
 ```
-$ docker run --name omnikdataloggerproxy -d -v ${PWD}/config.yaml:/config.yaml -p 10004:10004 --name omnikdataloggerproxy jbouwh/omnikdataloggerproxy:latest
+$ docker run --name omnikdataloggerproxy -d -v ${PWD}/config.yaml:/config.yaml -p 10004:10004 --name omnikdataloggerproxy --restart unless-stopped jbouwh/omnikdataloggerproxy:latest
 ```
 
 I also added a `docker-compose.yml` that can be used. Run it at the folder where your `config.yaml` file resites. It is still possible to use `config.ini` files as well. This option is decrepated now.
