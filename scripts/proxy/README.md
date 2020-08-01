@@ -48,7 +48,9 @@ key | optional | type | default | description
 Comfig file settings will overrule the command line settings. The MQTT parameters will fallback to the settings in the section `output.mqtt:`. Specify a config file using the --settings (or --config) option.
 For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt-settings-under-outputmqtt-in-appsyaml-or-outputmqtt-in-configini-configuration-options)
 
-There are example config files included [`config.yaml_example.txt`]https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.yaml_example.txt) and [`config.ini_example.txt`](https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.ini_example.txt).
+There are example config files included:
+- [`config.yaml_example.txt`](https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.yaml_example.txt)
+- [`config.ini_example.txt`](https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.ini_example.txt).
 
 ## Using Docker
 This directory contains all artefacts to run the `omnikdataloggerproxy` as a `Docker` container.
