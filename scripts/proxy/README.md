@@ -46,7 +46,7 @@ key | optional | type | default | description
 `listenport` | True | int | `10004` | The port the omnik/SolarmanPV datalogger server listens to.
 
 Comfig file settings will overrule the command line settings. The MQTT parameters will fallback to the settings in the section `output.mqtt:`. Specify a config file using the --settings (or --config) option.
-For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt-settings-under-outputmqtt-in-appsyaml-or-outputmqtt-in-configini-configuration-options)
+For details see the [Omnik Data Logger README.md](https://github.com/jbouwh/omnikdatalogger#mqtt_proxy-plugin-for-the-localproxy-client-in-the-section-clientlocalproxymqtt_proxy-of-appsyaml-or-configini)
 
 There are example config files included:
 - [`config.yaml_example.txt`](https://github.com/jbouwh/omnikdatalogger/blob/master/scripts/proxy/config.yaml_example.txt)
