@@ -3,9 +3,9 @@ version: '3'
 services:
   omnikdatalogger:
     build: .
-    image: omnikdataloggerproxy:latest
+    image: jbouwh/omnikdataloggerproxy:latest
     volumes:
-      - "${PWD}/config.ini:/config.ini"
+      - "${PWD}/config.yaml:/config.yaml"
     expose:
       - "10004"
     logging:

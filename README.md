@@ -452,13 +452,13 @@ Restart Mosquito after changing the config.
 
 key | optional | type | default | description
 -- | --| -- | -- | --
-`discovery_prefix` | True | string | `homeassistant` | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
-`device_name` | True | string | _Inverter_ | Omnik data logger proxy only setting. Overrides the name of the datalogger in the omnik portal. See also the `attributes` section below.
-`append_plant_id` | True | bool | `false` | When a device_name is specified the plant id can be added to the name te be able to identify the plant.
+`discovery_prefix` | True | string | _'homeassistant'_ | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
+`device_name` | True | string | _'Datalogger proxy'_ | Omnik data logger proxy only setting. Overrides the name of the datalogger in the omnik portal. See also the `attributes` section below.
+`append_plant_id` | True | bool | _false_ | When a device_name is specified the plant id can be added to the name te be able to identify the plant.
 `host` | True | string | `localhost` | Hostname or fqdn of the MQTT server for publishing.
-`port` | True | integer | `1883` | MQTT port to be used. 
-`retain` | True | bool | True | Retains the data send to the MQTT service
-`client_name_prefix` | True | string | `ha-mqtt-omniklogger` | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
+`port` | True | integer | _1883_ | MQTT port to be used. 
+`retain` | True | bool | _True_ | Retains the data send to the MQTT service
+`client_name_prefix` | True | string | _'ha-mqtt-omniklogger'_ | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.
 `username`* | False | string | _(none)_ | The MQTT username used for authentication
 `password`* | False | string | _(none)_ | The MQTT password used for authentication
 
