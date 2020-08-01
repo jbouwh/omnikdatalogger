@@ -25,7 +25,7 @@ install_requires = [
     'dsmr-parser>=0.21',
     'astral>=1.10.1',
     'pyyaml>=5.1',
-    'omnikdataloggerproxy>=1.1.3'
+    'omnikdataloggerproxy>=1.2.0'
 ]
 
 setup(
