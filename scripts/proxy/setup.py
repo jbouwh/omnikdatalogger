@@ -32,7 +32,7 @@ setup(
     description="Omnik Data Logger Proxy",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jbouwh/omnikdatalogger/scripts/proxy",
+    url="https://github.com/jbouwh/omnikdatalogger/tree/master/scripts/proxy",
     packages=find_packages(),
     data_files=[('share/omnikdataloggerproxy', [
         'iptables_setup_example.sh',
