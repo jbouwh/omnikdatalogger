@@ -114,7 +114,7 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=/usr/local/bin/omnikloggerproxy.py --serialnumber NLDN123456789012 --listenaddress 0.0.0.0 --omniklogger 176.58.117.69 --omnikloggerport 10004
-User=jbouwh
+User=omnik
 Group=users
 Restart=on-failure
 RestartSec=30s
