@@ -26,7 +26,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.2.3'
+__version__ = '1.2.4'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -163,6 +163,7 @@ class mqtt(object):
         self.mqtt_retain = args.mqtt_retain
         if not args.mqtt_username or not args.mqtt_password:
             logger.error("Please specify MQTT username and password in the configuration")
+            self.mqtt_client = None
             return
         else:
             self.mqtt_username = args.mqtt_username
@@ -186,7 +187,11 @@ class mqtt(object):
         self.lock = threading.Condition(threading.Lock())
 
     def close(self):
-        self.mqtt_client.disconnect()
+        if self.mqtt_client:
+            try:
+                self.mqtt_client.disconnect()
+            except Exception:
+                pass
 
     def _topics(self):
         topics = {}
@@ -386,7 +391,7 @@ if __name__ == '__main__':
                              'Set this to {0} as final forwarder.'.format(omnikloggerpublicaddress))
     parser.add_argument('--omnikloggerport', default=omnikloggerdestport, type=int,
                         help='The port the omnik/SolarmanPV datalogger server listens to')
-    parser.add_argument('--mqtt_host', default='localhost',
+    parser.add_argument('--mqtt_host', default='',
                         help='The mqtt host to forward processed data to. Config overrides.')
     parser.add_argument('--mqtt_port', default=1883, type=int,
                         help='The mqtt server port. Config overrides.')
