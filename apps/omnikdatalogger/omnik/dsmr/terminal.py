@@ -116,6 +116,7 @@ class Terminal(object):
                                         "WARNING", f"DSMR terminal {self.terminal_name} was interrupted "
                                         f"and will be restarted in a few moments: {e.args}"
                                         )
+                    time.sleep(5)
             finally:
                 self.sock.close()
 
