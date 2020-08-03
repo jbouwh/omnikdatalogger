@@ -94,8 +94,8 @@ class Terminal(object):
                 self.telegram_buffer = TelegramBuffer()
                 server_address = (self.host, self.port)
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.sock.connect(server_address)
                 self.sock.settimeout(5)
+                self.sock.connect(server_address)
                 while not self.stop:
                     data = self.sock.recv(1024)
                     if not data:
