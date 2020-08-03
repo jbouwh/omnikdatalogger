@@ -100,12 +100,13 @@ class Terminal(object):
                     data = self.sock.recv(1024)
                     if not data:
                         hybridlogger.ha_log(self.logger, self.hass_api,
-                                            "INFO", f"DSMR terminal {self.terminal_name} was interrupted and will be restarted."
+                                            "INFO",
+                                            f"DSMR terminal {self.terminal_name} was interrupted and will be restarted."
                                             )
                         time.sleep(5)
                         break
                     self._dsmr_data_received(data)
-                    
+
             except Exception as e:
                 if not self.stop:
                     hybridlogger.ha_log(self.logger, self.hass_api,
@@ -114,7 +115,6 @@ class Terminal(object):
                                         )
             finally:
                 self.sock.close()
-
 
     def _run_serial_terminal(self):
         # SERIAL_SETTINGS_V2_2, SERIAL_SETTINGS_V4, SERIAL_SETTINGS_V5
