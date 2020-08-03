@@ -86,23 +86,35 @@ class Terminal(object):
     def _run_tcp_terminal(self):
         self._get_dsmr_parser()
         # buffer to keep incomplete incoming data
-        self.telegram_buffer = TelegramBuffer()
-        server_address = (self.host, self.port)
         while not self.stop:
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "INFO", f"DSMR terminal {self.terminal_name} was started."
+                                )
             try:
+                self.telegram_buffer = TelegramBuffer()
+                server_address = (self.host, self.port)
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect(server_address)
+                self.sock.settimeout(5)
                 while not self.stop:
                     data = self.sock.recv(1024)
+                    if not data:
+                        hybridlogger.ha_log(self.logger, self.hass_api,
+                                            "INFO", f"DSMR terminal {self.terminal_name} was interrupted and will be restarted."
+                                            )
+                        time.sleep(5)
+                        break
                     self._dsmr_data_received(data)
-
-                self.sock.close()
+                    
             except Exception as e:
                 if not self.stop:
                     hybridlogger.ha_log(self.logger, self.hass_api,
                                         "WARNING", f"DSMR terminal {self.terminal_name} was interrupted "
                                         f"and will be restarted in a few moments: {e.args}"
                                         )
+            finally:
+                self.sock.close()
+
 
     def _run_serial_terminal(self):
         # SERIAL_SETTINGS_V2_2, SERIAL_SETTINGS_V4, SERIAL_SETTINGS_V5
