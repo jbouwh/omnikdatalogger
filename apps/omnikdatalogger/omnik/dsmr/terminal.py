@@ -1,5 +1,6 @@
-from dsmr_parser.clients import SerialReader
+from dsmr_parser.clients import create_dsmr_reader
 from dsmr_parser.parsers import TelegramParser
+from dsmr_parser.exceptions import ParseError, InvalidChecksumError
 from dsmr_parser.clients.telegram_buffer import TelegramBuffer
 from dsmr_parser import telegram_specifications
 
@@ -48,7 +49,6 @@ class Terminal(object):
             self.sock.close()
         self.thr.join()
 
-
     def _get_dsmr_parser(self):
         dsmr_version = self.dsmr_version
         if dsmr_version == '2.2':
@@ -88,13 +88,11 @@ class Terminal(object):
         # buffer to keep incomplete incoming data
         self.telegram_buffer = TelegramBuffer()
         server_address = (self.host, self.port)
-        #amount_expected = len(data)
         while not self.stop:
             try:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect(server_address)
                 while not self.stop:
-       
                     data = self.sock.recv(1024)
                     self._dsmr_data_received(data)
 
@@ -117,7 +115,6 @@ class Terminal(object):
         # serial_settings=SERIAL_SETTINGS_V5,
         # telegram_specification=telegram_specifications.V5
         # )
-
         loop = asyncio.new_event_loop()
         try:
             create_connection = partial(create_dsmr_reader,

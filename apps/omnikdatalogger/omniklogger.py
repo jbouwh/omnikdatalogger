@@ -27,11 +27,6 @@ ha_args = {}
 
 global stopflag
 
-# These 2 vars are for testing the HASS api from the command line
-# test_hass should be False in production!
-test_hass = False
-restarttest = 1
-
 
 # Generic signal handler
 def signal_handler(signal, frame):
@@ -101,9 +96,6 @@ class ha_ConfigParser(configparser.ConfigParser):
 class HA_OmnikDataLogger(hass.Hass):
 
     def initialize(self, *args, **kwargs):
-        if test_hass:
-            if args:
-                self.args = args[0]
         hybridlogger.ha_log(logger, self, "INFO", "Starting Omnik datalogger...")
         hybridlogger.ha_log(logger, self, "DEBUG", f"Arguments from AppDaemon config (self.args): {self.args}")
         if 'config' in self.args:
@@ -149,21 +141,6 @@ def main(c: ha_ConfigParser, hass_api=None):
     if c.get('default', 'debug', False):
         logger.setLevel(logging.DEBUG)
 
-    if test_hass:
-        hassinstance = HA_OmnikDataLogger()
-        n = restarttest
-        while n:
-            hassinstance.initialize(c.ha_args)
-            # loop is for commandline execution only
-            try:
-                while not stopflag:
-                    time.sleep(0.5)
-            except KeyboardInterrupt:
-                pass
-            hassinstance.terminate()
-            stopflag = False
-            n -= 1
-        return
     set_data_config_path(c)
     datalogger = DataLogger(c, hass_api=hass_api)
     if c.has_option('default', 'interval'):
