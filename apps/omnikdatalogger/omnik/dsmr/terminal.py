@@ -1,11 +1,12 @@
-from dsmr_parser.clients import create_dsmr_reader
 from dsmr_parser.parsers import TelegramParser
 from dsmr_parser.exceptions import ParseError, InvalidChecksumError
 from dsmr_parser.clients.telegram_buffer import TelegramBuffer
 from dsmr_parser import telegram_specifications
+from dsmr_parser.clients.settings import SERIAL_SETTINGS_V2_2, \
+    SERIAL_SETTINGS_V4, SERIAL_SETTINGS_V5
 
-import asyncio
-from functools import partial
+import serial
+
 import threading
 from omnik.ha_logger import hybridlogger
 import time
@@ -42,27 +43,29 @@ class Terminal(object):
 
     def terminate(self):
         self.stop = True
-        # cleanup connection after user initiated shutdown
-        if hasattr(self, 'transport'):
-            self.transport.close()
-        if hasattr(self, 'sock'):
-            self.sock.close()
+        # Wait for Thread to shutdown
         self.thr.join()
 
     def _get_dsmr_parser(self):
         dsmr_version = self.dsmr_version
         if dsmr_version == '2.2':
             specification = telegram_specifications.V2_2
+            serial_settings = SERIAL_SETTINGS_V2_2
         elif dsmr_version == '4':
             specification = telegram_specifications.V4
+            serial_settings = SERIAL_SETTINGS_V4
         elif dsmr_version == '5':
             specification = telegram_specifications.V5
+            serial_settings = SERIAL_SETTINGS_V5
         elif dsmr_version == '5B':
             specification = telegram_specifications.BELGIUM_FLUVIUS
+            serial_settings = SERIAL_SETTINGS_V5
         else:
             raise NotImplementedError("No telegram parser found for version: %s",
                                       dsmr_version)
         self.telegram_parser = TelegramParser(specification)
+        serial_settings['timeout'] = 10
+        self.serial_settings = serial_settings
 
     def _dsmr_data_received(self, data):
         """Add incoming data to buffer."""
@@ -117,44 +120,31 @@ class Terminal(object):
                 self.sock.close()
 
     def _run_serial_terminal(self):
-        # SERIAL_SETTINGS_V2_2, SERIAL_SETTINGS_V4, SERIAL_SETTINGS_V5
-        # Telegram specifications:
-        # V2_2, V3=V2_2, V4, V5, BELGIUM_FLUVIUS, LUXEMBOURG_SMARTY
-        # self.log("DSRM parser was started")
-        # The serial approach
-        # serial_reader = SerialReader(
-        # device='/dev/ttyUSB0',
-        # serial_settings=SERIAL_SETTINGS_V5,
-        # telegram_specification=telegram_specifications.V5
-        # )
-        loop = asyncio.new_event_loop()
-        try:
-            create_connection = partial(create_dsmr_reader,
-                                        self.device, self.dsmr_version,
-                                        self.dsmr_serial_callback, loop=loop)
-            hybridlogger.ha_log(self.logger, self.hass_api,
-                                "INFO", f"Connecting to '{self.device}' using DSMR v{self.dsmr_version}")
-        except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api,
-                                "ERROR", f"DSMR terminal {self.terminal_name} could not be initialized. "
-                                f"Check your configuration. Error: {e}")
-            return
-        # create serial or tcp connection
+        self._get_dsmr_parser()
+        # buffer to keep incomplete incoming data
         while not self.stop:
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "INFO", f"DSMR terminal {self.terminal_name} was started."
+                                )
             try:
-                conn = create_connection()
-                self.transport, protocol = loop.run_until_complete(conn)
-                # wait until connection it closed
-                loop.run_until_complete(protocol.wait_closed())
-                # wait 5 seconds before attempting reconnect
-                if not self.stop:
-                    loop.run_until_complete(asyncio.sleep(5))
+                self.telegram_buffer = TelegramBuffer()
+                self.sock = serial.Serial(port=self.device, **self.serial_settings)
+                while not self.stop:
+                    data = self.sock.read_until()
+                    if not data:
+                        hybridlogger.ha_log(self.logger, self.hass_api,
+                                            "INFO",
+                                            f"DSMR terminal {self.terminal_name} was interrupted and will be restarted."
+                                            )
+                        time.sleep(5)
+                        break
+                    self._dsmr_data_received(data)
+
             except Exception as e:
                 if not self.stop:
                     hybridlogger.ha_log(self.logger, self.hass_api,
                                         "WARNING", f"DSMR terminal {self.terminal_name} was interrupted "
                                         f"and will be restarted in a few moments: {e.args}"
                                         )
-                time.sleep(10)
-        # Close the event loop
-        loop.close()
+            finally:
+                self.sock.close()
