@@ -132,10 +132,12 @@ class HA_OmnikDataLogger(hass.Hass):
         self.rt = RepeatedJob(c, self.datalogger, hass_api=self)
 
     def terminate(self):
-        self.datalogger.terminate()
-        hybridlogger.ha_log(logger, self, "INFO", "DSMR Daemon was stopped.")
+        hybridlogger.ha_log(logger, self, "INFO", "Stopping omnikdatalogger daemon...")
         self.rt.stop()
         hybridlogger.ha_log(logger, self, "INFO", "Daemon was stopped.")
+        hybridlogger.ha_log(logger, self, "INFO", "Stopping DSMR Daemon...")
+        self.datalogger.terminate()
+        hybridlogger.ha_log(logger, self, "INFO", "DSMR Daemon was stopped.")
 
 
 # Initialization from the commandline

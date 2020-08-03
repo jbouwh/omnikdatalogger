@@ -1,8 +1,14 @@
-from dsmr_parser.clients import create_dsmr_reader, create_tcp_dsmr_reader
+from dsmr_parser.clients import SerialReader
+from dsmr_parser.parsers import TelegramParser
+from dsmr_parser.clients.telegram_buffer import TelegramBuffer
+from dsmr_parser import telegram_specifications
+
 import asyncio
 from functools import partial
 import threading
 from omnik.ha_logger import hybridlogger
+import time
+import socket
 
 
 class Terminal(object):
@@ -18,27 +24,89 @@ class Terminal(object):
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "ERROR", f"DSMR terminal {self.terminal_name} mode {self.mode} is not valid. "
                                 "Should be tcp or device. Ignoring DSMR configuration!")
-
+            return
         self.device = self.config.get(f"dsmr.{self.terminal_name}", 'device', '/dev/ttyUSB0')
         self.host = self.config.get(f"dsmr.{self.terminal_name}", 'host', 'localhost')
         self.port = self.config.get(f"dsmr.{self.terminal_name}", 'port', '3333')
         self.dsmr_version = dsmr_version
         # start terminal
         self.stop = False
-        self.transport = None
         hybridlogger.ha_log(self.logger, self.hass_api,
                             "INFO", f"Initializing DSMR termimal '{terminal_name}'. Mode: {self.mode}.")
-        self.thr = threading.Thread(target=self._run_terminal, name=self.terminal_name)
+        if self.mode == 'tcp':
+            self.thr = threading.Thread(target=self._run_tcp_terminal, name=self.terminal_name)
+        elif self.mode == 'device':
+            self.thr = threading.Thread(target=self._run_serial_terminal, name=self.terminal_name)
         self.thr.start()
 
     def terminate(self):
-        # cleanup connection after user initiated shutdown
-        if self.transport:
-            self.transport.close()
         self.stop = True
+        # cleanup connection after user initiated shutdown
+        if hasattr(self, 'transport'):
+            self.transport.close()
+        if hasattr(self, 'sock'):
+            self.sock.close()
         self.thr.join()
 
-    def _run_terminal(self):
+
+    def _get_dsmr_parser(self):
+        dsmr_version = self.dsmr_version
+        if dsmr_version == '2.2':
+            specification = telegram_specifications.V2_2
+        elif dsmr_version == '4':
+            specification = telegram_specifications.V4
+        elif dsmr_version == '5':
+            specification = telegram_specifications.V5
+        elif dsmr_version == '5B':
+            specification = telegram_specifications.BELGIUM_FLUVIUS
+        else:
+            raise NotImplementedError("No telegram parser found for version: %s",
+                                      dsmr_version)
+        self.telegram_parser = TelegramParser(specification)
+
+    def _dsmr_data_received(self, data):
+        """Add incoming data to buffer."""
+        data = data.decode('ascii')
+        self.telegram_buffer.append(data)
+
+        for telegram in self.telegram_buffer.get_all():
+            self._handle_telegram(telegram)
+
+    def _handle_telegram(self, telegram):
+        """Send off parsed telegram to handling callback."""
+        try:
+            parsed_telegram = self.telegram_parser.parse(telegram)
+        except InvalidChecksumError as e:
+            self.log.warning(str(e))
+        except ParseError:
+            self.log.exception("failed to parse telegram")
+        else:
+            self.dsmr_serial_callback(parsed_telegram)
+
+    def _run_tcp_terminal(self):
+        self._get_dsmr_parser()
+        # buffer to keep incomplete incoming data
+        self.telegram_buffer = TelegramBuffer()
+        server_address = (self.host, self.port)
+        #amount_expected = len(data)
+        while not self.stop:
+            try:
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.connect(server_address)
+                while not self.stop:
+       
+                    data = self.sock.recv(1024)
+                    self._dsmr_data_received(data)
+
+                self.sock.close()
+            except Exception as e:
+                if not self.stop:
+                    hybridlogger.ha_log(self.logger, self.hass_api,
+                                        "WARNING", f"DSMR terminal {self.terminal_name} was interrupted "
+                                        f"and will be restarted in a few moments: {e.args}"
+                                        )
+
+    def _run_serial_terminal(self):
         # SERIAL_SETTINGS_V2_2, SERIAL_SETTINGS_V4, SERIAL_SETTINGS_V5
         # Telegram specifications:
         # V2_2, V3=V2_2, V4, V5, BELGIUM_FLUVIUS, LUXEMBOURG_SMARTY
@@ -49,20 +117,14 @@ class Terminal(object):
         # serial_settings=SERIAL_SETTINGS_V5,
         # telegram_specification=telegram_specifications.V5
         # )
+
         loop = asyncio.new_event_loop()
         try:
-            if self.mode == 'tcp':
-                create_connection = partial(create_tcp_dsmr_reader,
-                                            self.host, self.port, self.dsmr_version,
-                                            self.dsmr_serial_callback, loop=loop)
-                hybridlogger.ha_log(self.logger, self.hass_api,
-                                    "INFO", f"Connecting to '{self.host}:{self.port}' using DSMR v{self.dsmr_version}")
-            elif self.mode == 'device':
-                create_connection = partial(create_dsmr_reader,
-                                            self.device, self.dsmr_version,
-                                            self.dsmr_serial_callback, loop=loop)
-                hybridlogger.ha_log(self.logger, self.hass_api,
-                                    "INFO", f"Connecting to '{self.device}' using DSMR v{self.dsmr_version}")
+            create_connection = partial(create_dsmr_reader,
+                                        self.device, self.dsmr_version,
+                                        self.dsmr_serial_callback, loop=loop)
+            hybridlogger.ha_log(self.logger, self.hass_api,
+                                "INFO", f"Connecting to '{self.device}' using DSMR v{self.dsmr_version}")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "ERROR", f"DSMR terminal {self.terminal_name} could not be initialized. "
@@ -79,10 +141,11 @@ class Terminal(object):
                 if not self.stop:
                     loop.run_until_complete(asyncio.sleep(5))
             except Exception as e:
-                hybridlogger.ha_log(self.logger, self.hass_api,
-                                    "WARNING", f"DSMR terminal {self.terminal_name} was interrupted "
-                                    f"and will be restarted in a few moments: {e.args}"
-                                    )
-                asyncio.sleep(10)
+                if not self.stop:
+                    hybridlogger.ha_log(self.logger, self.hass_api,
+                                        "WARNING", f"DSMR terminal {self.terminal_name} was interrupted "
+                                        f"and will be restarted in a few moments: {e.args}"
+                                        )
+                time.sleep(10)
         # Close the event loop
         loop.close()
