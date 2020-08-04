@@ -27,7 +27,7 @@ class HASSAPI(LocalProxyPlugin):
             return
         self.logger_entity = self.config.get('client.localproxy.hassapi', 'logger_entity', 'binary_sensor.datalogger')
 
-    def stop(self):
+    def terminate(self):
         if self.hass_handle:
             self.hass_api.cancel_listen_state(self.hass_handle)
 

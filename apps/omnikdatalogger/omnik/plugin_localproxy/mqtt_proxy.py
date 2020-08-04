@@ -83,7 +83,7 @@ class MQTTproxy(LocalProxyPlugin):
         return self.config.get('client.localproxy.mqtt_proxy', parameter,
                                self.config.get('output.mqtt', parameter, fallback=fallback))
 
-    def stop(self):
+    def terminate(self):
         self.mqtt_client.loop_stop()
         self.mqtt_client.disconnect()
 

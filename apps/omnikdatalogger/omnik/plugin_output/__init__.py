@@ -72,3 +72,6 @@ class Plugin(object, metaclass=BasePlugin):
 
     def process(self, **args):
         pass
+
+    def terminate(self):
+        pass

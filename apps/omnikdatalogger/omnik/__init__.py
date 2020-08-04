@@ -104,8 +104,6 @@ class RepeatedJob(object):
         if self.use_timer:
             self._timer.cancel()
         else:
-            # Stop listening
-            self.client.stop()
             # exit event message loop
             self.msgevent.set()
         self.is_running = False

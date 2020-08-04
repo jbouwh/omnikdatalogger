@@ -19,3 +19,6 @@ class LocalProxyPlugin(object, metaclass=LocalProxyBasePlugin):
     hass_api = None
     semaphore = None
     client = None
+
+    def terminate(self):
+        pass

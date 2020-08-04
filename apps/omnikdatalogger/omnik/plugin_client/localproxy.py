@@ -51,14 +51,12 @@ class LocalProxy(Client):
         # Initialize dict with inverter info
         self.inverters = {}
 
-    def stop(self):
-        # Call baseclass
-        super().stop()
+    def terminate(self):
         # Stop all plugins
         # Claim the semaphore
         self.semaphore.acquire()
-        for plugin in LocalProxyPlugin.localproxy_plugins:
-            plugin.stop()
+        while LocalProxyPlugin.localproxy_plugins:
+            LocalProxyPlugin.localproxy_plugins.pop(0).terminate()
         # Release the semaphore
         self.semaphore.release()
 

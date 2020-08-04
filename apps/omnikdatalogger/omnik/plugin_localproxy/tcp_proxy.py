@@ -48,7 +48,7 @@ class TCPproxy(LocalProxyPlugin):
         RequestHandler.client = self.client
         self.tcpServer = socketserver.TCPServer(self.listenaddress, RequestHandler)
 
-    def stop(self):
+    def terminate(self):
         try:
             # Shutting down tcp server
             self.tcpServer.shutdown()

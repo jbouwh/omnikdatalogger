@@ -179,6 +179,11 @@ class DataLogger(object):
         return True
 
     def terminate(self):
+        # Cleanup Client
+        self._terminate_client()
+        # Cleanup Output plugins
+        self._terminate_output_plugins()
+        # Terminate DSMR
         if self.dsmr:
             self.dsmr.terminate()
 
@@ -204,6 +209,10 @@ class DataLogger(object):
                                 "ERROR", f"Client '{self.client_module}' could not be initialized. Error: {e}")
             sys.exit(1)
 
+    def _terminate_client(self):
+        self.client.terminate()
+        del self.client
+
     def _init_output_plugins(self):
         self.plugins = self.config.getlist('plugins', 'output', fallback=[''])
         if self.plugins and self.plugins[0]:
@@ -219,6 +228,10 @@ class DataLogger(object):
 
             for plugin in self.plugins:
                 __import__(plugin)
+
+    def _terminate_output_plugins(self):
+        while Plugin.plugins:
+            Plugin.plugins.pop(0).terminate()
 
     def _init_dsmr(self):
         terminals = self.config.getlist('dsmr', 'terminals', fallback=[])

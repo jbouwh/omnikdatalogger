@@ -16,10 +16,9 @@ class Client(object, metaclass=BaseClient):
     logger = None
     hass_api = None
     use_timer = True
-    stoprequest = False
 
     def initialize(self):
         pass
 
-    def stop(self):
-        self.stoprequest = True
+    def terminate(self):
+        pass

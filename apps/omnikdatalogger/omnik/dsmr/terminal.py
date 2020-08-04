@@ -101,14 +101,15 @@ class Terminal(object):
                 self.sock.connect(server_address)
                 while not self.stop:
                     data = self.sock.recv(1024)
-                    if not data:
+                    if not data and not self.stop:
                         hybridlogger.ha_log(self.logger, self.hass_api,
                                             "INFO",
                                             f"DSMR terminal {self.terminal_name} was interrupted and will be restarted."
                                             )
                         time.sleep(5)
                         break
-                    self._dsmr_data_received(data)
+                    elif data:
+                        self._dsmr_data_received(data)
 
             except Exception as e:
                 if not self.stop:
@@ -132,14 +133,15 @@ class Terminal(object):
                 self.sock = serial.Serial(port=self.device, **self.serial_settings)
                 while not self.stop:
                     data = self.sock.read_until()
-                    if not data:
+                    if not data and not self.stop:
                         hybridlogger.ha_log(self.logger, self.hass_api,
                                             "INFO",
                                             f"DSMR terminal {self.terminal_name} was interrupted and will be restarted."
                                             )
                         time.sleep(5)
                         break
-                    self._dsmr_data_received(data)
+                    elif data:
+                        self._dsmr_data_received(data)
 
             except Exception as e:
                 if not self.stop:
