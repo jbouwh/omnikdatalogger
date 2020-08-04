@@ -285,7 +285,7 @@ class DataLogger(object):
             self._dsmr_cache_update(plant_id, dsmr_message)
             # self.dsmr_data[plant_id] = deepcopy(dsmr_message)
             self.dsmr_access.release()
-            if plant_id in self.plant_update and self.total_energy(plant_id):
+            if plant_id in self.plant_update:
                 self._proces_pushed_net_event(plant_id, dsmr_message)
         else:
             self._proces_pushed_net_event(None, dsmr_message)
@@ -682,7 +682,7 @@ class DataLogger(object):
         data = deepcopy(dsmr_message)
         dsmr_timestamp = data['timestamp']
         # if (dsmr_timestamp - last_update) > (self.every + 10) and dsmr_timestamp > self.pasttime:
-        if dsmr_timestamp > self.pasttime and plant_id:
+        if dsmr_timestamp > self.pasttime and plant_id and self.total_energy(plant_id):
             # Process independent net data for aggregated clients with regards of rate limits
             # data['current_power'] = Decimal('0')
             # Omnik related fields need 'last_update' timestamp
