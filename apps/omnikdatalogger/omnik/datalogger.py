@@ -16,6 +16,8 @@ from .dsmr import DSRM
 from copy import deepcopy
 from cachetools import Cache
 
+import importlib
+
 # from .plugin_localproxy import LocalProxyPlugin
 
 logger = logging.getLogger(__name__)
@@ -202,7 +204,10 @@ class DataLogger(object):
             Client.logger = self.logger
             Client.config = self.config
             Client.hass_api = self.hass_api
-            __import__(self.client_module)
+            # __import__(self.client_module)
+            spec = importlib.util.find_spec(self.client_module)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
             self.client = Client.client[0]
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api,
@@ -210,8 +215,8 @@ class DataLogger(object):
             sys.exit(1)
 
     def _terminate_client(self):
-        self.client.terminate()
-        del self.client
+        while Client.client:
+            Client.client.pop(0).terminate()
 
     def _init_output_plugins(self):
         self.plugins = self.config.getlist('plugins', 'output', fallback=[''])
@@ -227,7 +232,10 @@ class DataLogger(object):
             Plugin.hass_api = self.hass_api
 
             for plugin in self.plugins:
-                __import__(plugin)
+                spec = importlib.util.find_spec(plugin)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                # importlib.import_module(plugin)
 
     def _terminate_output_plugins(self):
         while Plugin.plugins:

@@ -4,6 +4,7 @@ from omnik.plugin_client import Client
 from omnik.plugin_localproxy import LocalProxyPlugin
 import time
 import threading
+import importlib
 
 
 class LocalProxy(Client):
@@ -41,7 +42,10 @@ class LocalProxy(Client):
             LocalProxyPlugin.hass_api = self.hass_api
             LocalProxyPlugin.client = self
             for plugin in self.plugins:
-                __import__(plugin)
+                # __import__(plugin)
+                spec = importlib.util.find_spec(plugin)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
         else:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "ERROR", "At least one plugin needs to be configured. "
