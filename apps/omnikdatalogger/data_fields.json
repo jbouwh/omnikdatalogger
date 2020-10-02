@@ -503,7 +503,7 @@
     "ELECTRICITY_ACTIVE_TARIFF": {
         "name": "Active tariff",
         "dev_cla": "",
-        "ic": "coin-outline",
+        "ic": "currency-eur",
         "unit": "",
         "measurement": null,
         "tags": { "power_class": "ac" },
