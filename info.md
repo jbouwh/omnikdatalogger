@@ -21,8 +21,11 @@ When used with HACS the dependencies in [requirements.txt](https://github.com/jb
 system_packages: []
 python_packages:
   - cachetools
+  - dsmr-parser
 init_commands: []
 ```
+
+The `dsmr-parser` package is needed when you are using a Dutch Smart Meter (DSMR compliant) USB adapter. Please feel free to adjust the base log_level as well.
 
 The basescript `omniklogger.py` holds a class HA_OmnikDataLogger that implements appdaemon.plugins.hass.hassapi
 See for more information and documentation about AppDaemon: https://appdaemon.readthedocs.io/en/latest/APPGUIDE.html
