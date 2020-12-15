@@ -55,10 +55,11 @@ When AppDaemon is used with Home Assistant the following base configuration coul
 system_packages: []
 python_packages:
   - cachetools
+  - dsmr-parser
 init_commands: []
 log_level: info
 ```
-The dependency for cachetools is the only 'hard' dependency. Please feel free to adjust the base log_level.
+The dependency for cachetools is the only 'hard' dependency. The `dsmr-parser` package is needed when you are using a Dutch Smart Meter (DSMR compliant) USB adapter. Please feel free to adjust the base log_level.
 
 When used with HACS the dependencies in [requirements.txt](https://github.com/jbouwh/omnikdatalogger/blob/master/requirements.txt) should be installed automatically.
 
