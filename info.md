@@ -192,7 +192,7 @@ omnik_datalogger:
     # DSMR
     timestamp_name: Update slimme meter
     ELECTRICITY_USED_TARIFF_1_name: Verbruik (laag)
-    ELECTRICITY_USED_TARIFF_2_name: Vebruik (normaal)
+    ELECTRICITY_USED_TARIFF_2_name: Verbruik (normaal)
     ELECTRICITY_DELIVERED_TARIFF_1_name: Genereerd (laag)
     ELECTRICITY_DELIVERED_TARIFF_2_name: Gegenereerd (normaal)
     energy_used_net_name: Verbruikt (net)
