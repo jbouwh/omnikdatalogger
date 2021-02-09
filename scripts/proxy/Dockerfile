@@ -1,9 +1,9 @@
-FROM python:3.8.0-alpine as base
+FROM python:3.9.1-alpine as base
 
 RUN apk add --update \
     tzdata
 
-FROM python:3.8.0-alpine
+FROM python:3.9.1-alpine
 
 WORKDIR /home/omnik
 ADD requirements.txt /home/omnik
