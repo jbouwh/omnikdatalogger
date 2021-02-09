@@ -1,9 +1,9 @@
-FROM python:3.9.1-alpine as base
+FROM python:3.9.1-alpine3.12 as base
 
 RUN apk add --update \
     tzdata
 
-FROM python:3.9.1-alpine
+FROM python:3.9.1-alpine3.12
 
 WORKDIR /home/omnik
 
