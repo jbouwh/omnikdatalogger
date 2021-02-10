@@ -26,7 +26,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.2.5'
+__version__ = '1.2.6'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -311,12 +311,12 @@ class mqtt(object):
 
         self.lock.release()
 
-    def _mqtt_on_connect(self, client, userdata, flags, rc):
+    def _mqtt_on_connect(self, client, userdata, flags, rc=0):
         if rc == 0:
             logger.info("MQTT connected")
             # subscribe listening (not used)
 
-    def _mqtt_on_disconnect(self, client, userdata, flags, rc):
+    def _mqtt_on_disconnect(self, client, userdata, flags, rc=0):
         if rc == 0:
             logger.info("MQTT disconnected")
 

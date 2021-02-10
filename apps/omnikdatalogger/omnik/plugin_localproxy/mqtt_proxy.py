@@ -42,7 +42,7 @@ class MQTTproxy(LocalProxyPlugin):
         self.mqtt_client.on_message = self._mqtt_on_message  # called on receiving updates on subscibed messages
         self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
-    def _mqtt_on_connect(self, client, userdata, flags, rc):
+    def _mqtt_on_connect(self, client, userdata, flags, rc=0, properties=None):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTTproxy client connected")
             # subscribe to datalogger objects
@@ -57,7 +57,7 @@ class MQTTproxy(LocalProxyPlugin):
                     hybridlogger.ha_log(self.logger, self.hass_api,
                                         "ERROR", f"MQTTproxy failed to subsrcibed ontopic: {topic}. Error {e}")
 
-    def _mqtt_on_disconnect(self, client, userdata, flags, rc):
+    def _mqtt_on_disconnect(self, client, userdata, flags, rc=0):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
 

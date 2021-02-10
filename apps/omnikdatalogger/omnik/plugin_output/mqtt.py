@@ -88,12 +88,12 @@ class mqtt(Plugin):
         # self.mqtt_field_name_override_init[msg['plant_id']] = True
         return asset_classes
 
-    def _mqtt_on_connect(self, client, userdata, flags, rc):
+    def _mqtt_on_connect(self, client, userdata, flags, rc=0, properties=None):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT connected")
             # subscribe listening (not used)
 
-    def _mqtt_on_disconnect(self, client, userdata, flags, rc):
+    def _mqtt_on_disconnect(self, client, userdata, flags, rc=0):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
 
