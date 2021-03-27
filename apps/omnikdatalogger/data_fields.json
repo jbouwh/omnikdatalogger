@@ -612,7 +612,7 @@
         "name": "Net power usage L1",
         "dev_cla": "power",
         "ic": "flash-circle",
-        "unit": "W",
+        "unit": "kW",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
@@ -625,7 +625,7 @@
         "name": "Net power usage L2",
         "dev_cla": "power",
         "ic": "flash-circle",
-        "unit": "W",
+        "unit": "kW",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
@@ -638,7 +638,7 @@
         "name": "Net power usage L3",
         "dev_cla": "power",
         "ic": "flash-circle",
-        "unit": "W",
+        "unit": "kW",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
@@ -651,7 +651,7 @@
         "name": "Net power delivery L1",
         "dev_cla": "power",
         "ic": "flash-circle",
-        "unit": "W",
+        "unit": "kW",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
@@ -664,7 +664,7 @@
         "name": "Net power delivery L2",
         "dev_cla": "power",
         "ic": "flash-circle",
-        "unit": "W",
+        "unit": "kW",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
@@ -677,7 +677,7 @@
         "name": "Net Power delivery L3",
         "dev_cla": "power",
         "ic": "flash-circle",
-        "unit": "W",
+        "unit": "kW",
         "measurement": "power",
         "tags": {
             "power_class": "ac",
