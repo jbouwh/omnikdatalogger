@@ -720,7 +720,7 @@ class DataLogger(object):
             self.pasttime = dsmr_timestamp - (dsmr_timestamp % self.interval_aggregated) + self.interval_aggregated
             # set net updates out for aggegated clients (pvoutput)
             last_update = datetime.timestamp(self.plant_update[plant_id])
-            if (dsmr_timestamp - last_update) > (self.every + 10) or not self.last_current_power(plant_id):
+            if (dsmr_timestamp - last_update) > (self.every + 10) or self.last_current_power(plant_id):
                 self._process_received_update(aggegated_data, netdata=True, plant=plant_id)
                 self._output_update_aggregated_data(plant_id, aggegated_data)
         # TODO process net update for other clients
