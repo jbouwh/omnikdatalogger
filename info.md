@@ -55,7 +55,7 @@ omnik_datalogger:
 #     - mqtt_proxy
 #     - tcp_proxy
 # the client that is beging used (choose one)
-# valid clients are localproxy, omnikportal, solarmanpv and tcpclient
+# valid clients are localproxy, solarmanpv and tcpclient
     client: localproxy
 
 # attributes override
@@ -120,12 +120,6 @@ omnik_datalogger:
 #   api_key: apitest
     plant_id_list:
       - 123
-
-# Omnik portal options
-  client.omnikportal:
-    username: john.doe@example.com
-    password: some_password
-#   base_url: https://api.omnikportal.com/v1
 
 # Influxdb output plugin configuration options
   output.influxdb:
@@ -255,7 +249,7 @@ key | optional | type | default | description
 #### Enable plugins in the section `plugins`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
+`client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client` or `solarmanpv`.
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
 `output` |  True | list | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
 
@@ -336,15 +330,6 @@ key | optional | type | default | description
 `base_url` | True | string | _(http://www.solarmanpv.com:18000/SolarmanApi/serverapi)_ | The API URL used to access your data.
 
 This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section mentioned earlier.
-
-#### OmnikPortal client settings in the section `client.omnikportal` of `apps.yaml`
-key | optional | type | default | description
--- | --| -- | -- | --
-`username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
-`password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
-`app_id ` | True | string | _(10038)_ | The APP_ID used to access your data. The default value might work for you as well.
-`app_key` | True | string | _(Ox7yu3Eivicheinguth9ef9kohngo9oo)_ | The API key to access your data 
-`base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data.
 
 #### MQTT plugin
 You can use the the official add-on 'Mosquito broker' for the MQTT integration in HomeAssistant

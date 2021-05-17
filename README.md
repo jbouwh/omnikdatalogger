@@ -127,7 +127,7 @@ omnik_datalogger:
 #     - mqtt_proxy
 #     - tcp_proxy
 # the client that is beging used (choose one)
-# valid clients are localproxy, omnikportal, solarmanpv and tcpclient
+# valid clients are localproxy, solarmanpv and tcpclient
     client: localproxy
 
 # attributes override
@@ -192,12 +192,6 @@ omnik_datalogger:
 #   api_key: apitest
     plant_id_list:
       - 123
-
-# Omnik portal options
-  client.omnikportal:
-    username: john.doe@example.com
-    password: some_password
-#   base_url: https://api.omnikportal.com/v1
 
 # Influxdb output plugin configuration options
   output.influxdb:
@@ -339,7 +333,7 @@ key | optional | type | default | description
 #### Plugin settings in the section `plugins` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, `solarmanpv` or `omnikportal`.
+`client` | False | string | _(none)_ | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client`, or `solarmanpv`.
 `localproxy` | True | list | _(none)_ | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.
 `output` |  True | list | _(empty list)_ | A (yaml) list of string specifying the name(s) of the output plugins to be used. Available plugins are *pvoutput*, *influxdb* and *mqtt*. If no plugins are configured, nothing will be logged.
 
@@ -366,7 +360,7 @@ key | optional | type | default | description
 Every client and client plugin has an own section with configuration keys. Additional for every plant there is a section with plant specific settings.
 
 ### Plant specific settings in the section `plant.*plant_id*` of `apps.yaml` or `config.ini`
-Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by logging in at the https://www.omnikportal.com. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
+Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan_id by logging in at the https://www.solarmanpv.com/portal. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
 key | optional | type | default | description
 -- | --| -- | -- | --
 `inverter_address` | True | string | _(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.
@@ -426,15 +420,6 @@ key | optional | type | default | description
 
 This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section [mentioned earlier](#plant-specific-settings-under-plant_id-in-appsyaml-or-plant_id-configini-configuration-options).
 
-### OmnikPortal client settings in the section `client.omnikportal` of `apps.yaml` or `config.ini`
-key | optional | type | default | description
--- | --| -- | -- | --
-`username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
-`password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
-`app_id ` | True | string | _(10038)_ | The APP_ID used to access your data. The default value might work for you as well.
-`app_key` | True | string | _(Ox7yu3Eivicheinguth9ef9kohngo9oo)_ | The API key to access your data 
-`base_url` | True | string | _(https://api.omnikportal.com/v1)_ | The API URL used to access your data.
-    
 ## Output plugins
 
 ### MQTT plugin
@@ -635,7 +620,7 @@ city = Amsterdam
 interval = 360
 
 [plugins]
-# valid clients are localproxy, omnikportal, solarmanpv and tcpclient. Chose one!
+# valid clients are localproxy, solarmanpv and tcpclient. Chose one!
 client = localproxy
 
 # valid localproxy client plugins are: mqtt_proxy, tcp_proxy, hassapi
@@ -719,11 +704,6 @@ listen_port = 10004
 [client.tcpclient]
 plant_id_list = 123
 # The serial number is checked against the section [plant_id] inverter_sn = serialnumber
-
-# omnik portal client settings
-[client.omnikportal]
-username = john.doe@example.com
-password = S3cret!
 
 # solarmanpv portal client settings
 [client.solarmanpv]
