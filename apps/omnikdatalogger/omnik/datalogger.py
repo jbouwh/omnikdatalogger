@@ -53,7 +53,6 @@ class DataLogger(object):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Error reading configuration file (data_fields.json). Exiting!. Error: {e.args}")
             raise e
-            sys.exit(1)
 
         # read attributes
         if not self._read_attributes():
@@ -177,7 +176,6 @@ class DataLogger(object):
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Error reading attributes from config. Error: {e.args}")
             raise e
-            return False
         return True
 
     def terminate(self):

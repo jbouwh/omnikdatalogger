@@ -13,7 +13,7 @@ from omnik import RepeatedJob
 from omnik.datalogger import DataLogger
 try:
     # AppDeamon is only needed when run used with AppDaemon
-    import appdaemon.plugins.hass.hassapi as hass
+    import appdaemon.plugins.hass.hassapi as hass # type: ignore
 except ImportError:
     # AppDeamon is not needed when run in command mode uses dummy class
     class hass(object):
@@ -222,6 +222,14 @@ def setup_config_parser(args, settings):
 
 def get_config_from_files(args):
     c = None
+    if args.debug:
+        ha_args['debug'] = args.debug
+    if args.interval:
+        ha_args['interval'] = args.interval
+    if args.data_config:
+        ha_args['data_config'] = args.data_config
+    if args.persistant_cache_file:
+        ha_args['persistant_cache_file'] = args.persistant_cache_file
     if os.path.isfile(args.settings):
         if os.path.isfile(args.config):
             logging.warning("Multiple config files found at '{0}' or '{1}', "
@@ -229,17 +237,11 @@ def get_config_from_files(args):
                             format(args.settings, args.config))
 
         settings = get_yaml_settings(args)
+        # commandline override
+        settings.update(ha_args)
         c = setup_config_parser(args, settings)
     if os.path.isfile(args.config) and not os.path.isfile(args.settings):
         ha_args['config'] = args.config
-        if args.debug:
-            ha_args['debug'] = args.debug
-        if args.interval:
-            ha_args['interval'] = args.interval
-        if args.data_config:
-            ha_args['data_config'] = args.data_config
-        if args.persistant_cache_file:
-            ha_args['persistant_cache_file'] = args.persistant_cache_file
         c = ha_ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]}, ha_args=ha_args)
         c.read([args.config], encoding='utf-8')
         c.configfile = args.config
