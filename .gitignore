@@ -195,4 +195,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# configfiles
+.omnik/*
+
 # End of https://www.gitignore.io/api/macos,python,windows,visualstudiocode

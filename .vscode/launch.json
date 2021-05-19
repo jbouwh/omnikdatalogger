@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Omnikdatalogger",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/apps//omnikdatalogger/omniklogger.py",
+        "args": ["--debug", "--settings", "${workspaceFolder}/.omnik/config.yaml", "--config", "${workspaceFolder}/.omnik/config.ini", "--persistant_cache_file", "${workspaceFolder}/.omnik/persistant_cache.json"]
+      }
+    ]
+  }
+  
