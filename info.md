@@ -257,7 +257,7 @@ key | optional | type | default | description
 key | optional | type | default | description
 -- | --| -- | -- | --
 `terminals ` | False | list | _(empty list)_ | List of DSMR terminals. Eacht termial has settings at section [dsrm.{terminal_name}]. An empty list disables the DSMR integration.
-`tarif.0001` |  True | string | _low_ | Tarif value override for tarif 0001 (low). If yoy need outher tarifs then 0001 or 0002 the configure the tarif key.
+`tarif.0001` |  True | string | _low_ | Tarif value override for tarif 0001 (low). If you need outher tarifs then 0001 or 0002 the configure the tarif key.
 `tarif.0002` |  True | string | _normal_ | Tarif value override for tarif 0002 (normal)
 `tarif` | True"| list | _['0001', '0002']_ | Use only if your meter has other tarifs then 0001 and 0002 and you want to override the name. (Not needed in the Netherlands I suppose)
 
