@@ -26,7 +26,7 @@ import logging
 import datetime
 import time
 
-__version__ = '1.2.6'
+__version__ = '1.2.7'
 listenaddress = b'127.0.0.1'                       # Default listenaddress
 listenport = 10004                                 # Make sure your firewall enables you listening at this port
 # There is no need to change this if this proxy must log your data directly to the Omnik/SolarmanPV servers
@@ -453,7 +453,7 @@ if __name__ == '__main__':
         args.logger_sensor_name = c.get('output.mqtt', 'logger_sensor_name', fallback=args.mqtt_logger_sensor_name)
 
         # TODO: Try to get from config from no arguments are given. Handle required parameters and defaults
-        args.serialnumber = c.getlist('proxy', 'serialnumber', fallback=args.serialnumber)
+        args.serialnumber = c.get('proxy', 'serialnumber', fallback=args.serialnumber)
         args.loglevel = c.get('proxy', 'loglevel', fallback=args.loglevel)
         args.listenaddress = c.get('proxy', 'listenaddress', fallback=args.listenaddress)
         args.listenport = c.getint('proxy', 'listenport', fallback=args.listenport)

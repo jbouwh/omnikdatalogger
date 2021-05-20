@@ -126,12 +126,6 @@ class pvoutput(Plugin):
 
         except requests.exceptions.RequestException as err:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Unhandled request error: {err}")
-        except requests.exceptions.HTTPError as errh:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Http error: {errh}")
-        except requests.exceptions.ConnectionError as errc:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Connection error: {errc}")
-        except requests.exceptions.Timeout as errt:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"Unexpected error: {e.args}")
         finally:

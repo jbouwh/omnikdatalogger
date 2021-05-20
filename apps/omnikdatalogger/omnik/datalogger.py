@@ -1,6 +1,8 @@
 import os
 import sys
 import logging
+
+from requests.exceptions import RequestException
 from omnik.ha_logger import hybridlogger
 import requests
 import json
@@ -345,18 +347,9 @@ class DataLogger(object):
             self.client.initialize()
             # Logged on
             self.omnik_api_level = 1
-        except requests.exceptions.RequestException as err:
-            hybridlogger.ha_log(self.logger, self.hass_api,
-                                "WARNING", f"Request error during account validation omnik portal: {err}")
-        except requests.exceptions.HTTPError as errh:
-            hybridlogger.ha_log(self.logger, self.hass_api,
-                                "WARNING", f"HTTP error during account validation omnik portal: {errh}")
-        except requests.exceptions.ConnectionError as errc:
+        except RequestException as errc:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "WARNING", f"Connection error during account validation omnik portal: {errc}")
-        except requests.exceptions.Timeout as errt:
-            hybridlogger.ha_log(self.logger, self.hass_api,
-                                "WARNING", f"Timeout error during account validation omnik portal: {errt}")
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", e)
 
@@ -378,18 +371,6 @@ class DataLogger(object):
                 self.omnik_api_level = 2
             except requests.exceptions.RequestException as err:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Request error: {err}")
-                self.omnik_api_level = 0
-                return False
-            except requests.exceptions.HTTPError as errh:
-                hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"HTTP error: {errh}")
-                self.omnik_api_level = 0
-                return False
-            except requests.exceptions.ConnectionError as errc:
-                hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Connection error: {errc}")
-                self.omnik_api_level = 0
-                return False
-            except requests.exceptions.Timeout as errt:
-                hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
                 self.omnik_api_level = 0
                 return False
             except Exception as e:
@@ -446,21 +427,6 @@ class DataLogger(object):
 
         except requests.exceptions.RequestException as err:
             hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Request error: {err}")
-            self.omnik_api_level = 0
-            # Abort retry later
-            return None
-        except requests.exceptions.HTTPError as errh:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"HTTP error: {errh}")
-            self.omnik_api_level = 0
-            # Abort retry later
-            return None
-        except requests.exceptions.ConnectionError as errc:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Connection error: {errc}")
-            self.omnik_api_level = 0
-            # Abort retry later
-            return None
-        except requests.exceptions.Timeout as errt:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Timeout error: {errt}")
             self.omnik_api_level = 0
             # Abort retry later
             return None

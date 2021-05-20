@@ -124,7 +124,6 @@ class InverterMsg:
             if not isinstance(data, dict):
                 # Object is not a dict
                 raise Exception("data object is not a dict")
-                return
         else:
             data = {}
         # Fill the dict

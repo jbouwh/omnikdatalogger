@@ -85,7 +85,7 @@ class ha_ConfigParser(configparser.ConfigParser):
                 if option in self.ha_args[section]:
                     return self.ha_args[section].get(option, fallback)
         try:
-            retval = super().getlist(section, option, fallback=fallback, **kwargs)
+            retval = super().get(section, option, fallback=fallback, **kwargs)
         except Exception:
             retval = fallback
             pass
