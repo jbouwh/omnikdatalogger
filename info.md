@@ -291,7 +291,7 @@ key | optional | type | default | description
 `plant_id_list` | False | list | _(none)_ | List with the plant id's you monitor. Details for the plant are set in section `plant.{plant id}]`. Every plant has its own section.
 
 The LocalProxy client uses input plugins that are used to collect the data.
-The `omnikloggerproxy.py` script (under the folder `/scripts/proxy`) enable to proxy the raw logger data to MQTT and can help to forward your data to omnikdatalogger and still support forwarding the logging to the the legacy portal of Omnik/Solarman.
+The `omnikloggerproxy.py` script (See `https://github.com/jbouwh/omnikdataloggerproxy`) enable to proxy the raw logger data to MQTT and can help to forward your data to omnikdatalogger and still support forwarding the logging to the the legacy portal of Omnik/Solarman.
 Multiple plugins can be enabled, but usualy you will use one of these input pluging. The decoding is based on _(https://github.com/Woutrrr/Omnik-Data-Logger)_ by Wouter van der Zwan.
 The plugings for the `localproxy` client are:
 * `tcp_proxy`: Listens to directed inverter input on port 10004. See *tcp_proxy* paragraph. Yo need to forward the inverter traffic to be able to intercept your inverter data.
