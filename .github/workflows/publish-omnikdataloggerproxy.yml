@@ -7,6 +7,10 @@ on:
   release:
     types: [created]
 
+defaults:
+  run:
+    working-directory: ./scripts/proxy
+
 jobs:
   deploy:
 
@@ -28,6 +32,5 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        cd ./scripts/proxy
         python setup.py sdist bdist_wheel
         twine upload dist/*
