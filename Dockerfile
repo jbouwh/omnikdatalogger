@@ -9,9 +9,9 @@ WORKDIR /home/omnik/source
 
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 
-ADD requirements.txt apps/omnikdatalogger/ scripts/systemd/ setup.py README.md ./
-
 ENV TZ=Europe/Amsterdam
+
+COPY requirements.txt apps/omnikdatalogger/ scripts/systemd/ setup.py README.md ./
 
 RUN pip3 install -r requirements.txt --upgrade && \
   adduser -D -u 1000 omnik && \
