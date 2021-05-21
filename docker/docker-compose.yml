@@ -5,7 +5,7 @@ services:
     build: .
     image: omnikdatalogger:latest
     volumes:
-      - "${PWD}/config.yaml:/config.yaml"
+      - "${PWD}/config.yaml:/config/config.yaml"
     expose:
       - "10004"
     logging:
