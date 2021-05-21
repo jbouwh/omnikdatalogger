@@ -19,7 +19,7 @@ RUN pip3 install -r requirements.txt --upgrade && \
   python setup.py install && \
   adduser -D -u 1000 omnik && \
   mkdir /config && \
-  cp -u /source/apps/omnikdatalogger/data_fields.json /config && \
+  cp -u /source/apps/omnikdatalogger/data_fields.json /config/data_fields.json && \
   chown omnik.users -R /config
 
 WORKDIR /config
