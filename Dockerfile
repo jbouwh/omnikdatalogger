@@ -5,15 +5,15 @@ RUN apk add --update \
 
 FROM python:3.9.1-alpine3.12
 
-WORKDIR /home/omnik/source
+WORKDIR /source
 
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 
 ENV TZ=Europe/Amsterdam
 
 COPY requirements.txt setup.py README.md ./
-COPY apps/omnikdatalogger/. apps/omnikdatalogger/ 
 COPY scripts/systemd/. scripts/systemd/ 
+COPY apps/omnikdatalogger/. apps/omnikdatalogger/ 
 
 RUN pip3 install -r requirements.txt --upgrade && \
   adduser -D -u 1000 omnik && \
