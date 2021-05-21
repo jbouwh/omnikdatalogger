@@ -12,7 +12,7 @@ COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Amsterdam
 
 COPY requirements.txt setup.py README.md ./
-COPY apps/omnikdatalogger/. scripts/systemd/. apps/omnikdatalogger/ 
+COPY apps/omnikdatalogger/. apps/omnikdatalogger/ 
 COPY scripts/systemd/. scripts/systemd/ 
 
 RUN pip3 install -r requirements.txt --upgrade && \

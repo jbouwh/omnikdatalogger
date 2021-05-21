@@ -42,7 +42,7 @@ setup(
     packages=find_packages(where="apps/omnikdatalogger"),
     data_files=[('share/omnikdatalogger', [
         'apps/omnikdatalogger/data_fields.json',
-        'vomnikdatalogger.service',
+        'scripts/systemd/omnikdatalogger.service',
         ])
                 ],
     classifiers=[
