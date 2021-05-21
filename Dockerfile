@@ -7,9 +7,9 @@ FROM python:3.9.1-alpine3.12
 
 WORKDIR /home/omnik/source
 
-ADD requirements.txt apps/omnikdatalogger/ share/omnikdatalogger/ setup.py README.md ./
-
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+
+ADD requirements.txt apps/omnikdatalogger/ share/omnikdatalogger/ setup.py README.md ./
 
 ENV TZ=Europe/Amsterdam
 
