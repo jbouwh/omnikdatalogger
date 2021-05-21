@@ -172,7 +172,7 @@ def set_data_config_path(config):
     config.data_config_file_path = f"{pathlib.Path(__file__).parent.absolute()}/data_fields.json"
     config.data_config_file_shared = f"{pathlib.Path(__file__).parent.parent.absolute()}" \
                                      "/share/omnikdatalogger/data_fields.json"
-    config.data_config_file_cwd = f"{os.getcwd()}/datafields.json"
+    config.data_config_file_cwd = f"{os.getcwd()}/data_fields.json"
 
 
 def get_yaml_settings(args):
