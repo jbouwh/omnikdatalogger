@@ -19,14 +19,16 @@ RUN pip3 install -r requirements.txt --upgrade && \
   python setup.py install && \
   adduser -D -u 1000 omnik && \
   mkdir /config && \
-  cp /source/apps/omnikdatalogger/data_fields.json /config/data_fields.json && \
+  mkdir /home && \
+  cp /source/apps/omnikdatalogger/data_fields.json /home/omnik/data_fields.json && \
+  chown omnik.users -R /home/omnik && \
   chown omnik.users -R /config
 
-WORKDIR /config
+WORKDIR /home/omnik
 USER omnik
 
 EXPOSE 10004
 
 ENTRYPOINT ["omniklogger.py"]
 
-CMD ["--config", "/config/config.ini","--settings", "/config/config.yaml", "--persistant_cache_file", "/config/persistant_cache.json", "--data_config", "/config/data_fields.json"]
+CMD ["--config", "/config/config.ini","--settings", "/config/config.yaml", "--persistant_cache_file", "/config/persistant_cache.json"]
