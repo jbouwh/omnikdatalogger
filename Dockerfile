@@ -9,7 +9,7 @@ WORKDIR /home/omnik/source
 
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 
-ADD requirements.txt apps/omnikdatalogger/ share/omnikdatalogger/ setup.py README.md ./
+ADD requirements.txt apps/omnikdatalogger/ scripts/systemd/ setup.py README.md ./
 
 ENV TZ=Europe/Amsterdam
 
