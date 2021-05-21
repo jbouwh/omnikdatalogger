@@ -5,17 +5,19 @@ RUN apk add --update \
 
 FROM python:3.9.1-alpine3.12
 
-WORKDIR /home/omnik
+WORKDIR /home/omnik/source
 
-ADD requirements.txt /home/omnik
+ADD requirements.txt apps/omnikdatalogger/ share/omnikdatalogger/ setup.py README.md ./
 
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 
 ENV TZ=Europe/Amsterdam
 
 RUN pip3 install -r requirements.txt --upgrade && \
-  adduser -D -u 1000 omnik
+  adduser -D -u 1000 omnik && \
+  python setup.py install
 
+WORKDIR /home/omnik
 USER omnik
 
 EXPOSE 10004
