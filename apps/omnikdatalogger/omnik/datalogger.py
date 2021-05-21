@@ -96,6 +96,8 @@ class DataLogger(object):
                             f"Data configuration [path]: '{self.config.data_config_file_path}'.")
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                             f"Data configuration [shared]: '{self.config.data_config_file_shared}'.")
+        hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
+                            f"Data configuration [cwd]: '{self.config.data_config_file_cwd}'.")        
         if self.config.configfile:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Using configuration from '{self.config.configfile}'.")
 
@@ -111,6 +113,10 @@ class DataLogger(object):
             self.data_config_file = self.config.data_config_file_shared
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
                                 f"Using shared data configuration from '{self.data_config_file}'.")
+        elif os.path.exists(self.config.data_config_file_cwd):
+            self.data_config_file = self.config.data_config_file_cwd
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
+                                f"Using shared data configuration current working directory '{self.data_config_file}'.")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 "No valid data configuration file (data_fields.json) found. Exiting!")
