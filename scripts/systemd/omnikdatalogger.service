@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/omniklogger.py --settings /etc/omnik/config.ini --settings /etc/omnik/config.yaml --interval 360
+ExecStart=/usr/local/bin/omniklogger.py --settings /etc/omnik/config.ini --settings /etc/omnik/config.yaml
 Restart=on-failure
 RestartSec=30s
 
