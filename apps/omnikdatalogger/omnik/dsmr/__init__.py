@@ -56,12 +56,6 @@ class DSRM(object):
             self.ts_last_telegram[terminal] = 0
             self.last_gas_update[terminal] = [0, Decimal('0.0'), Decimal('0.000')]
 
-            # Warnings and errors
-            if not self.tconfig[terminal]['plant_id']:
-                hybridlogger.ha_log(self.logger, self.hass_api,
-                                    "WARNING", f"DSMR 'plant_id' for terminal '{terminal}' is not specified. "
-                                    "Received data will be NOT be associated with your solar data "
-                                    "and will be processed as stand-a-lone data!")
             # Initialize terminal
             self.terminals[terminal] = Terminal(self.config, self.logger, self.hass_api, terminal,
                                                 self.dsmr_serial_callback, self.tconfig[terminal]['dsmr_version'])
