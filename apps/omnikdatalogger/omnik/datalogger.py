@@ -404,12 +404,16 @@ class DataLogger(object):
         newreporttime = datetime.fromtimestamp(data['last_update']).astimezone(timezone.utc)
         if not plant:
             plant = data['plant_id']
+        if plant == '0':
+            updated_entities = 'aggregated logging'
+        else:
+            updated_entities = f'plant {plant}'
         if netdata:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                f"Net data update for plant '{plant}' update at UTC {newreporttime}")
+                                f"Net data update for {updated_entities} UTC {newreporttime}")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                f"Update for plant {plant} update at UTC {newreporttime}")
+                                f"Update for {updated_entities} UTC {newreporttime}")
 
         return plant
 
@@ -428,7 +432,7 @@ class DataLogger(object):
                 # Only proces updates that occured after we started or start a single measurement (TODO)
                 if (newreporttime > self.plant_update[plant].last_update_time or not self.every or self.sundown):
                     hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                        f"Update for plant {plant} update at UTC {newreporttime}")
+                                        f"Update for plant {plant} UTC {newreporttime}")
                     # the newest plant_update time will be used as a baseline to program the timer
                     self.last_update_time = newreporttime
                     # Store the plant_update time for each indiviual plant,
@@ -708,7 +712,7 @@ class DataLogger(object):
             # set next time block for update
             self.pasttime = dsmr_timestamp - (dsmr_timestamp % self.interval_aggregated) + self.interval_aggregated
             # set net updates out for aggegated output (pvoutput) with (multiple) pushing inverters with aggegation and no updates
-            last_update = 0.0
+            last_update = time.time()
             if plant_id == '0':
                 for plant in self.plant_update:
                     if datetime.timestamp(self.plant_update[plant].last_update_time) > last_update:
