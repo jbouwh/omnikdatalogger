@@ -50,6 +50,6 @@
 	// Advertize container environment
 	"containerEnv": { "DEVCONTAINER": "1" },
 
-	// Setup appdaemoin environment
+	// Setup appdaemon environment
 	"runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/devcontainer.env"],
 }
