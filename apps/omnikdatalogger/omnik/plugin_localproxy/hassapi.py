@@ -9,7 +9,7 @@ class HASSAPI(LocalProxyPlugin):
     This plugin enables you to subscribe to the logger requests using the AppDaemon HASSAPI integration
     Use scripts/proxy/omnikloggerproxy.py to capture the inverter events and publish the data to MQTT (Home Assistant)
 
-    This class makes use the following localproxy client objects
+    This class makes use of the following localproxy client attributes
     self.client.msg
     self.client.msgevent
     self.client.semaphore
@@ -28,7 +28,7 @@ class HASSAPI(LocalProxyPlugin):
         # Deprecated property (use only if no plant specific configuration is available)
         self.legacy_logger_entity = self.config.get('client.localproxy.hassapi', 'logger_entity', 'binary_sensor.datalogger')
         self.logger_entity = []
-        for plant in self.config.getlist('client.localproxy', 'plant_id_list', []):
+        for plant in self.client.plant_id_list:
             entity = self.config.get(f'plant.{plant}', 'logger_entity', None)
             if entity:
                 self.logger_entity.append(entity)

@@ -8,8 +8,9 @@ class LocalProxyBasePlugin(type):
         else:
             cls.register(cls)  # Called when a plugin class is imported
 
-    def register(cls, plugin):
-        cls.localproxy_plugins.append(plugin())
+    def register(cls, plugin=None):
+        if plugin:
+            cls.localproxy_plugins.append(plugin())
 
 
 class LocalProxyPlugin(object, metaclass=LocalProxyBasePlugin):
