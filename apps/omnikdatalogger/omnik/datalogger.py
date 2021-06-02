@@ -709,7 +709,7 @@ class DataLogger(object):
 
             aggegated_data = {}
             self._aggregate_data(aggegated_data, data)
-            # Do not publish the current power
+            # Do not publish the current power, since we do not know the last state
             # set next time block for update
             self.pasttime = dsmr_timestamp - (dsmr_timestamp % self.interval_aggregated) + self.interval_aggregated
             # set net updates out for aggegated output (pvoutput) with (multiple) pushing inverters with aggegation and no updates
@@ -720,7 +720,7 @@ class DataLogger(object):
                         last_update = datetime.timestamp(self.plant_update[plant].last_update_time)
             else:
                 last_update = datetime.timestamp(self.plant_update[plant_id].last_update_time)
-            if (dsmr_timestamp - last_update) > (self.every + 10) or self.last_current_power(plant_id):
+            if (dsmr_timestamp - last_update) > self.every + 10:
                 self._process_received_update(aggegated_data, netdata=True, plant=plant_id)
                 self._output_update_aggregated_data(plant_id, aggegated_data)
         # TODO process net update for other clients
