@@ -197,5 +197,15 @@ $RECYCLE.BIN/
 
 # configfiles
 .omnik/*
+.devcontainer/devcontainer.env
+persistant_cache.json
+
+#appdaemon
+
+www/*
+compiled/*
+css/*
+apps/apps.yaml
+appdaemon/*
 
 # End of https://www.gitignore.io/api/macos,python,windows,visualstudiocode
