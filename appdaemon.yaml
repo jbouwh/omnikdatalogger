@@ -1,0 +1,31 @@
+secrets: .omnik/secrets.yaml
+appdaemon:
+  latitude: 0.0
+  longitude: 0.0
+  elevation: 0.0
+  time_zone: Europe/Amsterdam
+  exclude_dirs:
+    - build
+    - dist
+    - docker
+    - scripts
+    - tests
+    - www
+    - namespaces
+    - css
+    - compiled
+  plugins:
+    HASS:
+      type: hass
+      ha_url: !secret ha_url
+      token: !secret token
+http:
+  url: http://localhost:5050/
+admin:
+api:
+hadashboard:
+logs:
+  main_log:
+    filename: appdaemon/appdaemon.log
+  error_log:
+    filename: appdaemon/appdaemon.err

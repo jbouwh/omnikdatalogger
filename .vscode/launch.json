@@ -8,8 +8,15 @@
         "name": "Omnikdatalogger",
         "type": "python",
         "request": "launch",
-        "program": "${workspaceFolder}/apps//omnikdatalogger/omniklogger.py",
-        "args": ["--debug", "--settings", "${workspaceFolder}/.omnik/config.yaml", "--config", "${workspaceFolder}/.omnik/config.ini", "--persistant_cache_file", "${workspaceFolder}/.omnik/persistant_cache.json"]
+        "program": "${workspaceFolder}/apps/omnikdatalogger/omniklogger.py",
+        "args": ["--debug", "--settings", "${workspaceFolder}/.omnik/config.yaml", "--config", "${workspaceFolder}/.omnik/config.ini", "--persistant_cache_file", "${workspaceFolder}/.omnik/persistant_cache.json"],
+      },
+      {
+        "name": "Omnikdatalogger (AppDaemon)",
+        "type": "python",
+        "request": "launch",
+        "program": "/home/vscode/.local/bin/appdaemon",
+        "args": [ "-c", "${workspaceFolder}/"],
       }
     ]
   }
