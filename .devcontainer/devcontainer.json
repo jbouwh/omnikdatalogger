@@ -42,7 +42,7 @@
 	"forwardPorts": [10004, 5050],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip3 install --user -r requirements.txt && pip3 install --user appdaemon",
+	"postCreateCommand": "pip3 install --user -r requirements.txt && pip3 install --user appdaemon && ln -s ../.omnik/config.yaml /workspaces/omnikdatalogger/apps/apps.yaml",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
