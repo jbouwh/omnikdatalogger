@@ -197,7 +197,6 @@ $RECYCLE.BIN/
 
 # configfiles
 .omnik/*
-.devcontainer/devcontainer.env
 persistant_cache.json
 
 #appdaemon
