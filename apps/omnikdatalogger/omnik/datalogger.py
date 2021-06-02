@@ -720,7 +720,7 @@ class DataLogger(object):
                         last_update = datetime.timestamp(self.plant_update[plant].last_update_time)
             else:
                 last_update = datetime.timestamp(self.plant_update[plant_id].last_update_time)
-            if (dsmr_timestamp - last_update) > self.every + 10:
+            if (dsmr_timestamp - last_update) > (self.every * 2):
                 self._process_received_update(aggegated_data, netdata=True, plant=plant_id)
                 self._output_update_aggregated_data(plant_id, aggegated_data)
         # TODO process net update for other clients
@@ -820,21 +820,17 @@ class DataLogger(object):
             # Wait for new data logging event
             data = self._listen_for_update()
             if data:
-                aggegated_data = {}
                 plant = self._process_received_update(data)
                 # Set last update time for plant
                 self.plant_update[plant].last_update_time = datetime.fromtimestamp(data['last_update'], timezone.utc)
-                self.plant_update[plant].data = data
                 # Digitize data
                 self._digitize(data)
+                # Cache last update for aggregation
+                self.plant_update[plant].data = data
                 # Get specific dsmr data
                 self._get_dsmr_data(plant, data)
-                # Assemble aggegated data
-                self._aggregate_data(aggegated_data, data)
                 # export the data to the output plugins
                 self._output_update(plant, data)
-                # Process aggregated
-                self._output_update_aggregated_data(plant, aggegated_data)
         
         # To aggregate over multiple inverters we need to trigger publishing when we an update for all our inverters
         # Unless the last data update of an inverter is longer then 7 minutes ago
