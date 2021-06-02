@@ -25,6 +25,8 @@ class influxdb(Plugin):
         elif self.config.has_option('output.influxdb', 'username') and self.config.has_option('output.influxdb', 'password'):
             self.auth = requests.auth.HTTPBasicAuth(self.config.get('output.influxdb', 'username'),
                                                     self.config.get('output.influxdb', 'password'))
+        else:
+            self.auth = None
         self.timestamp_field = {}
         for field in self.config.data_field_config:
             if not self.config.data_field_config[field]['dev_cla'] == 'timestamp':
@@ -93,7 +95,7 @@ class influxdb(Plugin):
             self.access.acquire()
             msg = args['msg']
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                                f"Loggin data to InfluxDB: {msg}")
+                                f"Logging data to InfluxDB: {msg}")
             values = msg.copy()
             # self._get_temperature(values)
 
@@ -121,6 +123,5 @@ class influxdb(Plugin):
         except Exception as e:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
                                 f"Got unknown submitting to influxdb: {e.args} (ignoring: if this happens a lot ... fix it)")
-            raise e
         finally:
             self.access.release()
