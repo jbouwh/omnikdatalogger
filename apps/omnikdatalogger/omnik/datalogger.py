@@ -706,13 +706,14 @@ class DataLogger(object):
             data['today_energy'] = self.total_energy(plant_id, lifetime=False)
             self._calculate_consumption(data)
             data['total_energy'] = data.pop('total_energy_recalc')
+
             aggegated_data = {}
             self._aggregate_data(aggegated_data, data)
             # Do not publish the current power
             # set next time block for update
             self.pasttime = dsmr_timestamp - (dsmr_timestamp % self.interval_aggregated) + self.interval_aggregated
             # set net updates out for aggegated output (pvoutput) with (multiple) pushing inverters with aggegation and no updates
-            last_update = time.time()
+            last_update = 0.0
             if plant_id == '0':
                 for plant in self.plant_update:
                     if datetime.timestamp(self.plant_update[plant].last_update_time) > last_update:
