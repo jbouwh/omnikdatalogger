@@ -1,7 +1,7 @@
 class BaseClient(type):
     def __init__(cls, name, bases, attrs):
         super(BaseClient, cls).__init__(name)
-        if not hasattr(cls, 'client'):
+        if not hasattr(cls, "client"):
             cls.client = []
         else:
             cls.register(cls)  # Called when a client class is imported

@@ -98,7 +98,7 @@ class DataLogger(object):
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
                             f"Data configuration [shared]: '{self.config.data_config_file_shared}'.")
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG",
-                            f"Data configuration [cwd]: '{self.config.data_config_file_cwd}'.")        
+                            f"Data configuration [cwd]: '{self.config.data_config_file_cwd}'.")
         if self.config.configfile:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Using configuration from '{self.config.configfile}'.")
 
@@ -505,7 +505,7 @@ class DataLogger(object):
                     'voltage_ac_max',
                     'inverter_temperature',
                 ]:
-                self._init_aggregated_data_field(aggregated_data, data, field)    
+                self._init_aggregated_data_field(aggregated_data, data, field)
             if self.dsmr:
                 for field in [
                     # Attributes Electricity for pvoutput
@@ -556,7 +556,7 @@ class DataLogger(object):
                     "gas_consumption_total",
                     "gas_consumption_hour",
                 ]:
-                    self._init_aggregated_data_field(aggregated_data, data, field)    
+                    self._init_aggregated_data_field(aggregated_data, data, field)
                 # Other attributes Electricity
                 # Other attributes Gas
                 {"timestamp_gas": 1622714706.0, "gas_consumption_total": 2864.6, "gas_consumption_hour": 0}
@@ -623,7 +623,7 @@ class DataLogger(object):
                 self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_DELIVERED_TARIFF_1')
                 self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_DELIVERED_TARIFF_2')
                 self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_ACTIVE_TARIFF')
-                
+
                 self._adapt_add_value(aggregated_data, data, 'energy_delivered_net')
                 self._adapt_add_value(aggregated_data, data, 'CURRENT_ELECTRICITY_USAGE')
                 self._adapt_add_value(aggregated_data, data, 'CURRENT_ELECTRICITY_DELIVERY')
@@ -695,7 +695,7 @@ class DataLogger(object):
             if field in digitize_fields:
                 data[field] = Decimal(f'{data[field]}')
         self._total_energy_recalc(data)
-    
+
     def _total_energy_recalc(self, data):
         # Re calculate total energy for today accuracy (TODO per plant_id!) update after every measurement
         # store in cache and make persistant
@@ -876,7 +876,7 @@ class DataLogger(object):
                         # Assemble aggegated data
                         self._aggregate_data(aggegated_data, data)
                     except:
-                        # do not allow data aggregation unless we have valid data 
+                        # do not allow data aggregation unless we have valid data
                         skip_aggregation = True
 
             # Process aggregated data over all plants if no specific plants are configured with DSMR terminal
@@ -930,7 +930,7 @@ class DataLogger(object):
                 self._output_update(plant, data)
         else:
             return next_report_at
-        
+
         # To aggregate over multiple inverters we need to trigger publishing when we an update for all our inverters
         # Unless the last data update of an inverter is longer then 2 timed cycles
         aggegated_data = {}
@@ -951,9 +951,9 @@ class DataLogger(object):
             if len(self.client.plant_id_list) > 1:
                 self._output_update(plant, aggegated_data)
             self._output_update_aggregated_data('0', aggegated_data)
-            # 
+            #
             hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Aggregated data processed.')
-                
+
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Pushed logging processed')
 

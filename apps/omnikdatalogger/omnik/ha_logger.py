@@ -2,10 +2,9 @@ import datetime
 
 
 class hybridlogger:
-
     @staticmethod
     def ha_log(logger, hass_api, level, message):
-        if hass_api and hasattr(hass_api, 'log'):
+        if hass_api and hasattr(hass_api, "log"):
             hass_api.log(message, level=level)
         else:
             if level == "DEBUG":

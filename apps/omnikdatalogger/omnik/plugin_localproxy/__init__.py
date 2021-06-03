@@ -1,9 +1,7 @@
-
-
 class LocalProxyBasePlugin(type):
     def __init__(cls, name, bases, attrs):
         super(LocalProxyBasePlugin, cls).__init__(name)
-        if not hasattr(cls, 'localproxy_plugins'):
+        if not hasattr(cls, "localproxy_plugins"):
             cls.localproxy_plugins = []
         else:
             cls.register(cls)  # Called when a plugin class is imported

@@ -6,17 +6,16 @@ from omnik.ha_logger import hybridlogger
 from datetime import datetime, timedelta, timezone
 import threading
 
-logging.basicConfig(stream=sys.stdout,
-                    level=os.environ.get('LOGLEVEL', logging.INFO))
+logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOGLEVEL", logging.INFO))
 
-__version__ = '1.5.0'
+__version__ = "1.5.0"
 
 logger = logging.getLogger(__name__)
 
 
 class RepeatedJob(object):
     def __init__(self, c, datalogger, hass_api, *args, **kwargs):
-        if c.get('default', 'debug', fallback=False):
+        if c.get("default", "debug", fallback=False):
             logger.setLevel(logging.DEBUG)
         self.logger = logger
         self.hass_api = hass_api
@@ -25,8 +24,8 @@ class RepeatedJob(object):
         self.use_timer = datalogger.client.use_timer
         if self.use_timer:
             self._timer = None
-            self.interval = int(c.get('default', 'interval', fallback=360))
-            self.half_interval = self.interval/2
+            self.interval = int(c.get("default", "interval", fallback=360))
+            self.half_interval = self.interval / 2
             self.retries = 0
             # Trigger the RepeatedJob using a short timer (1s) for the first time so the initialization can finish
             self.calculated_interval = 1
@@ -53,17 +52,23 @@ class RepeatedJob(object):
             self.retries = 0
             if self.last_update_time <= datetime.now(timezone.utc):
                 # If last report time + 2x interval is less than the current time then increase
-                self.new_report_expected_at = self.last_update_time + timedelta(seconds=self.interval)
+                self.new_report_expected_at = self.last_update_time + timedelta(
+                    seconds=self.interval
+                )
                 # Check if we have at least 60 seconds for the next cycle
-                if (self.new_report_expected_at + timedelta(seconds=-10) <
-                        datetime.now(timezone.utc)):
+                if self.new_report_expected_at + timedelta(seconds=-10) < datetime.now(
+                    timezone.utc
+                ):
                     # No recent update of missing update: wait {interval} from now()
-                    self.new_report_expected_at = datetime.now(timezone.utc) + \
-                        timedelta(seconds=self.interval)
+                    self.new_report_expected_at = datetime.now(
+                        timezone.utc
+                    ) + timedelta(seconds=self.interval)
             else:
                 # Skipping dark period
                 self.new_report_expected_at = self.last_update_time
-            self.calculated_interval = (self.new_report_expected_at - datetime.now(timezone.utc)).seconds
+            self.calculated_interval = (
+                self.new_report_expected_at - datetime.now(timezone.utc)
+            ).seconds
         else:
             # An error occured calculate retry interval
             retry_interval = self.half_interval
@@ -76,14 +81,21 @@ class RepeatedJob(object):
             if self.retries < 3:
                 self.retries += 1
             # Calculate new report time
-            self.new_report_expected_at = datetime.now(timezone.utc) + \
-                timedelta(seconds=retry_interval)
-            self.calculated_interval = (self.new_report_expected_at - datetime.now(timezone.utc)).seconds
+            self.new_report_expected_at = datetime.now(timezone.utc) + timedelta(
+                seconds=retry_interval
+            )
+            self.calculated_interval = (
+                self.new_report_expected_at - datetime.now(timezone.utc)
+            ).seconds
         # Make sure we have at least 15 seconds on the time to prevent a deadlocked timer loop
         if self.calculated_interval < 15:
             self.calculated_interval = 15
-        hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                            f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.")
+        hybridlogger.ha_log(
+            self.logger,
+            self.hass_api,
+            "INFO",
+            f"new poll in {self.calculated_interval} seconds at {self.new_report_expected_at.isoformat()}.",
+        )
         self.start()
 
     # This function actual starts the timer
