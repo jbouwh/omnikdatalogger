@@ -267,7 +267,7 @@ key | optional | type | default | description
 `mode` | True | string | _device_ | Mode for the DSMR terminal. Mode can be `device` (default) or `tcp`)
 `host ` | True | string | _localhost_ | When using tcp, the host or IP-address to connect to (e.g. a ser2net instance).
 `port ` | True | int | _3333_ | When using tcp, the port to connect to (e.g. a ser2net instance).
-`plant_id` | True | string | _(none)_ | Associates the DSMR data with the Omnik plant data. Needed for influxdb plugin to calculate energy consumption. Without this key omnik data logger wil produce a warning but can still log to influx db and mqtt.
+`plant_id` | True | string | _(none)_ | Associates the DSMR data with the Omnik plant data. Use only when you have multiple inverters that use a different DSMR meter.
 `dsmr_version` | True | string | _'5'_ | The DSMR version of your smart meter. Choices: '2.2', '4', '5', '5B' (For Belgian Meter). Default = '5'.'
 `gas_meter` | True | boolean | _true_ | The DSMR meter has a connected gas meter to read out.
 `total_energy_offset` | True | float | _0.0_ | The start value of your solar system used to calculated the total energy consumption.
