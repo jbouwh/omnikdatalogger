@@ -47,8 +47,8 @@ class pvoutput(Plugin):
 
         if 'sys_id' not in msg:
             hybridlogger.ha_log(self.logger, self.hass_api, "ERROR",
-                                f'[{__name__}] No sys_id found in dataset, set sys_id under '
-                                'your plant settings or global under the output.pvoutput section')
+                                f'[{__name__}] No sys_id found in dataset, set sys_id  '
+                                'in the output.pvoutput section')
             return False
         return True
 
