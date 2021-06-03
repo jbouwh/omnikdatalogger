@@ -80,7 +80,7 @@ omnik_datalogger:
     port: 3333
     device: /dev/ttyUSB0
     dsmr_version: '5'
-    plant_id: '123'
+    # plant_id: '123' # not needed in most cases
     total_energy_offset: 15338.0
     gas_meter: true
 
