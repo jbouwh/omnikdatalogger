@@ -26,6 +26,12 @@
 		"python.languageServer": "Pylance",
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
+		"python.formatting.provider": "black",
+		"python.testing.pytestArgs": ["--no-cov"],
+		"editor.formatOnPaste": false,
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true,
+		"files.trimTrailingWhitespace": true,
 		"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
 		"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
 		"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
@@ -40,7 +46,10 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
+		"visualstudioexptteam.vscodeintellicode",
+		"redhat.vscode-yaml",
+		"esbenp.prettier-vscode",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
