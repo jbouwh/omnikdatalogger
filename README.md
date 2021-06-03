@@ -368,6 +368,7 @@ key | optional | type | default | description
 `inverter_port` | True | int | _8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
 `inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant_id' to validate/filter the raw data messages received.
 `sys_id` | True | int | _`sys_id` setting under [pvoutput] section_ | Your unique system id, generated when creating an account at pvoutput.org. See `pvoutput` settings for more information.
+`logger_entity` | True | string | _(none)_ | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.
 
 ### TCPclient client settings in the section `client.tcpclient` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
@@ -407,7 +408,7 @@ key | optional | type | default | description
 #### `hassapi` plugin for the `localproxy` client in the section `client.localproxy.hassapi` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script
+`logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script. With multiple inverters use `logger_entity` with the plant specific settings.
 
 ### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
