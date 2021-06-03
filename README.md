@@ -152,7 +152,6 @@ omnik_datalogger:
     port: 3333
     device: /dev/ttyUSB0
     dsmr_version: '5'
-    plant_id: '123'
     total_energy_offset: 15338.0
     gas_meter: true
 
@@ -391,13 +390,13 @@ The plugings for the `localproxy` client are:
 #### `tcp_proxy` plugin for the `localproxy` client in the section `client.localproxy.tcp_proxy` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`listen_address` | True | string | _(0.0.0.0)_ | The IP-adres to listen to.
-`listen_port` | True | string | _(10004)_ | The port to listen to.
+`listen_address` | True | string | _'0.0.0.0'_ | The IP-adres to listen to.
+`listen_port` | True | string | _'10004'_ | The port to listen to.
 
 #### `mqtt_proxy` plugin for the `localproxy` client in the section `client.localproxy.mqtt_proxy` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`logger_sensor_name` | True | string | _(Datalogger)_ | The mqtt topic is assembled as {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
+`logger_sensor_name` | True | string | _'Datalogger'_ | The mqtt topic is assembled as {mqtt.discovery_prefix }/binary_sensor/{logger_sensor_name}_{serialnumber}
 `discovery_prefix` | True | string | (key under the `output.mqtt` section) | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery.
 `host` | True | string | (key under the `output.mqtt` section) | Hostname or fqdn of the MQTT server for publishing.
 `port` | True | integer | (key under the `output.mqtt` section`) | MQTT port to be used. 
@@ -408,7 +407,7 @@ key | optional | type | default | description
 #### `hassapi` plugin for the `localproxy` client in the section `client.localproxy.hassapi` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
 -- | --| -- | -- | --
-`logger_entity` | True | string | _(binary_sensor.datalogger)_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script. With multiple inverters use `logger_entity` with the plant specific settings.
+`logger_entity` | True | string | _'binary_sensor.datalogger'_ | The entity name of the datalogger object in Home Assistant created by the mqtt output of the `omnikloggerproxy.py` script. With multiple inverters use `logger_entity` with the plant specific settings.
 
 ### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml` or `config.ini`
 key | optional | type | default | description
@@ -416,8 +415,8 @@ key | optional | type | default | description
 `username` | False | string | _(none)_ | Your Omikportal or SolarmanPV username
 `password` | False | string | _(none)_ | Your Omikportal or SolarmanPV password
 `plant_id_list` |  False | list | _(empty list)_ | A (comma separated) or yaml list of strings specifying the plant_id(s) or pid's of of your plants.
-`api_key` | True | string | _(apitest)_ | The API key used to access your data. The default key might work for you as well.
-`base_url` | True | string | _(http://www.solarmanpv.com:18000/SolarmanApi/serverapi)_ | The API URL used to access your data.
+`api_key` | True | string | _'apitest'_ | The API key used to access your data. The default key might work for you as well.
+`base_url` | True | string | _'http://www.solarmanpv.com:18000/SolarmanApi/serverapi'_ | The API URL used to access your data.
 
 This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section [mentioned earlier](#plant-specific-settings-under-plant_id-in-appsyaml-or-plant_id-configini-configuration-options).
 
@@ -641,8 +640,8 @@ terminals = term1
 # tarif.0002 = normaal
 
 [dsmr.term1]
-# Plant the DSMR meter is asscoiated with
-plant_id = 123
+# Plant the DSMR meter is asscoiated with, optional
+# plant_id = 123
 # Mode of DSRM terminal. Can be tcp or device (default device)
 # mode = device
 # Serial port to which Smartmeter is connected via USB. For remote (i.e., ser2net) connections, use TCP port number to connect to (i.e., 2001).
