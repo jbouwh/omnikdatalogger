@@ -14,7 +14,7 @@ class BasePlugin(type):
         else:
             cls.register(cls)  # Called when a plugin class is imported
 
-    def register(cls, plugin):
+    def register(cls, plugin=None):
         cls.plugins.append(plugin())
 
 

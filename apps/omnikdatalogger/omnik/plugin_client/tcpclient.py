@@ -88,7 +88,7 @@ class TCPclient(Client):
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", f"data size: {len(rawmsg)}.\n"
                                     f"Datadump: {str(binascii.b2a_base64(rawmsg))}")
         except Exception as e:
-            hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Error getting data from inverter. {e}")
+            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", f"Inverter is not reachable, this is normal when it is dark. {e}")
             return None
 
         if valid:

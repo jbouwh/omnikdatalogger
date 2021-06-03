@@ -101,12 +101,12 @@ class mqtt(Plugin):
         # Init from using mqtt field config (loaded from json)
         # self.config.data_field_config
         # field: name, dev_cla, ic, unit, filter
-
+        topic_suffix = f"_{msg['plant_id']}" if not msg['plant_id'] == '0' else ""
         topics = {}
         for asset_class in asset_classes:
             topics[asset_class] = {}
             topics[asset_class]['main'] = \
-                f"{self.discovery_prefix}/sensor/{self.config.attributes['devicename'][asset_class]}_{msg['plant_id']}"
+                f"{self.discovery_prefix}/sensor/{self.config.attributes['devicename'][asset_class]}{topic_suffix}"
             topics[asset_class]['state'] = f"{topics[asset_class]['main']}/state"
             topics[asset_class]['attr'] = f"{topics[asset_class]['main']}/attr"
             topics[asset_class]['config'] = {}

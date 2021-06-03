@@ -6,7 +6,7 @@ class BaseClient(type):
         else:
             cls.register(cls)  # Called when a client class is imported
 
-    def register(cls, client):
+    def register(cls, client=None):
         cls.client.append(client())
 
 
@@ -16,6 +16,7 @@ class Client(object, metaclass=BaseClient):
     logger = None
     hass_api = None
     use_timer = True
+    plant_id_list = []
 
     def initialize(self):
         pass

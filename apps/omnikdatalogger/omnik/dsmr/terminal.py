@@ -80,9 +80,9 @@ class Terminal(object):
         try:
             parsed_telegram = self.telegram_parser.parse(telegram)
         except InvalidChecksumError as e:
-            self.log.warning(str(e))
+            self.logger.warning(str(e))
         except ParseError:
-            self.log.exception("failed to parse telegram")
+            self.logger.exception("failed to parse telegram")
         else:
             self.dsmr_serial_callback(parsed_telegram)
 

@@ -4,6 +4,7 @@ import logging
 
 from requests.exceptions import RequestException
 from omnik.ha_logger import hybridlogger
+from omnik.plant import Plant
 import requests
 import json
 from .daylight import daylight
@@ -267,6 +268,10 @@ class DataLogger(object):
         # Try to merge with the latest dsmr data available
         complete = False
         tries = 20
+        if 'plant_id' not in data:
+            data['plant_id'] = '0'
+        if plant not in self.dsmr_data:
+            return False
         while tries > 0:
             self.dsmr_access.acquire()
             if plant in self.dsmr_data:
@@ -274,6 +279,7 @@ class DataLogger(object):
                 data.update(self._dsmr_cache(plant, data['last_update']))
                 # Insert calculated netto values (solar - net)
                 self._calculate_consumption(data)
+                data['total_energy'] = data.pop('total_energy_recalc')
                 complete = True
             self.dsmr_access.release()
             tries -= 1
@@ -283,8 +289,9 @@ class DataLogger(object):
                 break
         if not tries:
             hybridlogger.ha_log(self.logger, self.hass_api,
-                                "WARNING", f"Could not combine DSMR data for plant {plant}. "
-                                "Did you configure plant_id at your dsmr terminal config?")
+                                "WARNING", f"Could not match DSMR data. "
+                                "Did you configure your dsmr terminal correctly?")
+        return complete
 
     def _calculate_consumption(self, data):
         # Calculate cumulative energy direct used
@@ -306,16 +313,20 @@ class DataLogger(object):
         # m3 {dsmr_message['gas_consumption_hour']} m3/h - {dsmr_message['timestamp_gas']}")
         if dsmr_message['plant_id']:
             plant_id = dsmr_message.pop('plant_id')
-            # Get last total energy form cache (if available) and ad to the dataset
-            # dsmr_message['total_energy_cache'] = self.total_energy(plant_id)
-            self.dsmr_access.acquire()
-            self._dsmr_cache_update(plant_id, dsmr_message)
-            # self.dsmr_data[plant_id] = deepcopy(dsmr_message)
-            self.dsmr_access.release()
-            if plant_id in self.plant_update:
-                self._proces_pushed_net_event(plant_id, dsmr_message)
         else:
-            self._proces_pushed_net_event(None, dsmr_message)
+            plant_id = '0'
+        # Get last total energy form cache (if available) and ad to the dataset
+        # dsmr_message['total_energy_cache'] = self.total_energy(plant_id)
+        self.dsmr_access.acquire()
+        self._dsmr_cache_update(plant_id, dsmr_message)
+        # self.dsmr_data[plant_id] = deepcopy(dsmr_message)
+        self.dsmr_access.release()
+        if plant_id in self.plant_update:
+            # DSMR for specific plant
+            self._proces_pushed_net_event(plant_id, dsmr_message)
+        else:
+            # Aggregated DSMR only
+            self._proces_pushed_net_event('0', dsmr_message)
 
     def _dsmr_cache_update(self, plant_id, dsmr_message):
         if plant_id not in self.dsmr_data:
@@ -373,7 +384,7 @@ class DataLogger(object):
             try:
                 plants = self.client.getPlants()
                 for pid in plants:
-                    self.plant_update[str(pid['plant_id'])] = self.last_update_time
+                    self.plant_update[str(pid['plant_id'])] = Plant(pid['plant_id'], self.last_update_time.astimezone(timezone.utc))
                 self.omnik_api_level = 2
             except requests.exceptions.RequestException as err:
                 hybridlogger.ha_log(self.logger, self.hass_api, "WARNING", f"Request error: {err}")
@@ -394,12 +405,16 @@ class DataLogger(object):
         newreporttime = datetime.fromtimestamp(data['last_update']).astimezone(timezone.utc)
         if not plant:
             plant = data['plant_id']
+        if plant == '0':
+            updated_entities = 'aggregated logging'
+        else:
+            updated_entities = f'plant {plant}'
         if netdata:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                f"Net data update for plant '{plant}' update at UTC {newreporttime}")
+                                f"Net data update for {updated_entities} UTC {newreporttime}")
         else:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                f"Update for plant {plant} update at UTC {newreporttime}")
+                                f"Update for {updated_entities} UTC {newreporttime}")
 
         return plant
 
@@ -416,14 +431,14 @@ class DataLogger(object):
                 # Get the actual report time from the omnik portal
                 newreporttime = datetime.fromtimestamp(data['last_update']).astimezone(timezone.utc)
                 # Only proces updates that occured after we started or start a single measurement (TODO)
-                if (newreporttime > self.plant_update[plant] or not self.every or self.sundown):
+                if (newreporttime > self.plant_update[plant].last_update_time or not self.every or self.sundown):
                     hybridlogger.ha_log(self.logger, self.hass_api, "INFO",
-                                        f"Update for plant {plant} update at UTC {newreporttime}")
+                                        f"Update for plant {plant} UTC {newreporttime}")
                     # the newest plant_update time will be used as a baseline to program the timer
                     self.last_update_time = newreporttime
                     # Store the plant_update time for each indiviual plant,
                     # update only if there is a new report available to avoid duplicates
-                    self.plant_update[plant] = newreporttime
+                    self.plant_update[plant].last_update_time = newreporttime.astimezone(timezone.utc)
                     data['plant_id'] = plant
                     return data
                 else:
@@ -479,23 +494,72 @@ class DataLogger(object):
         if not aggregated_data:
             # Initialize
             aggregated_data['sys_id'] = sys_id
-            self._init_aggregated_data_field(aggregated_data, data, 'last_update')
-            self._init_aggregated_data_field(aggregated_data, data, 'current_power')
-            self._init_aggregated_data_field(aggregated_data, data, 'today_energy')
-            self._init_aggregated_data_field(aggregated_data, data, 'total_energy')
-            self._init_aggregated_data_field(aggregated_data, data, 'voltage_ac1')
-            self._init_aggregated_data_field(aggregated_data, data, 'voltage_ac2')
-            self._init_aggregated_data_field(aggregated_data, data, 'voltage_ac3')
-            self._init_aggregated_data_field(aggregated_data, data, 'voltage_ac_max')
-            self._init_aggregated_data_field(aggregated_data, data, 'inverter_temperature')
+            for field in [
+                    'last_update',
+                    'current_power',
+                    'today_energy',
+                    'total_energy',
+                    'voltage_ac1',
+                    'voltage_ac2',
+                    'voltage_ac3',
+                    'voltage_ac_max',
+                    'inverter_temperature',
+                ]:
+                self._init_aggregated_data_field(aggregated_data, data, field)    
             if self.dsmr:
-                self._init_aggregated_data_field(aggregated_data, data, 'power_consumption')
-                self._init_aggregated_data_field(aggregated_data, data, 'energy_used')
-                self._init_aggregated_data_field(aggregated_data, data, 'energy_used_net')
-                self._init_aggregated_data_field(aggregated_data, data, 'net_voltage_max')
-                self._init_aggregated_data_field(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L1')
-                self._init_aggregated_data_field(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L2')
-                self._init_aggregated_data_field(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L3')
+                for field in [
+                    # Attributes Electricity for pvoutput
+                    'power_consumption',
+                    'energy_used',
+                    'energy_used_net',
+                    'net_voltage_max',
+                    'INSTANTANEOUS_VOLTAGE_L1',
+                    'INSTANTANEOUS_VOLTAGE_L2',
+                    'INSTANTANEOUS_VOLTAGE_L3',
+                    # Other attributes Electricity for mqtt or influxdb
+                    'timestamp',
+                    "ELECTRICITY_USED_TARIFF_1",
+                    "ELECTRICITY_USED_TARIFF_2",
+                    "ELECTRICITY_DELIVERED_TARIFF_1",
+                    "ELECTRICITY_DELIVERED_TARIFF_2",
+                    "energy_delivered_net",
+                    "CURRENT_ELECTRICITY_USAGE",
+                    "CURRENT_ELECTRICITY_DELIVERY",
+                    "ELECTRICITY_ACTIVE_TARIFF",
+                    "LONG_POWER_FAILURE_COUNT",
+                    "SHORT_POWER_FAILURE_COUNT",
+                    "VOLTAGE_SAG_L1_COUNT",
+                    "VOLTAGE_SAG_L2_COUNT",
+                    "VOLTAGE_SAG_L3_COUNT",
+                    "VOLTAGE_SWELL_L1_COUNT",
+                    "VOLTAGE_SWELL_L2_COUNT",
+                    "VOLTAGE_SWELL_L3_COUNT",
+                    "INSTANTANEOUS_ACTIVE_POWER_L1_POSITIVE",
+                    "INSTANTANEOUS_ACTIVE_POWER_L1_NEGATIVE",
+                    "INSTANTANEOUS_ACTIVE_POWER_L2_POSITIVE",
+                    "INSTANTANEOUS_ACTIVE_POWER_L2_NEGATIVE",
+                    "INSTANTANEOUS_ACTIVE_POWER_L3_POSITIVE",
+                    "INSTANTANEOUS_ACTIVE_POWER_L3_NEGATIVE",
+                    "current_net_power",
+                    "current_net_power_l1",
+                    "current_net_power_l2",
+                    "current_net_power_l3",
+                    "net_voltage_max",
+                    "INSTANTANEOUS_CURRENT_L1",
+                    "INSTANTANEOUS_CURRENT_L2",
+                    "INSTANTANEOUS_CURRENT_L3",
+                    "net_current_l1",
+                    "net_current_l2",
+                    "net_current_l3",
+                    # Other attributes Gas
+                    "timestamp_gas",
+                    "gas_consumption_total",
+                    "gas_consumption_hour",
+                ]:
+                    self._init_aggregated_data_field(aggregated_data, data, field)    
+                # Other attributes Electricity
+                # Other attributes Gas
+                {"timestamp_gas": 1622714706.0, "gas_consumption_total": 2864.6, "gas_consumption_hour": 0}
 
     def _init_aggregated_data_field(self, aggregated_data, data, field):
         if field in data:
@@ -510,7 +574,13 @@ class DataLogger(object):
         if field in data:
             aggregated_data[field] += data[field]
 
+    def _adapt_last_value(self, aggregated_data, data, field):
+        if field in data:
+            aggregated_data[field] = data[field]
+
     def _aggregate_data(self, aggregated_data, data):
+        if not data:
+            return
         # Check for pvoutput sys_id override in config
         sys_id = int(self.config.get(f"plant.{data['plant_id']}", 'sys_id', '0'))
         global_sys_id = int(self.config.get('output.pvoutput', 'sys_id', '0'))
@@ -536,15 +606,59 @@ class DataLogger(object):
                 self._adapt_max_value(aggregated_data, data, 'voltage_ac2')
                 self._adapt_max_value(aggregated_data, data, 'voltage_ac3')
                 self._adapt_max_value(aggregated_data, data, 'net_voltage_max')
-                self._adapt_max_value(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L1')
-                self._adapt_max_value(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L2')
-                self._adapt_max_value(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L3')
                 # Max inverter temperature
                 self._adapt_max_value(aggregated_data, data, 'inverter_temperature')
             if sys_id and self.dsmr:
                 self._adapt_add_value(aggregated_data, data, 'power_consumption')
                 self._adapt_add_value(aggregated_data, data, 'energy_used_net')
                 self._adapt_add_value(aggregated_data, data, 'energy_used')
+                # DSMR specific data for output to mqtt or influx with multiple meters or inverters
+                self._adapt_max_value(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L1')
+                self._adapt_max_value(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L2')
+                self._adapt_max_value(aggregated_data, data, 'INSTANTANEOUS_VOLTAGE_L3')
+                # Other attributes Electricity for mqtt or influxdb
+                self._adapt_last_value(aggregated_data, data, 'timestamp')
+                self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_USED_TARIFF_1')
+                self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_USED_TARIFF_2')
+                self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_DELIVERED_TARIFF_1')
+                self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_DELIVERED_TARIFF_2')
+                self._adapt_last_value(aggregated_data, data, 'ELECTRICITY_ACTIVE_TARIFF')
+                
+                self._adapt_add_value(aggregated_data, data, 'energy_delivered_net')
+                self._adapt_add_value(aggregated_data, data, 'CURRENT_ELECTRICITY_USAGE')
+                self._adapt_add_value(aggregated_data, data, 'CURRENT_ELECTRICITY_DELIVERY')
+                self._adapt_add_value(aggregated_data, data, 'LONG_POWER_FAILURE_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'SHORT_POWER_FAILURE_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'VOLTAGE_SAG_L1_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'VOLTAGE_SAG_L2_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'VOLTAGE_SAG_L3_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'VOLTAGE_SWELL_L1_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'VOLTAGE_SWELL_L2_COUNT')
+                self._adapt_add_value(aggregated_data, data, 'VOLTAGE_SWELL_L3_COUNT')
+
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_ACTIVE_POWER_L1_POSITIVE')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_ACTIVE_POWER_L2_POSITIVE')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_ACTIVE_POWER_L3_POSITIVE')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_ACTIVE_POWER_L1_NEGATIVE')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_ACTIVE_POWER_L2_NEGATIVE')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_ACTIVE_POWER_L3_NEGATIVE')
+
+                self._adapt_add_value(aggregated_data, data, 'current_net_power')
+                self._adapt_add_value(aggregated_data, data, 'current_net_power_l1')
+                self._adapt_add_value(aggregated_data, data, 'current_net_power_l2')
+                self._adapt_add_value(aggregated_data, data, 'current_net_power_l3')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_CURRENT_L1')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_CURRENT_L2')
+                self._adapt_add_value(aggregated_data, data, 'INSTANTANEOUS_CURRENT_L3')
+                self._adapt_add_value(aggregated_data, data, 'net_current_l1')
+                self._adapt_add_value(aggregated_data, data, 'net_current_l2')
+                self._adapt_add_value(aggregated_data, data, 'net_current_l3')
+                # Other attributes Gas
+                self._adapt_last_value(aggregated_data, data, 'timestamp_gas')
+
+                self._adapt_add_value(aggregated_data, data, 'gas_consumption_total')
+                self._adapt_add_value(aggregated_data, data, 'gas_consumption_hour')
+
 
     def _digitize(self, data):
         digitize_fields = [
@@ -580,10 +694,17 @@ class DataLogger(object):
         for field in data:
             if field in digitize_fields:
                 data[field] = Decimal(f'{data[field]}')
-        # Re calculate total enery for today accuracy (TODO per plant_id!) update after every measurement
+        self._total_energy_recalc(data)
+    
+    def _total_energy_recalc(self, data):
+        # Re calculate total energy for today accuracy (TODO per plant_id!) update after every measurement
         # store in cache and make persistant
         # Also store the last current power to the cache
-        data['total_energy_recalc'] = self.total_energy(data['plant_id'],
+        if 'plant_id' in data:
+            plant = data['plant_id']
+        else:
+            plant = '0'
+        data['total_energy_recalc'] = self.total_energy(plant,
                                                         today_energy=data['today_energy'],
                                                         total_energy=data['total_energy'],
                                                         current_power=data['current_power']
@@ -673,7 +794,7 @@ class DataLogger(object):
         data = deepcopy(dsmr_message)
         dsmr_timestamp = data['timestamp']
         # if (dsmr_timestamp - last_update) > (self.every + 10) and dsmr_timestamp > self.pasttime:
-        if dsmr_timestamp > self.pasttime and plant_id and self.total_energy(plant_id):
+        if dsmr_timestamp > self.pasttime and self.total_energy(plant_id):
             # Process independent net data for aggregated clients with regards of rate limits
             # data['current_power'] = Decimal('0')
             # Omnik related fields need 'last_update' timestamp
@@ -683,35 +804,28 @@ class DataLogger(object):
             data['today_energy'] = self.total_energy(plant_id, lifetime=False)
             self._calculate_consumption(data)
             data['total_energy'] = data.pop('total_energy_recalc')
+
             aggegated_data = {}
             self._aggregate_data(aggegated_data, data)
-            # Do not publish the current power
+            # Do not publish the current power, since we do not know the last state
             # set next time block for update
             self.pasttime = dsmr_timestamp - (dsmr_timestamp % self.interval_aggregated) + self.interval_aggregated
-            # set net updates out for aggegated clients (pvoutput)
-            last_update = datetime.timestamp(self.plant_update[plant_id])
-            if (dsmr_timestamp - last_update) > (self.every + 10) or self.last_current_power(plant_id):
+            # set net updates out for aggegated output (pvoutput) with (multiple) pushing inverters with aggegation and no updates
+            last_update = 0.0
+            if plant_id == '0':
+                for plant in self.plant_update:
+                    if datetime.timestamp(self.plant_update[plant].last_update_time) > last_update:
+                        last_update = datetime.timestamp(self.plant_update[plant].last_update_time)
+            else:
+                last_update = datetime.timestamp(self.plant_update[plant_id].last_update_time)
+            if (dsmr_timestamp - last_update) > (self.every * 2):
                 self._process_received_update(aggegated_data, netdata=True, plant=plant_id)
                 self._output_update_aggregated_data(plant_id, aggegated_data)
         # TODO process net update for other clients
         data2 = deepcopy(dsmr_message)
         data2['plant_id'] = plant_id
         self._validate_client_data(plant_id, data2)
-        # data['last_update'] = dsmr_timestamp
-        # data['net_update'] = True
-        # dsmr_timestamp = data.pop('timestamp')
-        # data['last_update'] = dsmr_timestamp
-        # plant = self._process_received_update(data)
-        # Set last update time for plant
-        # self.plant_update[plant] = datetime.fromtimestamp(data['last_update'])
-        # Digitize data
-        # self._digitize(data)
-        # Get dsmr data
-        # self._get_dsmr_data(plant, data)
-        # Assemble aggegated data
-        # export the data to the output plugins
         self._output_update(plant_id, data2)
-        # Process aggregated
 
     def _process_timed_event(self):
         # For portal clients and tcpclient with a fixed interval
@@ -733,30 +847,54 @@ class DataLogger(object):
         # Process data reports for each plant
         if self.omnik_api_level == 2:
             aggegated_data = {}
+            skip_aggregation = False
             for plant in self.plant_update:
                 # Try getting a new update or wait for logging event
                 data = self._fetch_update(plant)
                 if data:
                     # A new last update time was set
-                    if self.plant_update[plant] > next_report_at:
-                        next_report_at = self.plant_update[plant]
+                    if self.plant_update[plant].last_update_time > next_report_at:
+                        next_report_at = self.plant_update[plant].last_update_time
                     # Digitize data
                     self._digitize(data)
-                    # Get dsmr data
+                    # Get specific dsmr data
                     self._get_dsmr_data(plant, data)
                     # Assemble aggegated data
                     self._aggregate_data(aggegated_data, data)
                     # export the data to the output plugins
                     self._output_update(plant, data)
-            # Process aggregated data
-            if aggegated_data:
+                else:
+                    # Use cached data for aggregation with DSMR
+                    data = {}
+                    try:
+                        data['total_energy'] = self.cache[f"{plant}.last_total_energy"]
+                        data['today_energy'] = self.cache[f"{plant}.last_today_energy"]
+                        data['current_power'] = Decimal('0.0')
+                        data['last_update'] = time.time()
+                        # Digitize data
+                        self._digitize(data)
+                        # Assemble aggegated data
+                        self._aggregate_data(aggegated_data, data)
+                    except:
+                        # do not allow data aggregation unless we have valid data 
+                        skip_aggregation = True
+
+            # Process aggregated data over all plants if no specific plants are configured with DSMR terminal
+            if aggegated_data and not skip_aggregation:
+                # Get dsmr data for aggegated data
+                self._total_energy_recalc(aggegated_data)
+                # Get dsmr data for aggegated data
+                self._get_dsmr_data('0', aggegated_data)
+                # Output aggregated data to influx/mqtt if we have multiple plants
+                if len(self.client.plant_id_list) > 1:
+                    self._output_update(plant, aggegated_data)
                 self._output_update_aggregated_data(plant, aggegated_data)
                 hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Aggregated data processed.')
 
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Timed data logging processed')
 
-        # Return the the time of the latest report received
+        # Return the the time of the last report received
         return next_report_at
 
     def _process_pushed_event(self):
@@ -774,26 +912,48 @@ class DataLogger(object):
             # Skip this measurement, retry later
             return None
 
-        # Process data reports for each plant
+        # Process data reports for plant event data
         if self.omnik_api_level == 2:
             # Wait for new data logging event
             data = self._listen_for_update()
             if data:
-                aggegated_data = {}
                 plant = self._process_received_update(data)
                 # Set last update time for plant
-                self.plant_update[plant] = datetime.fromtimestamp(data['last_update'])
+                self.plant_update[plant].last_update_time = datetime.fromtimestamp(data['last_update'], timezone.utc)
                 # Digitize data
                 self._digitize(data)
-                # Get dsmr data
+                # Get specific dsmr data
                 self._get_dsmr_data(plant, data)
-                # Assemble aggegated data
-                self._aggregate_data(aggegated_data, data)
+                # Cache last update for aggregation
+                self.plant_update[plant].data = data
                 # export the data to the output plugins
                 self._output_update(plant, data)
-                # Process aggregated
-                self._output_update_aggregated_data(plant, aggegated_data)
-
+        else:
+            return next_report_at
+        
+        # To aggregate over multiple inverters we need to trigger publishing when we an update for all our inverters
+        # Unless the last data update of an inverter is longer then 2 timed cycles
+        aggegated_data = {}
+        for published_plant in self.plant_update:
+            if self.plant_update[published_plant].pop_for_aggregate(self.cache):
+                # Assemble aggegated data
+                self._aggregate_data(aggegated_data, self.plant_update[published_plant].data)
+            else:
+                # Not ready yet to aggregate, erase cache
+                aggegated_data = {}
+                break
+        # only publish unpublished fresh data (<10 minutes old)
+        if aggegated_data:
+            # Get dsmr data for aggegated data
+            self._total_energy_recalc(aggegated_data)
+            self._get_dsmr_data('0', aggegated_data)
+            # Output aggregated data to influx/mqtt if we have multiple plants
+            if len(self.client.plant_id_list) > 1:
+                self._output_update(plant, aggegated_data)
+            self._output_update_aggregated_data('0', aggegated_data)
+            # 
+            hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Aggregated data processed.')
+                
         # Finish datalogging process
         hybridlogger.ha_log(self.logger, self.hass_api, "DEBUG", 'Pushed logging processed')
 

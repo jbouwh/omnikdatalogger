@@ -9,7 +9,7 @@ class HASSAPI(LocalProxyPlugin):
     This plugin enables you to subscribe to the logger requests using the AppDaemon HASSAPI integration
     Use scripts/proxy/omnikloggerproxy.py to capture the inverter events and publish the data to MQTT (Home Assistant)
 
-    This class makes use the following localproxy client objects
+    This class makes use of the following localproxy client attributes
     self.client.msg
     self.client.msgevent
     self.client.semaphore
@@ -20,29 +20,39 @@ class HASSAPI(LocalProxyPlugin):
     def __init__(self):
         super().__init__()
         hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "localproxy client plugin: HASSAPI")
-        self.hass_handle = None
+        self.hass_handle = {}
         if not self.hass_api:
             hybridlogger.ha_log(self.logger, self.hass_api,
                                 "ERROR", "No HassAPI detected. Use AppDaemon with Home Assistent for this plugin")
             return
-        self.logger_entity = self.config.get('client.localproxy.hassapi', 'logger_entity', 'binary_sensor.datalogger')
+        # Deprecated property (use only if no plant specific configuration is available)
+        self.legacy_logger_entity = self.config.get('client.localproxy.hassapi', 'logger_entity', 'binary_sensor.datalogger')
+        self.logger_entity = []
+        for plant in self.client.plant_id_list:
+            entity = self.config.get(f'plant.{plant}', 'logger_entity', None)
+            if entity:
+                self.logger_entity.append(entity)
+        if self.legacy_logger_entity not in self.logger_entity:
+            self.logger_entity.append(self.legacy_logger_entity)
 
     def terminate(self):
         if self.hass_handle:
-            self.hass_api.cancel_listen_state(self.hass_handle)
+            for handle in self.hass_handle:
+                self.hass_api.cancel_listen_state(self.hass_handle[handle])
 
     def listen(self):
         if self.hass_api:
-            self.hass_handle = self.hass_api.listen_state(self._run, self.logger_entity, attribute='data')
-            hybridlogger.ha_log(self.logger, self.hass_api,
-                                "INFO", f"HASSapi listening to. '{self.logger_entity}', attribute: 'data'")
+            for logger_entity in self.logger_entity:
+                self.hass_handle[logger_entity] = self.hass_api.listen_state(self._run, logger_entity, attribute='data')
+                hybridlogger.ha_log(self.logger, self.hass_api,
+                                    "INFO", f"HASSapi listening to. '{logger_entity}', attribute: 'data'")
 
     def _run(self, entity, attribute, old, new, kwargs):
         # HASSAPI callback handler
         hybridlogger.ha_log(self.logger, self.hass_api,
                             "INFO",
-                            f"HASSapi state change for {self.hass_api.get_state(self.logger_entity, 'inverter', 'n/a')} "
-                            f"at {self.hass_api.get_state(self.logger_entity, 'last_update', 'n/a')}")
+                            f"HASSapi state change for {self.hass_api.get_state(entity, 'inverter', 'n/a')} "
+                            f"at {self.hass_api.get_state(entity, 'last_update', 'n/a')}")
         # Try to parse payload as json
         try:
             data = binascii.a2b_base64(new)
