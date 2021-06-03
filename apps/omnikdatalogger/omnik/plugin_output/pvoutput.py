@@ -77,6 +77,14 @@ class pvoutput(Plugin):
             self.access.acquire()
 
             msg = args["msg"]
+            if str(msg["sys_id"]) == "0":
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "DEBUG",
+                    "ignoring publishing to pvoutput, no sys_id was set",
+                )
+                return
             reporttime = time.localtime(msg["last_update"])
 
             # self.logger.debug(json.dumps(msg, indent=2))
