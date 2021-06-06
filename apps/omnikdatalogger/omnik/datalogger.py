@@ -1035,7 +1035,7 @@ class DataLogger(object):
                 - (dsmr_timestamp % self.interval_aggregated)
                 + self.interval_aggregated
             )
-            # set net updates out for aggegated output (pvoutput) with (multiple) pushing inverters with aggegation and no updates
+            # proces net updates out for aggegated output (pvoutput) with (multiple) pushing inverters with aggegation and no updates
             last_update = 0.0
             if plant_id == "0":
                 for plant in self.plant_update:
