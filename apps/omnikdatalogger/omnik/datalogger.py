@@ -1050,6 +1050,7 @@ class DataLogger(object):
                 last_update = datetime.timestamp(
                     self.plant_update[plant_id].last_update_time
                 )
+            # we will send (net) updates when inverers do not retreive new updates
             if (dsmr_timestamp - last_update) > self.every:
                 self._process_received_update(
                     aggegated_data, netdata=True, plant=plant_id
@@ -1057,7 +1058,7 @@ class DataLogger(object):
                 # Export combined to pvoutput
                 self._output_update_aggregated_data(plant_id, aggegated_data)
                 # Export combined data to other output clients
-            self._output_update(plant, aggegated_data)
+                self._output_update(plant, aggegated_data)
         # TODO process net update for other clients
         data2 = deepcopy(dsmr_message)
         data2["plant_id"] = plant_id

@@ -279,7 +279,7 @@ omnik_datalogger:
 | `plant_id`            | True     | string  | _(none)_    | Associates the DSMR data with the Omnik plant data. Use only when you have multiple inverters that use a different DSMR meter. |
 | `dsmr_version`        | True     | string  | _'5'_       | The DSMR version of your smart meter. Choices: '2.2', '4', '5', '5B' (For Belgian Meter). Default = '5'.'                      |
 | `gas_meter`           | True     | boolean | _true_      | The DSMR meter has a connected gas meter to read out.                                                                          |
-| `total_energy_offset` | True     | float   | _0.0_       | The start value of your solar system used to calculated the total energy consumption.                                          |
+| `total_energy_offset` | True     | float   | _0.0_       | The start value of your solar system used to calculated the total energy consumption. When no `plant_id` is specified this start value is the `total_energy_offset` of all inverters together.                                           |
 
 ### Client settings (required, optional and defaults)
 
