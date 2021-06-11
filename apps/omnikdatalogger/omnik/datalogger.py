@@ -1069,6 +1069,13 @@ class DataLogger(object):
                 self._output_update_aggregated_data(plant_id, aggegated_data)
                 # Add omnik specific data for self._output_update to dataset
                 data.update(data2)
+                target = f"for plant {plant_id} " if plant_id else ""
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "INFO",
+                    f"Combining cached logging {target}with DSRM data.",
+                )
         # TODO process net update for other clients
         self._output_update(plant_id, data)
 
