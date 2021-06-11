@@ -40,7 +40,13 @@ class HASSAPI(LocalProxyPlugin):
             entity = self.config.get(f"plant.{plant}", "logger_entity", None)
             if entity:
                 self.logger_entity.append(entity)
-        if self.legacy_logger_entity not in self.logger_entity:
+        if not self.logger_entity:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"No plant specific logger_entity attribute found, using legacy attribute or default from client.localproxy.hassapi: {self.legacy_logger_entity}",
+            )
             self.logger_entity.append(self.legacy_logger_entity)
 
     def terminate(self):
