@@ -888,7 +888,7 @@ class DataLogger(object):
         self._total_energy_recalc(data)
 
     def _total_energy_recalc(self, data):
-        # Re calculate total energy for today accuracy (TODO per plant_id!) update after every measurement
+        # Re calculate total energy for today accuracy per plant_id! update after every measurement
         # store in cache and make persistant
         # Also store the last current power to the cache
         if "plant_id" in data:
@@ -1028,7 +1028,6 @@ class DataLogger(object):
             # Omnik related fields need 'last_update' timestamp
             # Copy relevant net data
             data2 = deepcopy(data)
-            data2["plant_id"] = plant_id
             # Get last data from cache
             data2["last_update"] = dsmr_timestamp
             data2["total_energy_recalc"] = self.total_energy(plant_id)

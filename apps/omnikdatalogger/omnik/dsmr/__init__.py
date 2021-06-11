@@ -47,7 +47,7 @@ class DSRM(object):
             self.tconfig[terminal] = {}
 
             self.tconfig[terminal]["plant_id"] = self.config.get(
-                f"dsmr.{terminal}", "plant_id", ""
+                f"dsmr.{terminal}", "plant_id", "0"
             )
             self.tconfig[terminal]["gas_meter"] = self.config.getboolean(
                 f"dsmr.{terminal}", "gas_meter", True
