@@ -56,9 +56,6 @@ class mqtt(Plugin):
         self.mqtt_client.hass_api = self.hass_api
         # self.mqtt_client.on_message=mqtt_on_message (not used)
         self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
-        self.mqtt_client.connect(self.mqtt_host, self.mqtt_port)
-        # start processing messages
-        self.mqtt_client.loop_start()
         if self.config.has_option("output.mqtt", "discovery_prefix"):
             self.discovery_prefix = self.config.get("output.mqtt", "discovery_prefix")
         else:
@@ -77,6 +74,23 @@ class mqtt(Plugin):
         self.config_pl = {}
         # Make instance to run exclusively
         self.access = threading.Condition(threading.Lock())
+        self._connected = self.mqtt_connect()
+
+    def mqtt_connect(self) -> bool:
+        try:
+            # connect
+            self.mqtt_client.connect(self.mqtt_host, self.mqtt_port)
+            # start processing messages
+            self.mqtt_client.loop_start()
+            return True
+        except OSError as ex:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "ERROR",
+                f"Unable to connect to MQTT server, is your configuration correct? MQTT was not initialized correctly. Error: {ex}",
+            )
+            return False
 
     def _init_config(self, msg):
         # Check if init is needed
@@ -388,6 +402,12 @@ class mqtt(Plugin):
         Send data to over mqtt (compliant with Home Assistant MQTT discovery standard
         See: https://www.home-assistant.io/docs/mqtt/discovery/)
         """
+
+        # Check if we have a valid loop
+        if not self._connected:
+            self._connected = self.mqtt_connect()
+            if not self._connected:
+                return
 
         self.access.acquire()
 

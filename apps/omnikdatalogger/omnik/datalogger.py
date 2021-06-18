@@ -309,7 +309,7 @@ class DataLogger(object):
         self.plugins = self.config.getlist("plugins", "output", fallback=[""])
         if self.plugins and self.plugins[0]:
             hybridlogger.ha_log(
-                self.logger, self.hass_api, "INFO", f"Plugins enabled: {self.plugins}."
+                self.logger, self.hass_api, "INFO", f"Output plugins configured: {self.plugins}."
             )
         else:
             hybridlogger.ha_log(
