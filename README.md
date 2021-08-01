@@ -1,8 +1,10 @@
 ﻿# omnikdatalogger
 
-![omnikdatalogger](https://github.com/jbouwh/omnikdatalogger/workflows/omnikdatalogger/badge.svg)
 ![PyPI version](https://badge.fury.io/py/omnikdatalogger.svg)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+
+Omnik data logger enables you to log the data of your Omnik inverter combine the data with a Dutch or Belgian SLIMME METER and output the data Home Assistant using MQTT discovery.
+You can also choose to log your data to pvoutput or an influx database.
 
 ## See also
 
