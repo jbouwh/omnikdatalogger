@@ -203,6 +203,7 @@ class mqtt(Plugin):
                 "uniq_id": f"{msg[identifier]}_{field}",
                 "name": f"{fieldname}",
                 "stat_t": "~/state",
+                "stat_cla": "measurement",
                 "json_attr_t": "~/attr",
                 "val_tpl": f"{{{{(value_json.{field}{self.config.data_field_config[field]['filter']})}}}}",
                 "dev": device_pl[asset_class],
@@ -249,12 +250,6 @@ class mqtt(Plugin):
             if apl:
                 attr_pl[asset_class] = apl
         return attr_pl
-
-        # attr_pl[asset_class] = {
-        # "inverter": msg['inverter'],
-        # "plant_id": msg['plant_id'],
-        # "last_update": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(msg['last_update']))
-        # }
 
     def _attribute_payload_asset_class(self, msg, asset_class):
         attr_pl_class = {}
