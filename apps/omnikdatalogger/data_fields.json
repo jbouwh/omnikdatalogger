@@ -11,7 +11,7 @@
     },
     "total_energy": {
         "name": "Energy total",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -23,7 +23,7 @@
     },
     "today_energy": {
         "name": "Energy today",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "chart-bell-curve-cumulative",
         "unit": "kWh",
         "measurement": "energy",
@@ -75,7 +75,7 @@
     },
     "current_ac1": {
         "name": "AC Current L1",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -88,7 +88,7 @@
     },
     "current_ac2": {
         "name": "AC Current L2",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -101,7 +101,7 @@
     },
     "current_ac3": {
         "name": "AC Current L3",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -114,7 +114,7 @@
     },
     "voltage_ac1": {
         "name": "AC Voltage L1",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -127,7 +127,7 @@
     },
     "voltage_ac2": {
         "name": "AC Voltage L2",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -140,7 +140,7 @@
     },
     "voltage_ac3": {
         "name": "AC Voltage L3",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -153,7 +153,7 @@
     },
     "voltage_ac_max": {
         "name": "AC Voltage max",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -243,7 +243,7 @@
     },
     "voltage_pv1": {
         "name": "DC Voltage string 1",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -256,7 +256,7 @@
     },
     "voltage_pv2": {
         "name": "DC Voltage string 2",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -269,7 +269,7 @@
     },
     "voltage_pv3": {
         "name": "DC Voltage string 3",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -282,7 +282,7 @@
     },
     "current_pv1": {
         "name": "DC Current string 1",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -295,7 +295,7 @@
     },
     "current_pv2": {
         "name": "DC Current string 2",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -308,7 +308,7 @@
     },
     "current_pv3": {
         "name": "DC Current string 3",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -422,7 +422,7 @@
     },
     "ELECTRICITY_USED_TARIFF_1": {
         "name": "Energy used tariff 1",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -432,7 +432,7 @@
     },
     "ELECTRICITY_USED_TARIFF_2": {
         "name": "Energy used tariff 2",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -442,7 +442,7 @@
     },
     "ELECTRICITY_DELIVERED_TARIFF_1": {
         "name": "Energy delivered tariff 1",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -452,7 +452,7 @@
     },
     "ELECTRICITY_DELIVERED_TARIFF_2": {
         "name": "Energy delivered tariff 2",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -462,7 +462,7 @@
     },
     "energy_used_net": {
         "name": "Energy used net",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -472,7 +472,7 @@
     },
     "energy_delivered_net": {
         "name": "Energy delivered net",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -739,7 +739,7 @@
     },
     "INSTANTANEOUS_VOLTAGE_L1": {
         "name": "Net voltage L1",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -752,7 +752,7 @@
     },
     "INSTANTANEOUS_VOLTAGE_L2": {
         "name": "Net voltage L2",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -765,7 +765,7 @@
     },
     "INSTANTANEOUS_VOLTAGE_L3": {
         "name": "Net voltage L3",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -778,7 +778,7 @@
     },
     "net_voltage_max": {
         "name": "Net voltage max",
-        "dev_cla": "",
+        "dev_cla": "voltage",
         "ic": "alert-outline",
         "unit": "V",
         "measurement": "voltage",
@@ -790,7 +790,7 @@
     },
     "INSTANTANEOUS_CURRENT_L1": {
         "name": "Net current L1 DSMR",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -803,7 +803,7 @@
     },
     "INSTANTANEOUS_CURRENT_L2": {
         "name": "Net current L2 DSMR",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -816,7 +816,7 @@
     },
     "INSTANTANEOUS_CURRENT_L3": {
         "name": "Net current L3 DSMR",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -829,7 +829,7 @@
     },
     "net_current_l1": {
         "name": "Net current L1",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -842,7 +842,7 @@
     },
     "net_current_l2": {
         "name": "Net Current L2",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -855,7 +855,7 @@
     },
     "net_current_l3": {
         "name": "Net Current L3",
-        "dev_cla": "",
+        "dev_cla": "current",
         "ic": "flash-auto",
         "unit": "A",
         "measurement": "current",
@@ -878,7 +878,7 @@
     },
     "energy_used": {
         "name": "Energy used",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
@@ -890,7 +890,7 @@
     },
     "energy_direct_use": {
         "name": "Energy used directly",
-        "dev_cla": "",
+        "dev_cla": "energy",
         "ic": "counter",
         "unit": "kWh",
         "measurement": "energy",
