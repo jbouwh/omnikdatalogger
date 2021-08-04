@@ -112,7 +112,7 @@ class mqtt(Plugin):
                     else:
                         pl = self.config.get(f"plant.{msg['plant_id']}", "start_date")
                     last_reset[asset_class] = (
-                        pl if type(pl) is datetime else time.gmtime(0)
+                        pl if type(pl) is datetime else datetime.fromtimestamp(0)
                     )
 
         # Init from using mqtt field config (loaded from json)
