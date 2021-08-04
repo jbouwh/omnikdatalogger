@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import time
 from omnik.ha_logger import hybridlogger
@@ -95,13 +96,25 @@ class mqtt(Plugin):
     def _init_config(self, msg):
         # Check if init is needed
         asset_classes = set()
+        last_reset = {}
         for field in msg:
             if field in self.config.data_field_config:
                 asset_class = self.config.data_field_config[field]["asset"]
                 if asset_class not in asset_classes:
                     asset_classes.add(asset_class)
-        # if msg['plant_id'] in self.mqtt_field_name_override_init:
-        #    return
+                    # set last_reset payload per assset_class
+                    if asset_class == "dsmr":
+                        pl = self.config.get(f"dsmr.{msg['terminal']}", "start_date")
+                    elif asset_class == "dsmr_gas":
+                        pl = self.config.get(
+                            f"dsmr.{msg['terminal']}", "start_date_gas"
+                        )
+                    else:
+                        pl = self.config.get(f"plant.{msg['plant_id']}", "start_date")
+                    last_reset[asset_class] = (
+                        pl if type(pl) is datetime else time.gmtime(0)
+                    )
+
         # Init from using mqtt field config (loaded from json)
         # self.config.data_field_config
         # field: name, dev_cla, ic, unit, measurement, filter, asset
@@ -116,7 +129,7 @@ class mqtt(Plugin):
 
         # Flag init as done
         # self.mqtt_field_name_override_init[msg['plant_id']] = True
-        return asset_classes
+        return (asset_classes, last_reset)
 
     def _mqtt_on_connect(self, client, userdata, flags, rc=0, properties=None):
         if rc == 0:
@@ -141,11 +154,15 @@ class mqtt(Plugin):
             topics[asset_class]["state"] = f"{topics[asset_class]['main']}/state"
             topics[asset_class]["attr"] = f"{topics[asset_class]['main']}/attr"
             topics[asset_class]["config"] = {}
+            topics["lrst"] = {}
             for field in self.config.data_field_config:
                 if field in msg:
                     topics[asset_class]["config"][
                         field
                     ] = f"{topics[asset_class]['main']}/{field}/config"
+                    topics["lrst"][
+                        field
+                    ] = f"{topics[asset_class]['main']}/{field}/lrst"
         return topics
 
     def _device_payload(self, msg, asset_classes):
@@ -208,11 +225,13 @@ class mqtt(Plugin):
                 "val_tpl": f"{{{{(value_json.{field}{self.config.data_field_config[field]['filter']})}}}}",
                 "dev": device_pl[asset_class],
             }
-            # Set device class if configured
+            # Set device class and last_reset_topic if configured
             if self.config.data_field_config[field]["dev_cla"]:
                 config_pl[field]["dev_cla"] = self.config.data_field_config[field][
                     "dev_cla"
                 ]
+            if self.config.data_field_config[field]["dev_cla"] == "energy":
+                config_pl[field]["lrst_t"] = f"~/{field}/lrst"
             # Set icon if configured
             if self.config.data_field_config[field]["ic"]:
                 config_pl[field][
@@ -258,6 +277,23 @@ class mqtt(Plugin):
             if attr_pl:
                 attr_pl_class[attr] = self._encode_attribute(msg, attr)
         return attr_pl_class
+
+    def _last_reset_payload(self, msg, last_reset):
+        last_reset_pl = {}
+        # Generate MQTT config topics
+        for field in self.config.data_field_config:
+            # field: name, dev_cla, ic, unit, filter
+            # Only generate payload for available data
+            if self.config.data_field_config[field]["dev_cla"] != "energy":
+                # skip publication
+                continue
+            asset_class = self.config.data_field_config[field]["asset"]
+            if not asset_class or asset_class not in last_reset:
+                # skip publication
+                continue
+            if field in msg:
+                last_reset_pl[field] = last_reset[asset_class]
+        return last_reset_pl
 
     def _encode_attribute(self, msg, attr):
         if attr not in msg:
@@ -392,6 +428,39 @@ class mqtt(Plugin):
                     f"Unhandled error publishing states: {e}",
                 )
 
+    def _publish_last_reset(self, topics, last_reset_pl):
+        """Publish last_reset timestamps for energy sensors."""
+        for field in last_reset_pl:
+            try:
+                # publish last_reset timestamp
+                if self.mqtt_client.publish(
+                    topics["lrst"][field],
+                    str(last_reset_pl[field].isoformat()),
+                    retain=self.mqtt_retain,
+                ):
+                    hybridlogger.ha_log(
+                        self.logger,
+                        self.hass_api,
+                        "DEBUG",
+                        f"Publishing last_reset {last_reset_pl[field].isoformat()} to "
+                        f"{topics['lrst'][field]} successful.",
+                    )
+                else:
+                    hybridlogger.ha_log(
+                        self.logger,
+                        self.hass_api,
+                        "WARNING",
+                        f"Publishing last_reset {last_reset_pl[field].isoformat()} to "
+                        f"{topics['lrst'][field]} failed!",
+                    )
+            except Exception as e:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "ERROR",
+                    f"Unhandled error publishing last_reset: {e}",
+                )
+
     def process(self, **args):
         """
         Send data to over mqtt (compliant with Home Assistant MQTT discovery standard
@@ -413,7 +482,7 @@ class mqtt(Plugin):
         # msg['reporttime'] = time.localtime(msg['last_update'])
 
         # Assemble config
-        asset_classes = self._init_config(msg)
+        asset_classes, last_reset = self._init_config(msg)
 
         # Publish config
         self._publish_config(msg)
@@ -424,5 +493,9 @@ class mqtt(Plugin):
         # publish state
         value_pl = self._value_payload(msg)
         self._publish_state(self.topics[msg["plant_id"]], value_pl, asset_classes)
+
+        # publish last reset
+        last_reset_pl = self._last_reset_payload(msg, last_reset)
+        self._publish_last_reset(self.topics[msg["plant_id"]], last_reset_pl)
 
         self.access.release()
