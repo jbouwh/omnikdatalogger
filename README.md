@@ -172,6 +172,8 @@ omnik_datalogger:
     dsmr_version: '5'
     total_energy_offset: 15338.0
     gas_meter: true
+    start_date: 2017-12-12 12:00:00
+    start_date_gas: 2017-12-12 12:00:00
 
 # Section for your inverters specific settings
   plant.123:
@@ -180,6 +182,7 @@ omnik_datalogger:
     inverter_port: 8899
     inverter_sn: NLxxxxxxxxxxxxxx
     sys_id: <YOUR SYSTEM ID>
+    start_date: 2012-10-24 00:00:00
 
 # Section for the localproxy client
   client.localproxy:
