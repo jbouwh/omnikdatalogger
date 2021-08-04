@@ -432,17 +432,31 @@ class mqtt(Plugin):
         """Publish last_reset timestamps for energy sensors."""
         for field in last_reset_pl:
             try:
+                payload = str(last_reset_pl[field].isoformat())
+                last_reset = self.config.data_field_config[field]["tags"].get(
+                    "last_reset"
+                )
+                if last_reset == "today":
+                    payload = str(
+                        datetime(
+                            year=datetime.now().year,
+                            month=datetime.now().month,
+                            day=datetime.now().day,
+                        ).isoformat()
+                    )
+                elif type(last_reset) is datetime:
+                    payload = str(last_reset.isoformat())
                 # publish last_reset timestamp
                 if self.mqtt_client.publish(
                     topics["lrst"][field],
-                    str(last_reset_pl[field].isoformat()),
+                    payload,
                     retain=self.mqtt_retain,
                 ):
                     hybridlogger.ha_log(
                         self.logger,
                         self.hass_api,
                         "DEBUG",
-                        f"Publishing last_reset {last_reset_pl[field].isoformat()} to "
+                        f"Publishing last_reset {payload} to "
                         f"{topics['lrst'][field]} successful.",
                     )
                 else:
@@ -450,7 +464,7 @@ class mqtt(Plugin):
                         self.logger,
                         self.hass_api,
                         "WARNING",
-                        f"Publishing last_reset {last_reset_pl[field].isoformat()} to "
+                        f"Publishing last_reset {payload} to "
                         f"{topics['lrst'][field]} failed!",
                     )
             except Exception as e:

@@ -28,7 +28,7 @@
         "unit": "kWh",
         "measurement": "energy",
         "tags": {
-            "power_class": "ac"
+            "power_class": "ac", "last_reset": "today"
         },
         "filter": "|round(2)",
         "asset": "omnik"
