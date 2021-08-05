@@ -154,13 +154,13 @@ class mqtt(Plugin):
             topics[asset_class]["state"] = f"{topics[asset_class]['main']}/state"
             topics[asset_class]["attr"] = f"{topics[asset_class]['main']}/attr"
             topics[asset_class]["config"] = {}
-            topics["lrst"] = {}
+            topics[asset_class]["lrst"] = {}
             for field in self.config.data_field_config:
                 if field in msg:
                     topics[asset_class]["config"][
                         field
                     ] = f"{topics[asset_class]['main']}/{field}/config"
-                    topics["lrst"][
+                    topics[asset_class]["lrst"][
                         field
                     ] = f"{topics[asset_class]['main']}/{field}/lrst"
         return topics
@@ -446,9 +446,10 @@ class mqtt(Plugin):
                     )
                 elif type(last_reset) is datetime:
                     payload = str(last_reset.isoformat())
+                asset_class = self.config.data_field_config[field].get("asset")
                 # publish last_reset timestamp
                 if self.mqtt_client.publish(
-                    topics["lrst"][field],
+                    topics[asset_class]["lrst"][field],
                     payload,
                     retain=self.mqtt_retain,
                 ):
@@ -457,7 +458,7 @@ class mqtt(Plugin):
                         self.hass_api,
                         "DEBUG",
                         f"Publishing last_reset {payload} to "
-                        f"{topics['lrst'][field]} successful.",
+                        f"{topics[asset_class]['lrst'][field]} successful.",
                     )
                 else:
                     hybridlogger.ha_log(
@@ -465,7 +466,7 @@ class mqtt(Plugin):
                         self.hass_api,
                         "WARNING",
                         f"Publishing last_reset {payload} to "
-                        f"{topics['lrst'][field]} failed!",
+                        f"{topics[asset_class]['lrst'][field]} failed!",
                     )
             except Exception as e:
                 hybridlogger.ha_log(
