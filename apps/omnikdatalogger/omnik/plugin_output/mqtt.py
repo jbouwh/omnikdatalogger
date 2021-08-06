@@ -505,12 +505,12 @@ class mqtt(Plugin):
         # publish attributes
         self._publish_attributes(msg, asset_classes)
 
-        # publish state
-        value_pl = self._value_payload(msg)
-        self._publish_state(self.topics[msg["plant_id"]], value_pl, asset_classes)
-
         # publish last reset
         last_reset_pl = self._last_reset_payload(msg, last_reset)
         self._publish_last_reset(self.topics[msg["plant_id"]], last_reset_pl)
+
+        # publish state
+        value_pl = self._value_payload(msg)
+        self._publish_state(self.topics[msg["plant_id"]], value_pl, asset_classes)
 
         self.access.release()
