@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, tzinfo
+import pytz
 import json
 import time
 from omnik.ha_logger import hybridlogger
@@ -15,9 +16,8 @@ class mqtt(Plugin):
         super().__init__()
         self.name = "mqtt"
         self.description = "Write output to internal mqtt facility of Home Assistant"
-        # tz = self.config.get('default', 'timezone',
-        #                      fallback='Europe/Amsterdam')
-        # self.timezone = pytz.timezone(tz)
+        tz = self.config.get("default", "timezone", fallback="Europe/Amsterdam")
+        self.timezone = pytz.timezone(tz)
 
         self.mqtt_client_name = (
             self.config.get(
@@ -438,11 +438,15 @@ class mqtt(Plugin):
                 )
                 if last_reset == "today":
                     payload = str(
-                        datetime(
-                            year=datetime.now().year,
-                            month=datetime.now().month,
-                            day=datetime.now().day,
-                        ).isoformat()
+                        datetime.now(self.timezone)
+                        .replace(
+                            hour=0,
+                            minute=0,
+                            second=0,
+                            microsecond=0,
+                        )
+                        .astimezone(pytz.utc)
+                        .isoformat()
                     )
                 elif type(last_reset) is datetime:
                     payload = str(last_reset.isoformat())
@@ -492,9 +496,6 @@ class mqtt(Plugin):
 
         # Get argument
         msg = args["msg"]
-
-        # Set report time in local timezone
-        # msg['reporttime'] = time.localtime(msg['last_update'])
 
         # Assemble config
         asset_classes, last_reset = self._init_config(msg)
