@@ -445,7 +445,6 @@ class mqtt(Plugin):
                             second=0,
                             microsecond=0,
                         )
-                        .astimezone(pytz.utc)
                         .isoformat()
                     )
                 elif type(last_reset) is datetime:
