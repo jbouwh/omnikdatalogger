@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import pytz
 
 from requests.exceptions import RequestException
 from omnik.ha_logger import hybridlogger
@@ -11,7 +12,7 @@ from .daylight import daylight
 import threading
 import time
 from decimal import Decimal
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 from .plugin_output import Plugin
 from .plugin_client import Client
@@ -39,6 +40,9 @@ class DataLogger(object):
         self.interval_aggregated = self._get_interval_aggregated()
         # Wait at least a polling interval before submitting net data without solar aggegation
         self.pasttime = time.time() + self.every
+        tz = self.config.get("default", "timezone", fallback="Europe/Amsterdam")
+        self.timezone = pytz.timezone(tz)
+
         self.dsmr_access = threading.Condition(threading.Lock())
 
         if self.config.get("default", "debug", fallback=False):
@@ -309,7 +313,10 @@ class DataLogger(object):
         self.plugins = self.config.getlist("plugins", "output", fallback=[""])
         if self.plugins and self.plugins[0]:
             hybridlogger.ha_log(
-                self.logger, self.hass_api, "INFO", f"Output plugins configured: {self.plugins}."
+                self.logger,
+                self.hass_api,
+                "INFO",
+                f"Output plugins configured: {self.plugins}.",
             )
         else:
             hybridlogger.ha_log(
@@ -956,12 +963,29 @@ class DataLogger(object):
         last_total_energy = f"{plant}.last_total_energy"
         last_today_energy = f"{plant}.last_today_energy"
         last_current_power = f"{plant}.last_current_power"
+        last_reset = f"{plant}.last_reset"
+        last_reset_payload = str(
+            datetime.now(self.timezone)
+            .replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            .isoformat()
+        )
         # if total energy is supplied, update cache directly
         if total_energy:
             self.cache[last_total_energy] = total_energy
             self.cache[last_today_energy] = today_energy
             self.cache[last_current_power] = current_power
+            self.cache[last_reset] = last_reset_payload
             self._update_persistant_cache()
+        elif self.cache.get(last_reset) and datetime.fromisoformat(last_reset_payload) > datetime.fromisoformat(self.cache.get(last_reset)):
+            # reset daily counters and last_reset
+            self.cache[last_today_energy] = Decimal('0.0')
+            self.cache[last_current_power] = Decimal('0.0')
+            self.cache[last_reset] = last_reset_payload
 
         if plant not in self.start_total_energy:
             if total_energy:
