@@ -987,7 +987,7 @@ class DataLogger(object):
             # reset daily counters and last_reset
             self.cache[last_today_energy] = Decimal("0.0")
             self.cache[last_current_power] = Decimal("0.0")
-            self.cache[last_reset] = last_reset_payload
+            self.cache[last_reset] = str(last_reset_payload)
             self._update_persistant_cache()
 
         if plant not in self.start_total_energy:
