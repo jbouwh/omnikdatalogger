@@ -981,11 +981,14 @@ class DataLogger(object):
             self.cache[last_current_power] = current_power
             self.cache[last_reset] = last_reset_payload
             self._update_persistant_cache()
-        elif self.cache.get(last_reset) and datetime.fromisoformat(last_reset_payload) > datetime.fromisoformat(self.cache.get(last_reset)):
+        elif self.cache.get(last_reset) and datetime.fromisoformat(
+            last_reset_payload
+        ) > datetime.fromisoformat(self.cache.get(last_reset)):
             # reset daily counters and last_reset
-            self.cache[last_today_energy] = Decimal('0.0')
-            self.cache[last_current_power] = Decimal('0.0')
+            self.cache[last_today_energy] = Decimal("0.0")
+            self.cache[last_current_power] = Decimal("0.0")
             self.cache[last_reset] = last_reset_payload
+            self._update_persistant_cache()
 
         if plant not in self.start_total_energy:
             if total_energy:
