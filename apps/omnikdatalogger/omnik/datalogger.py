@@ -914,7 +914,10 @@ class DataLogger(object):
             with open(self.persistant_cache_file) as total_energy_cache:
                 file_cache = json.load(total_energy_cache)
                 for item in file_cache:
-                    self.cache[item] = Decimal(f"{file_cache[item]}")
+                    try:
+                        self.cache[item] = Decimal(f"{file_cache[item]}")
+                    except:
+                        self.cache[item] = file_cache[item]
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
@@ -933,7 +936,10 @@ class DataLogger(object):
         try:
             file_cache = {}
             for item in self.cache:
-                file_cache[item] = float(self.cache[item])
+                if type(self.cache[item]) == Decimal:
+                    file_cache[item] = float(self.cache[item])
+                else:
+                    file_cache[item] = self.cache[item]
             with open(self.persistant_cache_file, "w") as json_file_config:
                 json.dump(file_cache, json_file_config)
         except Exception as e:
