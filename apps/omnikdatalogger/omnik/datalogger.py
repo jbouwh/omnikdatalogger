@@ -994,7 +994,11 @@ class DataLogger(object):
             self.cache[last_today_energy] = Decimal("0.0")
             self.cache[last_current_power] = Decimal("0.0")
             self.cache[last_reset] = str(last_reset_payload)
+            if self.cache.get(last_total_energy):
+                # reset start energy in memory now today energy is reset
+                self.start_total_energy[plant] = self.cache.get(last_total_energy)
             self._update_persistant_cache()
+            return self.cache[last_today_energy]
 
         if plant not in self.start_total_energy:
             if total_energy:

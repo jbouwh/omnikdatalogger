@@ -132,7 +132,7 @@ class pvoutput(Plugin):
                         "v2": f"{msg['current_power']}",
                     }
                 )
-                # v1 = energy_generated (Wh) * 1000 ; this value is on a dayly basis
+                # v1 = energy_generated (Wh) * 1000 ; this value is on a daily basis
                 # v2 = bruto power_generated (W)
                 # c1 = 0 ; v1 is not cumulative so the c1 flag not is set
                 # see note about Cumulative Enery at https://pvoutput.org/help.html#api-addstatus
