@@ -950,13 +950,6 @@ class DataLogger(object):
                 f"Cache file '{self.persistant_cache_file}' can not be written! Error: {e.args}",
             )
 
-    def last_current_power(self, plant):
-        last_current_power = f"{plant}.last_current_power"
-        if last_current_power not in self.cache:
-            return Decimal("0")
-        else:
-            return self.cache[last_current_power]
-
     def total_energy(
         self,
         plant,
