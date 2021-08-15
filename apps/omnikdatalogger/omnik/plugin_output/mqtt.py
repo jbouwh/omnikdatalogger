@@ -10,6 +10,20 @@ import uuid
 from omnik.plugin_output import Plugin
 import threading
 
+MEASUREMENT_CLASSES = [
+    "power",
+    "current",
+    "temperature",
+    "voltage",
+    "frequency",
+    "flow",
+]
+MEASUEMENT_TOTAL_CLASSES = ["energy"]
+MEASUEMENT_TOTAL_INCREASING_CLASSES = ["gas", "operation_time", "count"]
+STATE_CLASS_MEASUREMENT = "measurement"
+STATE_CLASS_TOTAL = "total"
+STATE_CLASS_TOTAL_INCREASING = "total_increasing"
+
 
 class mqtt(Plugin):
     def __init__(self):
@@ -220,18 +234,29 @@ class mqtt(Plugin):
                 "uniq_id": f"{msg[identifier]}_{field}",
                 "name": f"{fieldname}",
                 "stat_t": "~/state",
-                "stat_cla": "measurement",
                 "json_attr_t": "~/attr",
                 "val_tpl": f"{{{{(value_json.{field}{self.config.data_field_config[field]['filter']})}}}}",
                 "dev": device_pl[asset_class],
             }
+
             # Set device class and last_reset_topic if configured
             if self.config.data_field_config[field]["dev_cla"]:
                 config_pl[field]["dev_cla"] = self.config.data_field_config[field][
                     "dev_cla"
                 ]
-            if self.config.data_field_config[field]["dev_cla"] == "energy":
+            if self.config.data_field_config[field]["dev_cla"] in MEASUEMENT_TOTAL_CLASSES:
                 config_pl[field]["lrst_t"] = f"~/{field}/lrst"
+                state_class = STATE_CLASS_TOTAL
+            elif self.config.data_field_config[field]["dev_cla"] in MEASUEMENT_TOTAL_INCREASING_CLASSES:
+                state_class = STATE_CLASS_TOTAL_INCREASING
+            elif self.config.data_field_config[field]["dev_cla"] in MEASUREMENT_CLASSES:
+                state_class = None
+            else:
+                state_class = None
+
+            # set the state class for measurements
+            if state_class:
+                config_pl[field]["stat_cla"] = state_class
             # Set icon if configured
             if self.config.data_field_config[field]["ic"]:
                 config_pl[field][
@@ -284,7 +309,7 @@ class mqtt(Plugin):
         for field in self.config.data_field_config:
             # field: name, dev_cla, ic, unit, filter
             # Only generate payload for available data
-            if self.config.data_field_config[field]["dev_cla"] != "energy":
+            if self.config.data_field_config[field]["dev_cla"] not in MEASUEMENT_TOTAL_CLASSES:
                 # skip publication
                 continue
             asset_class = self.config.data_field_config[field]["asset"]
