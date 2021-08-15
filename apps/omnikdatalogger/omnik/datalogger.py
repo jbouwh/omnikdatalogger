@@ -904,9 +904,10 @@ class DataLogger(object):
             plant = "0"
         data["total_energy_recalc"] = self.total_energy(
             plant,
-            today_energy=data["today_energy"],
-            total_energy=data["total_energy"],
-            current_power=data["current_power"],
+            today_energy=data.get("today_energy"),
+            total_energy=data.get("total_energy"),
+            current_power=data.get("current_power"),
+            last_update=data.get("last_update"),
         )
 
     def _load_persistant_cache(self):
@@ -950,12 +951,20 @@ class DataLogger(object):
                 f"Cache file '{self.persistant_cache_file}' can not be written! Error: {e.args}",
             )
 
+    def get_last_update(self, plant, default=time.time()):
+        last_update_key = f"{plant}.last_update"
+        cache = self.cache.get(last_update_key)
+        if cache:
+            return datetime.timestamp(datetime.strptime(cache, "%Y-%m-%dT%H:%M:%S"))
+        return default if default else time.time().replace(microsecond=0)
+
     def total_energy(
         self,
         plant,
         today_energy=None,
         total_energy=None,
         current_power=None,
+        last_update=None,
         lifetime=True,
     ):
         # start_total_energy_key = f'{plant}.start_total_energy'
@@ -963,6 +972,7 @@ class DataLogger(object):
         last_today_energy = f"{plant}.last_today_energy"
         last_current_power = f"{plant}.last_current_power"
         last_reset = f"{plant}.last_reset"
+        last_update_key = f"{plant}.last_update"
         last_reset_payload = str(
             datetime.now(self.timezone)
             .replace(
@@ -979,6 +989,9 @@ class DataLogger(object):
             self.cache[last_today_energy] = today_energy
             self.cache[last_current_power] = current_power
             self.cache[last_reset] = last_reset_payload
+            self.cache[last_update_key] = str(
+                datetime.fromtimestamp(last_update).replace(microsecond=0).isoformat()
+            )
             self._update_persistant_cache()
         elif not self.cache.get(last_reset) or datetime.fromisoformat(
             last_reset_payload
@@ -1059,7 +1072,9 @@ class DataLogger(object):
             # Copy relevant net data
             data2 = deepcopy(data)
             # Get last data from cache
-            data2["last_update"] = dsmr_timestamp
+            data2["last_update"] = self.get_last_update(
+                plant_id, default=dsmr_timestamp
+            )
             data2["total_energy_recalc"] = self.total_energy(plant_id)
             data2["today_energy"] = self.total_energy(plant_id, lifetime=False)
             self._calculate_consumption(data2)
@@ -1151,7 +1166,7 @@ class DataLogger(object):
                         data["total_energy"] = self.cache[f"{plant}.last_total_energy"]
                         data["today_energy"] = self.cache[f"{plant}.last_today_energy"]
                         data["current_power"] = Decimal("0.0")
-                        data["last_update"] = time.time()
+                        data["last_update"] = self.get_last_update(plant)
                         # Digitize data
                         self._digitize(data)
                         # Assemble aggegated data
