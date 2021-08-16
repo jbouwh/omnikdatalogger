@@ -398,9 +398,7 @@ class DataLogger(object):
         if not recalc_total:
             return
         data["energy_direct_use"] = (
-            recalc_total
-            - data["total_energy_offset"]
-            - data["energy_delivered_net"]
+            recalc_total - data["total_energy_offset"] - data["energy_delivered_net"]
         )
         data["energy_used"] = (
             data["energy_used_net"] + data["energy_direct_use"]
@@ -899,7 +897,7 @@ class DataLogger(object):
         # Also store the last current power to the cache
         plant = data.get("plant_id")
         if not plant:
-            plant =  "0"
+            plant = "0"
         data["total_energy_recalc"] = self.total_energy(
             plant,
             today_energy=data.get("today_energy"),
@@ -1065,12 +1063,14 @@ class DataLogger(object):
         self._validate_client_data(plant_id, data)
         dsmr_timestamp = data["timestamp"]
         # if (dsmr_timestamp - last_update) > (self.every + 10) and dsmr_timestamp > self.pasttime:
-        if dsmr_timestamp > self.pasttime and self.total_energy(plant_id):
+        if dsmr_timestamp > self.pasttime:
             # Process independent net data for aggregated clients with regards of rate limits
             # Get last data from cache
             aggegated_data = {}
             if plant_id == "0":
                 for plant in self.plant_update.keys():
+                    if not self.total_energy(plant):
+                        continue
                     cached_data = {}
                     cached_data["plant_id"] = plant
                     cached_data["last_update"] = self.get_last_update(
@@ -1081,7 +1081,7 @@ class DataLogger(object):
                         plant, lifetime=False
                     )
                     self._aggregate_data(aggegated_data, cached_data)
-            else:
+            elif self.total_energy(plant_id):
                 cached_data = {}
                 cached_data["plant_id"] = plant_id
                 cached_data["last_update"] = self.get_last_update(
@@ -1093,7 +1093,8 @@ class DataLogger(object):
                 )
                 self._aggregate_data(aggegated_data, cached_data)
 
-            aggegated_data.update(data)
+            if aggegated_data:
+                aggegated_data.update(data)
             # Do not publish the current power, since we do not know the last state
             # set next time block for update
             self.pasttime = (
@@ -1117,7 +1118,7 @@ class DataLogger(object):
                     self.plant_update[plant_id].last_update_time
                 )
             # we will send (net) updates when inverers do not retreive new updates
-            if (dsmr_timestamp - last_update) > self.every:
+            if aggegated_data and (dsmr_timestamp - last_update) > self.every:
                 self._process_received_update(
                     aggegated_data, netdata=True, plant=plant_id
                 )
@@ -1177,13 +1178,9 @@ class DataLogger(object):
                     data = {}
                     try:
                         data["plant_id"] = plant
-                        data["last_update"] = self.get_last_update(
-                            plant
-                        )
+                        data["last_update"] = self.get_last_update(plant)
                         data["total_energy"] = self.total_energy(plant)
-                        data["today_energy"] = self.total_energy(
-                            plant, lifetime=False
-                        )
+                        data["today_energy"] = self.total_energy(plant, lifetime=False)
                         # Assemble aggegated data
                         self._aggregate_data(aggegated_data, data)
                     except:
