@@ -372,7 +372,6 @@ class DataLogger(object):
                 data.update(self._dsmr_cache(plant, data["last_update"]))
                 # Insert calculated netto values (solar - net)
                 self._calculate_consumption(data)
-                data["total_energy"] = data.pop("total_energy_recalc")
                 complete = True
             self.dsmr_access.release()
             tries -= 1
@@ -1057,25 +1056,21 @@ class DataLogger(object):
 
     def _proces_pushed_net_event(self, plant_id, dsmr_message):
 
-        # ts_midnight = datetime.combine(date.today(), datetime.min.time()).timestamp()
         data = deepcopy(dsmr_message)
         data["plant_id"] = plant_id
         self._validate_client_data(plant_id, data)
         dsmr_timestamp = data["timestamp"]
-        # if (dsmr_timestamp - last_update) > (self.every + 10) and dsmr_timestamp > self.pasttime:
         if dsmr_timestamp > self.pasttime:
             # Process independent net data for aggregated clients with regards of rate limits
             # Get last data from cache
             aggegated_data = {}
+            aggegated_data["last_update"] = dsmr_timestamp
             if plant_id == "0":
                 for plant in self.plant_update.keys():
                     if not self.total_energy(plant):
                         continue
                     cached_data = {}
                     cached_data["plant_id"] = plant
-                    cached_data["last_update"] = self.get_last_update(
-                        plant, default=dsmr_timestamp
-                    )
                     cached_data["total_energy"] = self.total_energy(plant)
                     cached_data["today_energy"] = self.total_energy(
                         plant, lifetime=False
@@ -1084,9 +1079,6 @@ class DataLogger(object):
             elif self.total_energy(plant_id):
                 cached_data = {}
                 cached_data["plant_id"] = plant_id
-                cached_data["last_update"] = self.get_last_update(
-                    plant_id, default=dsmr_timestamp
-                )
                 cached_data["total_energy"] = self.total_energy(plant_id)
                 cached_data["today_energy"] = self.total_energy(
                     plant_id, lifetime=False
@@ -1124,6 +1116,10 @@ class DataLogger(object):
                 )
                 # Add omnik specific data for self._output_update to dataset
                 self._calculate_consumption(aggegated_data)
+                # use last solar update time stamp for real time data output (not a dsmr_time stamp)
+                data["last_update"] = self.get_last_update(
+                    plant, default=dsmr_timestamp
+                )
                 data.update(aggegated_data)
                 # Export combined to pvoutput
                 self._output_update_aggregated_data(plant_id, aggegated_data)
