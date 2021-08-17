@@ -1119,7 +1119,7 @@ class DataLogger(object):
                 self._calculate_consumption(aggegated_data)
                 # use last solar update time stamp for real time data output (not a dsmr_time stamp)
                 data["last_update"] = self.get_last_update(
-                    plant, default=dsmr_timestamp
+                    plant_id, default=dsmr_timestamp
                 )
                 data.update(aggegated_data)
                 # Export combined to pvoutput
