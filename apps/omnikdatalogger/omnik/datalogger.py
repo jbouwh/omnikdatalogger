@@ -732,7 +732,7 @@ class DataLogger(object):
                 }
 
     def _init_aggregated_data_field(self, aggregated_data, data, field):
-        if not field in aggregated_data:
+        if field in data and field not in aggregated_data:
             aggregated_data[field] = Decimal("0")
 
     def _adapt_max_value(self, aggregated_data, data, field):
@@ -1064,13 +1064,13 @@ class DataLogger(object):
             # Process independent net data for aggregated clients with regards of rate limits
             # Get last data from cache
             aggegated_data = {}
-            aggegated_data["last_update"] = dsmr_timestamp
             if plant_id == "0":
                 for plant in self.plant_update.keys():
                     if not self.total_energy(plant):
                         continue
                     cached_data = {}
                     cached_data["plant_id"] = plant
+                    cached_data["last_update"] = dsmr_timestamp
                     cached_data["total_energy"] = self.total_energy(plant)
                     cached_data["today_energy"] = self.total_energy(
                         plant, lifetime=False
@@ -1079,6 +1079,7 @@ class DataLogger(object):
             elif self.total_energy(plant_id):
                 cached_data = {}
                 cached_data["plant_id"] = plant_id
+                cached_data["last_update"] = dsmr_timestamp
                 cached_data["total_energy"] = self.total_energy(plant_id)
                 cached_data["today_energy"] = self.total_energy(
                     plant_id, lifetime=False
