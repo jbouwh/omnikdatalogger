@@ -732,7 +732,7 @@ class DataLogger(object):
                 }
 
     def _init_aggregated_data_field(self, aggregated_data, data, field):
-        if field in data:
+        if not field in aggregated_data:
             aggregated_data[field] = Decimal("0")
 
     def _adapt_max_value(self, aggregated_data, data, field):

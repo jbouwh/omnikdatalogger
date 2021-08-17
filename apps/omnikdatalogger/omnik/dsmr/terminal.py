@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 from dsmr_parser.parsers import TelegramParser
 from dsmr_parser.exceptions import ParseError, InvalidChecksumError
 from dsmr_parser.clients.telegram_buffer import TelegramBuffer
@@ -148,8 +151,9 @@ class Terminal(object):
                         self.hass_api,
                         "WARNING",
                         f"DSMR terminal {self.terminal_name} was interrupted "
-                        f"and will be restarted in a few moments: {e.args}",
+                        f"and will be restarted in a few moments: {e}",
                     )
+                    traceback.print_exception(*sys.exc_info())
                     time.sleep(5)
             finally:
                 self.sock.close()
