@@ -1060,6 +1060,7 @@ class DataLogger(object):
         data["plant_id"] = plant_id
         self._validate_client_data(plant_id, data)
         dsmr_timestamp = data["timestamp"]
+        last_solar_update = 0.0
         if dsmr_timestamp > self.pasttime:
             # Process independent net data for aggregated clients with regards of rate limits
             # Get last data from cache
@@ -1076,6 +1077,9 @@ class DataLogger(object):
                         plant, lifetime=False
                     )
                     self._aggregate_data(aggegated_data, cached_data)
+                    cached_last_update = self.get_last_update(plant, 0.0)
+                    if  cached_last_update > last_solar_update:
+                        last_solar_update = cached_last_update
             elif self.total_energy(plant_id):
                 cached_data = {}
                 cached_data["plant_id"] = plant_id
@@ -1085,6 +1089,9 @@ class DataLogger(object):
                     plant_id, lifetime=False
                 )
                 self._aggregate_data(aggegated_data, cached_data)
+                cached_last_update = self.get_last_update(plant_id, 0.0)
+                if  cached_last_update > last_solar_update:
+                    last_solar_update = cached_last_update
 
             if aggegated_data:
                 aggegated_data.update(data)
@@ -1117,11 +1124,6 @@ class DataLogger(object):
                 )
                 # Add omnik specific data for self._output_update to dataset
                 self._calculate_consumption(aggegated_data)
-                # use last solar update time stamp for real time data output (not a dsmr_time stamp)
-                data["last_update"] = self.get_last_update(
-                    plant_id, default=dsmr_timestamp
-                )
-                data.update(aggegated_data)
                 # Export combined to pvoutput
                 self._output_update_aggregated_data(plant_id, aggegated_data)
                 target = f"for plant {plant_id} " if plant_id else ""
@@ -1131,6 +1133,9 @@ class DataLogger(object):
                     "INFO",
                     f"Combining cached logging {target} with DSRM data.",
                 )
+                # use last solar update time stamp for real time data output (not a dsmr_time stamp)
+                data.update(aggegated_data)
+                data["last_update"] = last_solar_update if last_solar_update else dsmr_timestamp
         # TODO process net update for other clients
         self._output_update(plant_id, data)
 
