@@ -90,7 +90,7 @@ class ha_ConfigParser(configparser.ConfigParser):
                         "ERROR",
                         f"Config type error: Section: '{section}', Attribute: '{option}'; Expected <class 'list'> got {str(type(payload))}",
                     )
-                    return None
+                    return fallback
         else:
             if str(section) in self.ha_args:
                 if option in self.ha_args[section]:
@@ -104,6 +104,7 @@ class ha_ConfigParser(configparser.ConfigParser):
                             "ERROR",
                             f"Config type error: Section: '{section}'; Attribute: '{option}'; Expected <class 'list'> got {str(type(payload))}",
                         )
+                        return fallback
         try:
             retval = super().get(section, option, fallback=fallback, **kwargs)
         except Exception:
