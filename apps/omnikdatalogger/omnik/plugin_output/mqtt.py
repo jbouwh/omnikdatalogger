@@ -244,10 +244,16 @@ class mqtt(Plugin):
                 config_pl[field]["dev_cla"] = self.config.data_field_config[field][
                     "dev_cla"
                 ]
-            if self.config.data_field_config[field]["dev_cla"] in MEASUEMENT_TOTAL_CLASSES:
+            if (
+                self.config.data_field_config[field]["dev_cla"]
+                in MEASUEMENT_TOTAL_CLASSES
+            ):
                 config_pl[field]["lrst_t"] = f"~/{field}/lrst"
                 state_class = STATE_CLASS_TOTAL
-            elif self.config.data_field_config[field]["dev_cla"] in MEASUEMENT_TOTAL_INCREASING_CLASSES:
+            elif (
+                self.config.data_field_config[field]["dev_cla"]
+                in MEASUEMENT_TOTAL_INCREASING_CLASSES
+            ):
                 state_class = STATE_CLASS_TOTAL_INCREASING
             elif self.config.data_field_config[field]["dev_cla"] in MEASUREMENT_CLASSES:
                 state_class = None
@@ -309,7 +315,10 @@ class mqtt(Plugin):
         for field in self.config.data_field_config:
             # field: name, dev_cla, ic, unit, filter
             # Only generate payload for available data
-            if self.config.data_field_config[field]["dev_cla"] not in MEASUEMENT_TOTAL_CLASSES:
+            if (
+                self.config.data_field_config[field]["dev_cla"]
+                not in MEASUEMENT_TOTAL_CLASSES
+            ):
                 # skip publication
                 continue
             asset_class = self.config.data_field_config[field]["asset"]
@@ -530,12 +539,12 @@ class mqtt(Plugin):
         # publish attributes
         self._publish_attributes(msg, asset_classes)
 
-        # publish last reset
-        last_reset_pl = self._last_reset_payload(msg, last_reset)
-        self._publish_last_reset(self.topics[msg["plant_id"]], last_reset_pl)
-
         # publish state
         value_pl = self._value_payload(msg)
         self._publish_state(self.topics[msg["plant_id"]], value_pl, asset_classes)
+
+        # publish last reset
+        last_reset_pl = self._last_reset_payload(msg, last_reset)
+        self._publish_last_reset(self.topics[msg["plant_id"]], last_reset_pl)
 
         self.access.release()
