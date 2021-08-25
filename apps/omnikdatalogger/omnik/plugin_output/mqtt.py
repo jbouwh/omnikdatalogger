@@ -73,14 +73,6 @@ class mqtt(Plugin):
             self.discovery_prefix = self.config.get("output.mqtt", "discovery_prefix")
         else:
             self.discovery_prefix = "homeassistant"
-        # The mqtt name of the inverter device
-        # use the configured device name or the device name from the omnik portal
-        # if self.config.has_option('output.mqtt', 'device_name'):
-        #    self.device_name = self.config.get('output.mqtt', 'device_name')
-        # else:
-        #    self.device_name = None
-        # self.config.mqtt_fields['<field_name>']['name'] can have an override
-        # self.mqtt_field_name_override_init = {}
         # Init topics dict
         self.topics = {}
         # Init config dict
