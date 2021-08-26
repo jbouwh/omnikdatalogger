@@ -80,11 +80,31 @@ class ha_ConfigParser(configparser.ConfigParser):
     def getlist(self, section, option, fallback=[], **kwargs):
         if str(section).lower() == "default":
             if option in self.ha_args:
-                return self.ha_args.get(option, fallback)
+                payload = self.ha_args.get(option, fallback)
+                if isinstance(payload, list):
+                    return payload
+                else:
+                    hybridlogger.ha_log(
+                        logger,
+                        self,
+                        "ERROR",
+                        f"Config type error: Section: '{section}', Attribute: '{option}'; Expected <class 'list'> got {str(type(payload))}",
+                    )
+                    return fallback
         else:
             if str(section) in self.ha_args:
                 if option in self.ha_args[section]:
-                    return self.ha_args[section].get(option, fallback)
+                    payload = self.ha_args[section].get(option, fallback)
+                    if isinstance(payload, list):
+                        return payload
+                    else:
+                        hybridlogger.ha_log(
+                            logger,
+                            self,
+                            "ERROR",
+                            f"Config type error: Section: '{section}'; Attribute: '{option}'; Expected <class 'list'> got {str(type(payload))}",
+                        )
+                        return fallback
         try:
             retval = super().get(section, option, fallback=fallback, **kwargs)
         except Exception:
