@@ -145,15 +145,11 @@ class mqtt(Plugin):
             topics[asset_class]["state"] = f"{topics[asset_class]['main']}/state"
             topics[asset_class]["attr"] = f"{topics[asset_class]['main']}/attr"
             topics[asset_class]["config"] = {}
-            topics[asset_class]["lrst"] = {}
             for field in self.config.data_field_config:
                 if field in msg:
                     topics[asset_class]["config"][
                         field
                     ] = f"{topics[asset_class]['main']}/{field}/config"
-                    topics[asset_class]["lrst"][
-                        field
-                    ] = f"{topics[asset_class]['main']}/{field}/lrst"
         return topics
 
     def _device_payload(self, msg, asset_classes):
