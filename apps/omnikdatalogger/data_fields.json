@@ -392,7 +392,7 @@
     },
     "gas_consumption_total": {
         "name": "Gas total",
-        "dev_cla": "",
+        "dev_cla": "gas",
         "ic": "counter",
         "unit": "m³",
         "measurement": "gas",
