@@ -374,7 +374,7 @@
         "name": "Hours active",
         "dev_cla": "",
         "ic": "progress-clock",
-        "unit": "Hours",
+        "unit": "h",
         "measurement": "operation_time",
         "tags": {},
         "filter": "",
