@@ -172,8 +172,6 @@ omnik_datalogger:
     dsmr_version: '5'
     total_energy_offset: 15338.0
     gas_meter: true
-    start_date: 2017-12-12 12:00:00
-    start_date_gas: 2017-12-12 12:00:00
 
 # Section for your inverters specific settings
   plant.123:
@@ -182,7 +180,6 @@ omnik_datalogger:
     inverter_port: 8899
     inverter_sn: NLxxxxxxxxxxxxxx
     sys_id: <YOUR SYSTEM ID>
-    start_date: 2012-10-24 00:00:00
 
 # Section for the localproxy client
   client.localproxy:
@@ -373,17 +370,15 @@ The first section in `config.yaml` will be used (see event log).
 
 ##### DSMR settings in the section `dsmr.{terminal_name}` of `apps.yaml` or `config.ini`
 
-| key                   | optional | type     | default                     |                                                                                                                                                                                                |
-| --------------------- | -------- | -------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mode`                | True     | string   | _device_                    | Mode for the DSMR terminal. Mode can be `device` (default) or `tcp`)                                                                                                                           |
-| `host `               | True     | string   | _localhost_                 | When using tcp, the host or IP-address to connect to (e.g. a ser2net instance).                                                                                                                |
-| `port `               | True     | int      | _3333_                      | When using tcp, the port to connect to (e.g. a ser2net instance).                                                                                                                              |
-| `plant_id`            | True     | string   | _(none)_                    | Associates the DSMR data with the Omnik plant data. Use only when you have multiple inverters that use a different DSMR meter.                                                                 |
-| `dsmr_version`        | True     | string   | _'5'_                       | The DSMR version of your smart meter. Choices: '2.2', '4', '5', '5B' (For Belgian Meter). Default = '5'                                                                                        |
-| `start_date`          | True     | datetime | _1970-01-01T00:00:00+00:00_ | The install date of your Smart Electricty Meter. This will set `last_reset` topic when update are done over MQTT.                                                                              |
-| `start_date_gas`      | True     | datetime | _1970-01-01T00:00:00+00:00_ | The install date of your Smart Gas Meter. This will set `last_reset` topic when update are done over MQTT.                                                                                     |
-| `gas_meter`           | True     | boolean  | _true_                      | The DSMR meter has a connected gas meter to read out.                                                                                                                                          |
-| `total_energy_offset` | True     | float    | _0.0_                       | The start value of your solar system used to calculated the total energy consumption. When no `plant_id` is specified this start value is the `total_energy_offset` of all inverters together. |
+| key                   | optional | type    | default     |                                                                                                                                                                                                |
+| --------------------- | -------- | ------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`                | True     | string  | _device_    | Mode for the DSMR terminal. Mode can be `device` (default) or `tcp`)                                                                                                                           |
+| `host `               | True     | string  | _localhost_ | When using tcp, the host or IP-address to connect to (e.g. a ser2net instance).                                                                                                                |
+| `port `               | True     | int     | _3333_      | When using tcp, the port to connect to (e.g. a ser2net instance).                                                                                                                              |
+| `plant_id`            | True     | string  | _(none)_    | Associates the DSMR data with the Omnik plant data. Use only when you have multiple inverters that use a different DSMR meter.                                                                 |
+| `dsmr_version`        | True     | string  | _'5'_       | The DSMR version of your smart meter. Choices: '2.2', '4', '5', '5B' (For Belgian Meter). Default = '5'                                                                                        |
+| `gas_meter`           | True     | boolean | _true_      | The DSMR meter has a connected gas meter to read out.                                                                                                                                          |
+| `total_energy_offset` | True     | float   | _0.0_       | The start value of your solar system used to calculated the total energy consumption. When no `plant_id` is specified this start value is the `total_energy_offset` of all inverters together. |
 
 ## Client settings
 
@@ -399,7 +394,6 @@ key | optional | type | default | description
 `inverter_port` | True | int | \_8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
 `inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant*id' to validate/filter the raw data messages received.
 `sys_id` | True | int | *`sys_id` setting under [pvoutput] section* | Your unique system id, generated when creating an account at pvoutput.org. This setting allows the `logger_entity` | True | string | *(none)\_ | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.
-`start_date` | True | datetime | _1970-01-01T00:00:00+00:00_ | The install date of your iverter. This will set `last_reset` topic when updates are done over MQTT
 
 ### TCPclient client settings in the section `client.tcpclient` of `apps.yaml` or `config.ini`
 
