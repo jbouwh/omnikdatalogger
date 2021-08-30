@@ -137,9 +137,9 @@ class pvoutput(Plugin):
                 # c1 = 0 ; v1 is not cumulative so the c1 flag not is set
                 # see note about Cumulative Enery at https://pvoutput.org/help.html#api-addstatus
 
-                # Publish (inverter) temperature if solar data is published and a temperature is available.
-                # alternatively use the temperature from openweather
-                self._get_temperature(msg, data)
+            # Publish (inverter) temperature if solar data is published and a temperature is available.
+            # alternatively use the temperature from openweather
+            self._get_temperature(msg, data)
 
             # Publish voltage (if available)
             self._get_voltage(msg, data)
