@@ -106,7 +106,7 @@ class InverterMsg:
         # Calculate current from power and voltage
         pac = self.getPAC(i)
         vac = self.getVAC(i)
-        return round(pac / vac, 2) if pac >= 0 else -1
+        return round(pac / vac, 2) if pac >= 0 and vac > 0 else -1
 
     def setIfValid(self, key, data, value):
         if value >= 0:
