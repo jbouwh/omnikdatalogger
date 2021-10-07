@@ -1,4 +1,3 @@
-from datetime import datetime, tzinfo
 import pytz
 import json
 import time
@@ -141,7 +140,7 @@ class mqtt(Plugin):
             topics[asset_class] = {}
             topics[asset_class][
                 "main"
-            ] = f"{self.discovery_prefix}/sensor/{self.config.attributes['devicename'][asset_class]}{topic_suffix}"
+            ] = f"{self.discovery_prefix}/sensor/{asset_class}{topic_suffix}"
             topics[asset_class]["state"] = f"{topics[asset_class]['main']}/state"
             topics[asset_class]["attr"] = f"{topics[asset_class]['main']}/attr"
             topics[asset_class]["config"] = {}

@@ -7,7 +7,7 @@
         "measurement": "power",
         "tags": { "power_class": "ac" },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "total_energy": {
         "name": "Energy total",
@@ -51,7 +51,7 @@
         "measurement": "temperature",
         "tags": { "source": "inverter" },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "temperature": {
         "name": "Temperature",
@@ -84,7 +84,7 @@
             "fase": "L1"
         },
         "filter": "|round(2)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "current_ac2": {
         "name": "AC Current L2",
@@ -97,7 +97,7 @@
             "fase": "L2"
         },
         "filter": "|round(2)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "current_ac3": {
         "name": "AC Current L3",
@@ -110,7 +110,7 @@
             "fase": "L3"
         },
         "filter": "|round(2)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_ac1": {
         "name": "AC Voltage L1",
@@ -123,7 +123,7 @@
             "fase": "L1"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_ac2": {
         "name": "AC Voltage L2",
@@ -136,7 +136,7 @@
             "fase": "L2"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_ac3": {
         "name": "AC Voltage L3",
@@ -149,7 +149,7 @@
             "fase": "L3"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_ac_max": {
         "name": "AC Voltage max",
@@ -161,7 +161,7 @@
             "power_class": "ac"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "frequency_ac1": {
         "name": "AC Frequency L1",
@@ -174,7 +174,7 @@
             "fase": "L1"
         },
         "filter": "|round(2)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "frequency_ac2": {
         "name": "AC Frequency L2",
@@ -187,7 +187,7 @@
             "fase": "L2"
         },
         "filter": "|round(2)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "frequency_ac3": {
         "name": "AC Frequency L3",
@@ -200,7 +200,7 @@
             "fase": "L3"
         },
         "filter": "|round(2)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "power_ac1": {
         "name": "AC Power L1",
@@ -213,7 +213,7 @@
             "fase": "L1"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "power_ac2": {
         "name": "AC Power L2",
@@ -226,7 +226,7 @@
             "fase": "L2"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "power_ac3": {
         "name": "AC Power L3",
@@ -239,7 +239,7 @@
             "fase": "L3"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_pv1": {
         "name": "DC Voltage string 1",
@@ -252,7 +252,7 @@
             "fase": "pv1"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_pv2": {
         "name": "DC Voltage string 2",
@@ -265,7 +265,7 @@
             "fase": "pv2"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "voltage_pv3": {
         "name": "DC Voltage string 3",
@@ -278,7 +278,7 @@
             "fase": "pv3"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "current_pv1": {
         "name": "DC Current string 1",
@@ -291,7 +291,7 @@
             "fase": "pc1"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "current_pv2": {
         "name": "DC Current string 2",
@@ -304,7 +304,7 @@
             "fase": "pc2"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "current_pv3": {
         "name": "DC Current string 3",
@@ -317,7 +317,7 @@
             "fase": "pv3"
         },
         "filter": "|round(1)",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "power_pv1": {
         "name": "DC Power string 1",
@@ -330,7 +330,7 @@
             "fase": "pv1"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "power_pv2": {
         "name": "DC Power string 2",
@@ -343,7 +343,7 @@
             "fase": "pv2"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "power_pv3": {
         "name": "DC Power string 3",
@@ -356,7 +356,7 @@
             "fase": "pv3"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "current_power_pv": {
         "name": "DC Current power",
@@ -368,7 +368,7 @@
             "power_class": "dc"
         },
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "operation_hours": {
         "name": "Hours active",
@@ -378,7 +378,7 @@
         "measurement": "operation_time",
         "tags": {},
         "filter": "",
-        "asset": "omnik"
+        "asset": "omnik_attributes"
     },
     "timestamp_gas": {
         "name": "Last update gas meter",

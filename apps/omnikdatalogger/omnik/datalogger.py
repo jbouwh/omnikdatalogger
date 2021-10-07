@@ -185,9 +185,12 @@ class DataLogger(object):
 
     def _init_attribute_dict(self):
         self.config.attributes = {}
-        asset_classes = list(["omnik", "omnik_dsmr", "dsmr", "dsmr_gas"])
+        asset_classes = list(
+            ["omnik", "omnik_attributes", "omnik_dsmr", "dsmr", "dsmr_gas"]
+        )
         self.config.attributes["asset"] = {
             "omnik": list(["inverter", "plant_id", "last_update"]),
+            "omnik_attributes": list(["inverter", "plant_id", "last_update"]),
             "omnik_dsmr": list(
                 ["inverter", "plant_id", "EQUIPMENT_IDENTIFIER", "last_update"]
             ),
@@ -196,24 +199,28 @@ class DataLogger(object):
         }
         self.config.attributes["model"] = {
             "omnik": "Omniksol",
+            "omnik_attributes": "Omniksol",
             "omnik_dsmr": "Omnik data logger",
             "dsmr": "DSMR electicity meter",
             "dsmr_gas": "DSMR gas meter",
         }
         self.config.attributes["mf"] = {
             "omnik": "Omnik",
+            "omnik_attributes": "Omnik",
             "omnik_dsmr": "JBsoft",
             "dsmr": "Netbeheer Nederland",
             "dsmr_gas": "Netbeheer Nederland",
         }
         self.config.attributes["identifier"] = {
             "omnik": "plant_id",
+            "omnik_attributes": "plant_id",
             "omnik_dsmr": "plant_id",
             "dsmr": "EQUIPMENT_IDENTIFIER",
             "dsmr_gas": "EQUIPMENT_IDENTIFIER_GAS",
         }
         self.config.attributes["devicename"] = {
             "omnik": "Inverter",
+            "omnik_attributes": "Inverter",
             "omnik_dsmr": "Omnik_data_logger",
             "dsmr": "DSMR_electicity_meter",
             "dsmr_gas": "DSMR_gasmeter",
