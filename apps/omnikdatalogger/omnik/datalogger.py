@@ -1078,7 +1078,7 @@ class DataLogger(object):
                     )
                     self._aggregate_data(aggegated_data, cached_data)
                     cached_last_update = self.get_last_update(plant, 0.0)
-                    if  cached_last_update > last_solar_update:
+                    if cached_last_update > last_solar_update:
                         last_solar_update = cached_last_update
             elif self.total_energy(plant_id):
                 cached_data = {}
@@ -1090,7 +1090,7 @@ class DataLogger(object):
                 )
                 self._aggregate_data(aggegated_data, cached_data)
                 cached_last_update = self.get_last_update(plant_id, 0.0)
-                if  cached_last_update > last_solar_update:
+                if cached_last_update > last_solar_update:
                     last_solar_update = cached_last_update
 
             if aggegated_data:
@@ -1135,7 +1135,9 @@ class DataLogger(object):
                 )
                 # use last solar update time stamp for real time data output (not a dsmr_time stamp)
                 data.update(aggegated_data)
-                data["last_update"] = last_solar_update if last_solar_update else dsmr_timestamp
+                data["last_update"] = (
+                    last_solar_update if last_solar_update else dsmr_timestamp
+                )
         # TODO process net update for other clients
         self._output_update(plant_id, data)
 

@@ -27,7 +27,9 @@ class MQTTproxy(LocalProxyPlugin):
             self.logger, self.hass_api, "INFO", "localproxy client plugin: MQTTproxy"
         )
         self.logger_sensor_name = self.mqttconfig("logger_sensor_name", "Datalogger")
-        self.mqtt_discovery_prefix = self.mqttconfig("listen_address", "homeassistant")
+        self.mqtt_discovery_prefix = self.mqttconfig(
+            "discovery_prefix", "homeassistant"
+        )
         self.mqtt_host = self.mqttconfig("host", "localhost")
         self.mqtt_port = int(self.mqttconfig("port", "1883"))
         self.mqtt_client_name_prefix = self.mqttconfig(
