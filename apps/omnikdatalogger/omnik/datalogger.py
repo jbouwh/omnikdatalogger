@@ -225,6 +225,13 @@ class DataLogger(object):
             "dsmr": "DSMR_electicity_meter",
             "dsmr_gas": "DSMR_gasmeter",
         }
+        self.config.attributes["device_identifier"] = {
+            "omnik": "omnik",
+            "omnik_attributes": "omnik",
+            "omnik_dsmr": "omnik_dsmr",
+            "dsmr": "dsmr",
+            "dsmr_gas": "dsmr_gas",
+        }
         return asset_classes
 
     def _init_attribute_set(self, attribute, asset_class, type="string"):

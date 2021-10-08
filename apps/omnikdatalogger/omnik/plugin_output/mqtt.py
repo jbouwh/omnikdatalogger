@@ -169,7 +169,9 @@ class mqtt(Plugin):
                 id_prefix = f"{msg[identifier]}_"
             # Device payload
             device_pl[asset_class] = {
-                "identifiers": [f"{id_prefix}{asset_class}"],
+                "identifiers": [
+                    f"{id_prefix}{self.config.attributes['device_identifier'][asset_class]}"
+                ],
                 "name": f"{device_name}{name_appendix}",
                 "mdl": self.config.attributes["model"][asset_class],
                 "mf": self.config.attributes["mf"][asset_class],
