@@ -137,11 +137,16 @@ class mqtt(Plugin):
         topic_suffix = f"_{msg['plant_id']}" if not msg["plant_id"] == "0" else ""
         topics = {}
         for asset_class in asset_classes:
+            device_name = self.config.attributes["devicename"][
+                self.config.attributes["device_identifier"][asset_class]
+            ]
             topics[asset_class] = {}
             topics[asset_class][
                 "main"
-            ] = f"{self.discovery_prefix}/sensor/{asset_class}{topic_suffix}"
-            topics[asset_class]["state"] = f"{topics[asset_class]['main']}/state"
+            ] = f"{self.discovery_prefix}/sensor/{device_name}{topic_suffix}"
+            topics[asset_class][
+                "state"
+            ] = f"{topics[asset_class]['main']}/{asset_class}_state"
             topics[asset_class]["attr"] = f"{topics[asset_class]['main']}/attr"
             topics[asset_class]["config"] = {}
             for field in self.config.data_field_config:
@@ -156,7 +161,9 @@ class mqtt(Plugin):
         for asset_class in asset_classes:
             device_pl[asset_class] = {}
             # Set device_name
-            device_name = self.config.attributes["devicename"][asset_class]
+            device_name = self.config.attributes["devicename"][
+                self.config.attributes["device_identifier"][asset_class]
+            ]
             # Determine appendixes
             name_appendix = ""
             identifier = self.config.attributes["identifier"][asset_class]
@@ -207,7 +214,7 @@ class mqtt(Plugin):
                 "~": f"{topics[asset_class]['main']}",
                 "uniq_id": f"{msg[identifier]}_{field}",
                 "name": f"{fieldname}",
-                "stat_t": "~/state",
+                "stat_t": f"~/{asset_class}_state",
                 "json_attr_t": "~/attr",
                 "val_tpl": f"{{{{(value_json.{field}{self.config.data_field_config[field]['filter']})}}}}",
                 "dev": device_pl[asset_class],
