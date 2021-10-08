@@ -83,7 +83,7 @@ class influxdb(Plugin):
 
         asset_class = self.config.data_field_config[field]["asset"]
         attributes = self._get_attributes(values, asset_class)
-        nanoepoch = int(values[self.timestamp_field[asset_class]] * 1000000000)
+        nanoepoch = int(values[self.timestamp_field.get(asset_class) or 'last_update'] * 1000000000)
 
         if field in values and self.config.data_field_config:
             # Get tags

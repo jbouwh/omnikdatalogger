@@ -185,9 +185,12 @@ class DataLogger(object):
 
     def _init_attribute_dict(self):
         self.config.attributes = {}
-        asset_classes = list(["omnik", "omnik_dsmr", "dsmr", "dsmr_gas"])
+        asset_classes = list(
+            ["omnik", "omnik_attributes", "omnik_dsmr", "dsmr", "dsmr_gas"]
+        )
         self.config.attributes["asset"] = {
             "omnik": list(["inverter", "plant_id", "last_update"]),
+            "omnik_attributes": list(["inverter", "plant_id", "last_update"]),
             "omnik_dsmr": list(
                 ["inverter", "plant_id", "EQUIPMENT_IDENTIFIER", "last_update"]
             ),
@@ -196,27 +199,38 @@ class DataLogger(object):
         }
         self.config.attributes["model"] = {
             "omnik": "Omniksol",
+            "omnik_attributes": "Omniksol",
             "omnik_dsmr": "Omnik data logger",
             "dsmr": "DSMR electicity meter",
             "dsmr_gas": "DSMR gas meter",
         }
         self.config.attributes["mf"] = {
             "omnik": "Omnik",
+            "omnik_attributes": "Omnik",
             "omnik_dsmr": "JBsoft",
             "dsmr": "Netbeheer Nederland",
             "dsmr_gas": "Netbeheer Nederland",
         }
         self.config.attributes["identifier"] = {
             "omnik": "plant_id",
+            "omnik_attributes": "plant_id",
             "omnik_dsmr": "plant_id",
             "dsmr": "EQUIPMENT_IDENTIFIER",
             "dsmr_gas": "EQUIPMENT_IDENTIFIER_GAS",
         }
         self.config.attributes["devicename"] = {
             "omnik": "Inverter",
+            "omnik_attributes": "Inverter",
             "omnik_dsmr": "Omnik_data_logger",
             "dsmr": "DSMR_electicity_meter",
             "dsmr_gas": "DSMR_gasmeter",
+        }
+        self.config.attributes["device_identifier"] = {
+            "omnik": "omnik",
+            "omnik_attributes": "omnik",
+            "omnik_dsmr": "omnik_dsmr",
+            "dsmr": "dsmr",
+            "dsmr_gas": "dsmr_gas",
         }
         return asset_classes
 
@@ -1078,7 +1092,7 @@ class DataLogger(object):
                     )
                     self._aggregate_data(aggegated_data, cached_data)
                     cached_last_update = self.get_last_update(plant, 0.0)
-                    if  cached_last_update > last_solar_update:
+                    if cached_last_update > last_solar_update:
                         last_solar_update = cached_last_update
             elif self.total_energy(plant_id):
                 cached_data = {}
@@ -1090,7 +1104,7 @@ class DataLogger(object):
                 )
                 self._aggregate_data(aggegated_data, cached_data)
                 cached_last_update = self.get_last_update(plant_id, 0.0)
-                if  cached_last_update > last_solar_update:
+                if cached_last_update > last_solar_update:
                     last_solar_update = cached_last_update
 
             if aggegated_data:
@@ -1135,7 +1149,9 @@ class DataLogger(object):
                 )
                 # use last solar update time stamp for real time data output (not a dsmr_time stamp)
                 data.update(aggegated_data)
-                data["last_update"] = last_solar_update if last_solar_update else dsmr_timestamp
+                data["last_update"] = (
+                    last_solar_update if last_solar_update else dsmr_timestamp
+                )
         # TODO process net update for other clients
         self._output_update(plant_id, data)
 
