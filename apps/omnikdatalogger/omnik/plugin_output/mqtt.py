@@ -1,6 +1,8 @@
 import pytz
 import json
 import time
+import ssl
+
 from omnik.ha_logger import hybridlogger
 
 import paho.mqtt.client as mqttclient
@@ -39,6 +41,11 @@ class mqtt(Plugin):
         )
         self.mqtt_host = self.config.get("output.mqtt", "host", fallback="localhost")
         self.mqtt_port = int(self.config.get("output.mqtt", "port", fallback="1833"))
+
+        self.ca_certs = self.config.get("output.mqtt", "ca_certs", fallback=None)
+        self.client_cert = self.config.get("output.mqtt", "client_cert", fallback=None)
+        self.client_key = self.config.get("output.mqtt", "client_key", fallback=None)
+
         self.mqtt_retain = self.config.getboolean(
             "output.mqtt", "retain", fallback=False
         )
@@ -68,6 +75,13 @@ class mqtt(Plugin):
         self.mqtt_client.hass_api = self.hass_api
         # self.mqtt_client.on_message=mqtt_on_message (not used)
         self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
+        # TLS support
+        self.mqtt_client.tls_set(
+            ca_certs=self.ca_certs or None,
+            certfile=self.client_cert or None,
+            keyfile=self.client_key or None,
+        )
+
         if self.config.has_option("output.mqtt", "discovery_prefix"):
             self.discovery_prefix = self.config.get("output.mqtt", "discovery_prefix")
         else:
