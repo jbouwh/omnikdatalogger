@@ -443,15 +443,12 @@ The plugings for the `localproxy` client are:
 
 ### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml` or `config.ini`
 
-| key             | optional | type   | default                                                   | description                                                                                        |
-| --------------- | -------- | ------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `username`      | False    | string | _(none)_                                                  | Your Omikportal or SolarmanPV username                                                             |
-| `password`      | False    | string | _(none)_                                                  | Your Omikportal or SolarmanPV password                                                             |
-| `plant_id_list` | False    | list   | _(empty list)_                                            | A (comma separated) or yaml list of strings specifying the plant_id(s) or pid's of of your plants. |
-| `api_key`       | True     | string | _'apitest'_                                               | The API key used to access your data. The default key might work for you as well.                  |
-| `base_url`      | True     | string | _'http://www.solarmanpv.com:18000/SolarmanApi/serverapi'_ | The API URL used to access your data.                                                              |
-
-This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section [mentioned earlier](#plant-specific-settings-under-plant_id-in-appsyaml-or-plant_id-configini-configuration-options).
+| key        | optional | type   | default  | description                            |
+| ---------- | -------- | ------ | -------- | -------------------------------------- |
+| `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username |
+| `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password |
+| `app_id`   | False    | string | _(none)_ | The API id used to access your data.   |
+| `app_key`  | False    | string | _(none)_ | The API key used to access your data.  |
 
 ## Output plugins
 
