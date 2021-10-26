@@ -206,9 +206,8 @@ omnik_datalogger:
   client.solarmanpv:
     username: john.doe@example.com
     password: some_password
-#   api_key: apitest
-    plant_id_list:
-      - 123
+    app_key: 12345678
+    app_id: 61510ddemo_api_key9ed2560cc
 
 # Influxdb output plugin configuration options
   output.influxdb:
@@ -754,12 +753,8 @@ plant_id_list = 123
 [client.solarmanpv]
 username = john.doe@example.com
 password = S3cret!
-
-# Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal
-# and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
-# Multiple numbers can be supplied like 123,124
-plant_id_list = 123
-# plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc
+app_key = 12345678
+app_id = 61510ddemo_api_key9ed2560cc
 
 [output.pvoutput]
 api_key = <YOUR API KEY>
