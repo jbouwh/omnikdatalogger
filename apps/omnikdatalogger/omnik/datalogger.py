@@ -637,7 +637,9 @@ class DataLogger(object):
         self._validate_field(
             data,
             "inverter",
-            self.config.get(f"plant.{plant}", "inverter_sn", "n/a"),
+            self.config.get(
+                f"plant.{plant}", "inverter_sn", data.get("inverter") or "n/a"
+            ),
         )
         if plant == "0":
             data["plant_id"] = "0"
