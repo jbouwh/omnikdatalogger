@@ -154,6 +154,7 @@ class OmnikPortalClient(Client):
         # we collect our data in `data` but we need a serial number to query the API, we extract this from plant_id
         data = {}
         station, serial = plant_id.split(",")
+        data["inverter"] = serial
 
         # get communication status and last update
         json = {"deviceSn": serial}
