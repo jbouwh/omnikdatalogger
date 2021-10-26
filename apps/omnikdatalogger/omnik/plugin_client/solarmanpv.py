@@ -1,161 +1,226 @@
-import requests
-import urllib.parse
-from omnik.ha_logger import hybridlogger
 import hashlib
-import xml.etree.ElementTree as ET
-import datetime
+from requests import Request, Session
+from omnik.ha_logger import hybridlogger
 from omnik.plugin_client import Client
+from datetime import datetime
+from decimal import Decimal
 
 
-class SolarmanPVClient(Client):
+DATAMAP = {
+    "DV1": "voltage_pv1",
+    "DV2": "voltage_pv2",
+    "DC1": "current_pv1",
+    "DC2": "current_pv2",
+    "AV1": "voltage_ac1",
+    "AV2": "voltage_ac2",
+    "AV3": "voltage_ac3",
+    "AC1": "current_ac1",
+    "AC2": "current_ac2",
+    "AC3": "current_ac3",
+    "APo_t1": "current_power",
+    "A_Fo1": "frequency_ac1",
+    "A_Fo2": "frequency_ac2",
+    "A_Fo3": "frequency_ac3",
+    "Et_ge0": "total_energy",
+    "Etdy_ge1": "today_energy",
+    "INV_T0": "inverter_temperature",
+    "t_w_hou1": "operation_hours",
+    "INV_ST1": "inverter_status",
+    "PG_V_ERR0": "grid_voltage_error_value",  # Default "0.0"
+    "PG_F_ERR0": "grid_frequency_error_value",  # Default "0.0"
+    "PG_I_ERR1": "grid_impedance_error_value",  # Default "65.535"
+    "MAC_T_ERRin1": "inner_temperature_error value",  # Default "0.0"
+    "V_ERRi1": "input_voltage_1_error_value",  # Default "0.0"
+    "V_ERRi2": "input_voltage_2_error_value",  # Default "0.0"
+    "V_ERRi3": "input_voltage_3_error_value",  # Default "0.0"
+    "ELC_ERR1": "leak_current_error_value",  # Default "0.0"
+}
+
+
+class OmnikPortalClient(Client):
     def __init__(self):
         super().__init__()
         hybridlogger.ha_log(
-            self.logger, self.hass_api, "INFO", "Client enabled: solarmanpvclient"
+            self.logger, self.hass_api, "INFO", "Client enabled: solarmanpv client"
         )
 
-        # API Key
-        self.api_key = self.config.get(
-            "client.solarmanpv", "api_key", fallback="apitest"
+        # API Key's
+        self.app_id = self.config.get("client.solarmanpv", "app_id", fallback="")
+        self.app_key = self.config.get(
+            "client.solarmanpv", "app_key", fallback="apitest"
         )
-        self.user_id = -1
-        self.token = None
 
         self.base_url = self.config.get(
-            "client.solarmanpv",
-            "base_url",
-            fallback="http://www.solarmanpv.com:18000/SolarmanApi/serverapi",
+            "client.solarmanpv", "base_url", fallback="https://api.solarmanpv.com"
         )
 
         self.username = self.config.get("client.solarmanpv", "username")
         self.password = self.config.get("client.solarmanpv", "password")
-        # Get plant_id_list
-        self.plant_id_list = self.config.getlist(
-            "client.solarmanpv", "plant_id_list", fallback=[]
-        )
+
+        self.session = Session()
+
+        self.last_update_cache = {}
 
     def initialize(self):
-        pwhash = hashlib.md5(self.password.encode("utf-8")).hexdigest()
-        url = f"{self.base_url}/Login?username={self.username}&password={pwhash}&key={self.api_key}"
+        url = f"{self.base_url}/account/v1.0/token"
 
-        xmldata = self._api_request(url, "GET", None)
-        hybridlogger.ha_log(
-            self.logger, self.hass_api, "DEBUG", f"account validation: {xmldata}"
-        )
+        body = {
+            "email": self.username,
+            "password": hashlib.sha256(str.encode(self.password)).hexdigest(),
+            "appSecret": self.app_key,
+        }
 
-        # Parsing the XML
-        for element in ET.fromstring(xmldata):
-            if element.tag == "userID":
-                self.user_id = int(element.text)
-            elif element.tag == "token":
-                self.token = element.text
+        if not self.app_id or not self.app_key or self.app_key == "apitest":
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "ERROR",
+                "Authentication error! The solarmanpvclient has changed! Please setup app_id and app_key!",
+            )
+            return None
 
-    def _api_request(self, url, method, body, encode=False):
-        """
-        This API mithod uses XML. When logging in a token is obtained.
-        For each request is to be checked if the token is still valid.
-        """
-        headers = {"Content-type": "application/x-www-form-urlencoded"}
+        data = self._api_request(url, body)
 
-        data = urllib.parse.urlencode(body) if encode and body is not None else body
+        if not data or not data.get("success"):
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "ERROR",
+                "Authorization failed!",
+            )
+            return None
+        else:
+            hybridlogger.ha_log(
+                self.logger, self.hass_api, "DEBUG", "Account validation successful!"
+            )
 
-        r = requests.request(method=method, url=url, data=data, headers=headers)
+        # set authentication header
+        self.session.headers.update({"Authorization": "Bearer " + data["access_token"]})
+        return True
 
-        r.raise_for_status()
+    def _api_request(self, url, json):
+        headers = {
+            "User-Agent": "Omnikdatalogger",
+        }
 
-        return r.content
+        #        if self.token:
+        #            headers["Authorization"] = "Bearer " + self.token
+
+        params = {"appId": self.app_id}
+
+        request = Request("POST", url=url, params=params, json=json, headers=headers)
+        prepped_request = self.session.prepare_request(request)
+
+        response = self.session.send(prepped_request)
+
+        response.raise_for_status()
+
+        return response.json()
 
     def getPlants(self):
+        # Get station list
+        url = f"{self.base_url}/station/v1.0/list"
+        json = {}
 
-        data = []
-        for plant in self.plant_id_list:
-            data.append({"plant_id": plant})
-
-        hybridlogger.ha_log(
-            self.logger, self.hass_api, "DEBUG", f"plant list from config {data}"
-        )
-
-        return data
-
-    def xmlprop(self, xml, params, fallback=None):
-        paramlist = params
-        param = paramlist.pop(0)
-        for el in xml:
-            if param == el.tag:
-                if paramlist:
-                    return self.xmlprop(el, paramlist, fallback)
-                else:
-                    return el.text
-        return fallback
-
-    def getPlantData(self, plant_id):
-
-        data = {}
-        url = f"{self.base_url}/Data?username={self.username}&stationid={plant_id}&key={self.api_key}&token={self.token}"
-
-        xmldata = self._api_request(url, "GET", None)
-        hybridlogger.ha_log(
-            self.logger, self.hass_api, "DEBUG", f"plant data ({plant_id}) {xmldata}"
-        )
-        # Parsing the XML
-        xml = ET.fromstring(xmldata)
-
-        # Check if an error was returned
-        if xml.tag != "data":
-            # log warning
+        stationlist = self._api_request(url, json=json)
+        if not stationlist or not stationlist.get("success"):
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "WARNING",
-                "No valid data received. Trying to renew token.",
+                "plant/station list cannot be loaded from the cloud config, no valid data available",
             )
-            # Get new token
-            self.initialize()
-            # Retry the call
-            url = f"{self.base_url}/Data?username={self.username}&stationid={plant_id}&key={self.api_key}&token={self.token}"
-            xmldata = self._api_request(url, "GET", None)
+            return None
+
+        # Get INVERTER devices for retreived stations
+        data = []
+        for station in stationlist.get("stationList"):
+            # Only append stations that have a valid INVERTER device
+            url = f"{self.base_url}/station/v1.0/device"
+            json = {"stationId": station.get("id")}
+            devicelist = self._api_request(url, json=json)
+            for device in devicelist.get("deviceListItems"):
+                if device.get("deviceType") == "INVERTER":
+                    data.append(
+                        {
+                            "plant_id": f'{str(station.get("id"))},{str(device.get("deviceSn"))}',
+                        }
+                    )
+
+        return data
+
+    def getPlantData(self, plant_id):
+
+        # we collect our data in `data` but we need a serial number to query the API, we extract this from plant_id
+        data = {}
+        station, serial = plant_id.split(",")
+
+        # get communication status and last update
+        json = {"deviceSn": serial}
+        url = f"{self.base_url}/device/v1.0/communication"
+
+        communicationdata = self._api_request(url, json=json)
+        if not communicationdata or not communicationdata.get("success"):
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Plant/station communication data for {station}, {serial} cannot be loaded from the cloud config, no valid data available",
+            )
+            return None
+
+        # update last update
+        data["last_update"] = communicationdata["communication"].get("updateTime")
+
+        # only update details if the updateTime has changed
+        if (
+            self.last_update_cache.get(serial)
+            and self.last_update_cache.get(serial) == data["last_update"]
+        ):
+            # Nothing has changed no need for updates
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Plant/station communication data for {station}, {serial} has no new update, ignoring. Is your update frequency to high?",
+            )
+
+        url = f"{self.base_url}/device/v1.0/currentData"
+
+        devicedata = self._api_request(url, json=json)
+
+        if not devicedata or not devicedata.get("success"):
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Plant data for station ({station}) cannot be loaded, no valid data available",
+            )
+            return None
+
+        if devicedata["deviceState"] == 3:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "DEBUG",
-                f"plant data retry ({plant_id}) {xmldata}",
-            )
-            # Parsing the XML
-            xml = ET.fromstring(xmldata)
-
-        if xml.tag == "data":
-            data["name"] = self.xmlprop(xml, ["name"])
-            data["income"] = float(self.xmlprop(xml, ["income", "TotalIncome"], 0.0))
-            data["data_logger"] = self.xmlprop(xml, ["detail", "WiFi", "id"], "")
-            data["inverter"] = self.xmlprop(
-                xml, ["detail", "WiFi", "inverter", "SN"], ""
-            )
-            data["status"] = int(
-                self.xmlprop(xml, ["detail", "WiFi", "inverter", "status"], 0)
-            )
-            data["current_power"] = int(
-                float(self.xmlprop(xml, ["detail", "WiFi", "inverter", "power"], 0.0))
-                * 1000
-            )
-            data["today_energy"] = float(
-                self.xmlprop(xml, ["detail", "WiFi", "inverter", "etoday"], 0.0)
-            )
-            data["total_energy"] = float(
-                self.xmlprop(xml, ["detail", "WiFi", "inverter", "etotal"], 0.0)
-            )
-            data["last_update"] = float(
-                self.xmlprop(
-                    xml,
-                    ["detail", "WiFi", "inverter", "lastupdated"],
-                    datetime.datetime.now().timestamp(),
-                )
-            )
-            data["last_update_time"] = datetime.datetime.utcfromtimestamp(
-                data["last_update"]
-            ).strftime("%Y-%m-%dT%H:%M:%SZ")
-            return data
-        else:
-            hybridlogger.ha_log(
-                self.logger, self.hass_api, "ERROR", f"Cannot fetch data: {xmldata}"
+                f"plant data ({plant_id}) not available inverter is offline",
             )
             return None
+        if devicedata["deviceState"] == 2:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"plant data ({plant_id}) inverter state is alerting",
+            )
+            return None
+
+        for entry in devicedata.get("dataList"):
+            # Adjust power to Watt (not kW) and covert strings numbers to float or int
+            if entry["key"] in DATAMAP:
+                data[DATAMAP[entry["key"]]] = Decimal(entry["value"])
+
+        # update cache
+        self.last_update_cache[serial] = data["last_update"]
+
+        return data

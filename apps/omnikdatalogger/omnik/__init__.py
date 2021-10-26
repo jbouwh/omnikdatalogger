@@ -59,10 +59,10 @@ class RepeatedJob(object):
                 if self.new_report_expected_at + timedelta(seconds=-10) < datetime.now(
                     timezone.utc
                 ):
-                    # No recent update of missing update: wait {interval} from now()
+                    # No recent update or missing update: wait {interval}/5 from now()
                     self.new_report_expected_at = datetime.now(
                         timezone.utc
-                    ) + timedelta(seconds=self.interval)
+                    ) + timedelta(seconds=self.interval / 5)
             else:
                 # Skipping dark period
                 self.new_report_expected_at = self.last_update_time
