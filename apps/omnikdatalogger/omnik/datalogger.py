@@ -485,10 +485,12 @@ class DataLogger(object):
 
     def _validate_user_login(self):
         self.omnik_api_level = 0
+        returnvalue = None
         try:
-            self.client.initialize()
+            returnvalue = self.client.initialize()
             # Logged on
             self.omnik_api_level = 1
+            return returnvalue
         except RequestException as errc:
             hybridlogger.ha_log(
                 self.logger,
@@ -502,8 +504,7 @@ class DataLogger(object):
     def _logon(self):
         # Log on to the omnik portal to enable fetching plant's
         if self.omnik_api_level == 0:
-            self._validate_user_login()
-            if self.omnik_api_level == 0:
+            if not self._validate_user_login() or self.omnik_api_level == 0:
                 return False
         return True
 
@@ -601,7 +602,7 @@ class DataLogger(object):
                         self.logger,
                         self.hass_api,
                         "INFO",
-                        f"No recent report update to process. Last report at UTC {newreporttime}",
+                        f"No recent report update to process aggregated data. Last report at UTC {newreporttime}",
                     )
                     return None
 
