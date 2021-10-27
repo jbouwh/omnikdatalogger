@@ -391,7 +391,7 @@ Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_
 | `inverter_address` | True     | string | _(none)_                                    | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.                                                                                                                  |
 | `logger_sn`        | True     | int    | _(none)_                                    | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.                                                                                               |
 | `inverter_port`    | True     | int    | _8899_                                      | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.                                                                                    |
-| `inverter_sn`      | False    | string | _(none)_                                    | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant\*id' to validate/filter the raw data messages received.              |
+| `inverter_sn`      | False    | string | _(none)_                                    | The serial number of the inverter. Used by the clients `tcpclient` and `localproxy` to map `inverter_sn` and `plant_id` to validate/filter the raw data messages received.              |
 | `sys_id`           | True     | int    | _`sys_id` setting under [pvoutput] section_ | Your unique system id, generated when creating an account at pvoutput.org. This setting allows the specific inveterdata to be published at pvoutput.org. See `pvoutput` settings for more information. |
 | `logger_entity`    | True     | string | _(none)_                                    | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.                               |
 
@@ -451,8 +451,8 @@ The plugings for the `localproxy` client are:
 | ---------- | -------- | ------ | -------- | -------------------------------------- |
 | `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username |
 | `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password |
-| `app_id`   | False    | string | _(none)_ | The API id used to access your data.   |
-| `app_key`  | False    | string | _(none)_ | The API key used to access your data.  |
+| `app_id`   | True     | string | _(none)_ | The API id used to access your data. If configured, this will override the default assigned id. |
+| `app_key`  | True     | string | _(none)_ | The API key used to access your data. If configured, this will override the default assigned id. |
 
 ## Output plugins
 
