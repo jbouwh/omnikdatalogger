@@ -21,6 +21,11 @@ class RepeatedJob(object):
         self.hass_api = hass_api
         self.datalogger = datalogger
         self.client = datalogger.client
+        self.args = args
+        self.kwargs = kwargs
+        # Initialize retry counter
+        self.is_running = False
+        self.last_update_time = None
         self.use_timer = datalogger.client.use_timer
         if self.use_timer:
             self._timer = None
@@ -32,10 +37,6 @@ class RepeatedJob(object):
         else:
             self.semaphore = self.client.semaphore
             self.msgevent = self.client.msgevent
-        self.args = args
-        self.kwargs = kwargs
-        # Initialize retry counter
-        self.is_running = False
         self.start()
 
     def function_thread(self):

@@ -2,7 +2,6 @@ import hashlib
 from requests import Request, Session
 from omnik.ha_logger import hybridlogger
 from omnik.plugin_client import Client
-from datetime import datetime
 from decimal import Decimal
 
 
@@ -144,6 +143,7 @@ class OmnikPortalClient(Client):
                     data.append(
                         {
                             "plant_id": f'{str(station.get("id"))},{str(device.get("deviceSn"))}',
+                            "last_update": device.get("collectionTime"),
                         }
                     )
 
@@ -203,18 +203,16 @@ class OmnikPortalClient(Client):
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
-                "DEBUG",
-                f"plant data ({plant_id}) not available inverter is offline",
+                "WARNING",
+                f"plant data ({plant_id}) indicates inverter is offline",
             )
-            return None
-        if devicedata["deviceState"] == 2:
+        elif devicedata["deviceState"] == 2:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "WARNING",
-                f"plant data ({plant_id}) inverter state is alerting",
+                f"plant data ({plant_id}) indicates inverter state is alerting",
             )
-            return None
 
         for entry in devicedata.get("dataList"):
             # Adjust power to Watt (not kW) and covert strings numbers to float or int
