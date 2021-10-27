@@ -2,7 +2,6 @@ import hashlib
 from requests import Request, Session
 from omnik.ha_logger import hybridlogger
 from omnik.plugin_client import Client
-from datetime import datetime
 from decimal import Decimal
 
 
@@ -45,9 +44,11 @@ class OmnikPortalClient(Client):
         )
 
         # API Key's
-        self.app_id = self.config.get("client.solarmanpv", "app_id", fallback="")
+        self.app_id = self.config.get(
+            "client.solarmanpv", "app_id", fallback="202107211350206"
+        )
         self.app_key = self.config.get(
-            "client.solarmanpv", "app_key", fallback="apitest"
+            "client.solarmanpv", "app_key", fallback="61510dabe03526bfcdfa94c9ed2560cc"
         )
 
         self.base_url = self.config.get(
@@ -70,12 +71,12 @@ class OmnikPortalClient(Client):
             "appSecret": self.app_key,
         }
 
-        if not self.app_id or not self.app_key or self.app_key == "apitest":
+        if not self.app_id or not self.app_key:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                "Authentication error! The solarmanpvclient has changed! Please setup app_id and app_key!",
+                "Authentication error! Please setup app_id and app_key!",
             )
             return None
 
@@ -144,6 +145,7 @@ class OmnikPortalClient(Client):
                     data.append(
                         {
                             "plant_id": f'{str(station.get("id"))},{str(device.get("deviceSn"))}',
+                            "last_update": device.get("collectionTime"),
                         }
                     )
 
@@ -203,18 +205,16 @@ class OmnikPortalClient(Client):
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
-                "DEBUG",
-                f"plant data ({plant_id}) not available inverter is offline",
+                "WARNING",
+                f"plant data ({plant_id}) indicates inverter is offline",
             )
-            return None
-        if devicedata["deviceState"] == 2:
+        elif devicedata["deviceState"] == 2:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "WARNING",
-                f"plant data ({plant_id}) inverter state is alerting",
+                f"plant data ({plant_id}) indicates inverter state is alerting",
             )
-            return None
 
         for entry in devicedata.get("dataList"):
             # Adjust power to Watt (not kW) and covert strings numbers to float or int

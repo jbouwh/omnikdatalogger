@@ -20,7 +20,6 @@ class daylight(object):
     def __init__(self, city_name=default_city_name):
         if VERSION == 2:
             self._city = lookup("Amsterdam", database())
-            self._sun = self.sun(datetime.now())
         else:
             self._a = Astral()
             self._a.solar_depression = "civil"
@@ -35,10 +34,8 @@ class daylight(object):
         else:
             return self._city.sun(t)
 
-    def localtime(self, t=None):
-        if not t:
-            t = datetime.now()
-        return self._city.tzinfo.localize(t)
+    def localtime(self):
+        return datetime.utcnow().astimezone(pytz.timezone(self._city.timezone))
 
     @property
     def version(self):
