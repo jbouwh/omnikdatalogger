@@ -206,9 +206,8 @@ omnik_datalogger:
   client.solarmanpv:
     username: john.doe@example.com
     password: some_password
-#   api_key: apitest
-    plant_id_list:
-      - 123
+    app_key: 12345678
+    app_id: 61510ddemo_api_key9ed2560cc
 
 # Influxdb output plugin configuration options
   output.influxdb:
@@ -329,7 +328,6 @@ omnik_datalogger:
 As mentioned command line and AppDaemon configuration override settings the `config.ini` (if still used).
 The .yaml file configuration file used from the command line has the same structure as `apps.yaml`
 
-Arguments marked with \* must be configured either in the `apps.yaml` or `config.ini` configuration file.
 The first section in `config.yaml` will be used (see event log).
 
 ### General settings
@@ -386,14 +384,16 @@ Every client and client plugin has an own section with configuration keys. Addit
 
 ### Plant specific settings in the section `plant.*plant_id*` of `apps.yaml` or `config.ini`
 
-Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system. Every plant has its own section. You can obtain the plan*id by logging in at the https://www.solarmanpv.com/portal. And read `pid`=`plant_id` number from the URL e.g. `https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123` where `plant_id` is `123`. The serial number of your Wi-Fi datalogger and inverter you can find here too. Go to **settings** and click on the **device** tab. Possible keys in this section are:
-key | optional | type | default | description
--- | --| -- | -- | --
-`inverter_address` | True | string | *(none)_ | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.
-`logger_sn` | True | int | _(none)_ | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.
-`inverter_port` | True | int | \_8899_ | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.
-`inverter_sn` | False | string | _(none)_ | The serial number of the inverter. Used by the clients `tcpclient`, `localproxy` and `solarmanpv` to map `inverter_sn` and 'plant*id' to validate/filter the raw data messages received.
-`sys_id` | True | int | *`sys_id` setting under [pvoutput] section* | Your unique system id, generated when creating an account at pvoutput.org. This setting allows the `logger_entity` | True | string | *(none)\_ | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.
+Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_ with the plant id of your system (you can choose you own id). Every plant has its own section. Possible keys in this section are:
+
+| key                | optional | type   | default                                     | description                                                                                                                                                                                            |
+| ------------------ | -------- | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `inverter_address` | True     | string | _(none)_                                    | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.                                                                                                                  |
+| `logger_sn`        | True     | int    | _(none)_                                    | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.                                                                                               |
+| `inverter_port`    | True     | int    | _8899_                                      | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.                                                                                    |
+| `inverter_sn`      | False    | string | _(none)_                                    | The serial number of the inverter. Used by the clients `tcpclient` and `localproxy` to map `inverter_sn` and `plant_id` to validate/filter the raw data messages received.              |
+| `sys_id`           | True     | int    | _`sys_id` setting under [pvoutput] section_ | Your unique system id, generated when creating an account at pvoutput.org. This setting allows the specific inveterdata to be published at pvoutput.org. See `pvoutput` settings for more information. |
+| `logger_entity`    | True     | string | _(none)_                                    | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.                               |
 
 ### TCPclient client settings in the section `client.tcpclient` of `apps.yaml` or `config.ini`
 
@@ -425,15 +425,19 @@ The plugings for the `localproxy` client are:
 
 #### `mqtt_proxy` plugin for the `localproxy` client in the section `client.localproxy.mqtt_proxy` of `apps.yaml` or `config.ini`
 
-| key                  | optional | type    | default                                                               | description                                                                                                                                                      |
-| -------------------- | -------- | ------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `logger_sensor_name` | True     | string  | _'Datalogger'_                                                        | The mqtt topic is assembled as {mqtt.discovery*prefix }/binary_sensor/{logger_sensor_name}*{serialnumber}                                                        |
-| `discovery_prefix`   | True     | string  | (key under the `output.mqtt` section)                                 | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery. |
-| `host`               | True     | string  | (key under the `output.mqtt` section)                                 | Hostname or fqdn of the MQTT server for publishing.                                                                                                              |
-| `port`               | True     | integer | (key under the `output.mqtt` section`)                                | MQTT port to be used.                                                                                                                                            |
-| `client_name_prefix` | True     | string  | (key under the `output.mqtt` section) then `ha-mqttproxy-omniklogger` | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.                                                                     |
-| `username`\*         | False    | string  | _(key under the `output.mqtt` section)_                               | The MQTT username used for authentication                                                                                                                        |
-| `password`\*         | False    | string  | _(key under the `output.mqtt` section)_                               | The MQTT password used for authentication                                                                                                                        |
+| key                  | optional | type    | default                                                                 | description                                                                                                                                                      |
+| -------------------- | -------- | ------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logger_sensor_name` | True     | string  | _'Datalogger'_                                                          | The mqtt topic is assembled as {mqtt.discovery*prefix }/binary_sensor/{logger_sensor_name}*{serialnumber}                                                        |
+| `discovery_prefix`   | True     | string  | _(key under the `output.mqtt` section)_                                 | The mqtt plugin supports MQTT auto discovery with Home Assistant. The discovery_prefix configures the topic prefix Home Assistant listens to for auto discovery. |
+| `host`               | True     | string  | _(key under the `output.mqtt` section)_                                 | Hostname or fqdn of the MQTT server for publishing.                                                                                                              |
+| `port`               | True     | integer | _(key under the `output.mqtt` section)_                                 | MQTT port to be used.                                                                                                                                            |
+| `client_name_prefix` | True     | string  | _(key under the `output.mqtt` section) then `ha-mqttproxy-omniklogger`_ | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.                                                                     |
+| `username`           | False    | string  | _(key under the `output.mqtt` section)_                                 | The MQTT username used for authentication                                                                                                                        |
+| `password`           | False    | string  | _(key under the `output.mqtt` section)_                                 | The MQTT password used for authentication                                                                                                                        |
+| `tls`                | True     | bool    | _(key under the `output.mqtt` section)_                                 | Secures the connection to the MQTT service, the MQTT server side needs a valid certificate                                                                       |
+| `ca_certs`           | True     | string  | _(key under the `output.mqtt` section)_                                 | File path to a file containing alternative CA's. If not configure the systems default CA is used                                                                 |
+| `client_cert`        | True     | string  | _(key under the `output.mqtt` section)_                                 | File path to a file containing a PEM encoded client certificate                                                                                                  |
+| `client_key`         | True     | string  | _(key under the `output.mqtt` section)_                                 | File path to a file containing a PEM encoded client private key                                                                                                  |
 
 #### `hassapi` plugin for the `localproxy` client in the section `client.localproxy.hassapi` of `apps.yaml` or `config.ini`
 
@@ -443,15 +447,12 @@ The plugings for the `localproxy` client are:
 
 ### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml` or `config.ini`
 
-| key             | optional | type   | default        | description                                                                                        |
-| --------------- | -------- | ------ | -------------- | -------------------------------------------------------------------------------------------------- |
-| `username`      | False    | string | _(none)_       | Your Omikportal or SolarmanPV username                                                             |
-| `password`      | False    | string | _(none)_       | Your Omikportal or SolarmanPV password                                                             |
-| `plant_id_list` | False    | list   | _(empty list)_ | A (comma separated) or yaml list of strings specifying the plant_id(s) or pid's of of your plants. |
-| `api_key`       | True     | string | _'apitest'_    | The API key used to access your data. The default key might work for you as well.                  |
-| `api_key`       | True     | string | _'apitest'_    | The API key used to access your data. The default key might work for you as well.                  |
-
-This client colects the inverters serial number (`inverter_sn`) and `plant_id` from the `[plant_id]` section [mentioned earlier](#plant-specific-settings-under-plant_id-in-appsyaml-or-plant_id-configini-configuration-options).
+| key        | optional | type   | default  | description                            |
+| ---------- | -------- | ------ | -------- | -------------------------------------- |
+| `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username |
+| `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password |
+| `app_id`   | True     | string | _(none)_ | The API id used to access your data. If configured, this will override the default assigned id. |
+| `app_key`  | True     | string | _(none)_ | The API key used to access your data. If configured, this will override the default assigned id. |
 
 ## Output plugins
 
@@ -481,8 +482,12 @@ Restart Mosquito after changing the config.
 | `port`               | True     | integer | _1883_                  | MQTT port to be used.                                                                                                                                            |
 | `retain`             | True     | bool    | _True_                  | Retains the data send to the MQTT service                                                                                                                        |
 | `client_name_prefix` | True     | string  | _'ha-mqtt-omniklogger'_ | Defines a prefix that is used as client name. A 4 byte uuid is added to ensure an unique ID.                                                                     |
-| `username`\*         | False    | string  | _(none)_                | The MQTT username used for authentication                                                                                                                        |
-| `password`\*         | False    | string  | _(none)_                | The MQTT password used for authentication                                                                                                                        |
+| `username`           | False    | string  | _(none)_                | The MQTT username used for authentication                                                                                                                        |
+| `password`           | False    | string  | _(none)_                | The MQTT password used for authentication                                                                                                                        |
+| `tls`                | True     | bool    | _False_                 | Secures the connection to the MQTT service, the MQTT server side needs a valid certificate                                                                       |
+| `ca_certs`           | True     | string  | _(none)_                | File path to a file containing alternative CA's. If not configure the systems default CA is used                                                                 |
+| `client_cert`        | True     | string  | _(none)_                | File path to a file containing a PEM encoded client certificate                                                                                                  |
+| `client_key`         | True     | string  | _(none)_                | File path to a file containing a PEM encoded client private key                                                                                                  |
 
 #### Renaming entities. (Keys are like {fieldname}\_name)
 
@@ -606,13 +611,13 @@ _(used by *PVoutput* plugin if *use_temperature* is true and you did not specify
 
 Visit https://openweathermap.org/price to obtain a (free) api key. The weather data is cached with een TTL of 300 seconds.
 
-| key         | optional | type   | default                  | description                                                            |
-| ----------- | -------- | ------ | ------------------------ | ---------------------------------------------------------------------- |
-| `api_key`\* | False    | string | _(none)_                 | Unique access key generated at openweathermap.org                      |
-| `endpoint`  | True     | string | `api.openweathermap.org` | FQDN of the API endpoint.                                              |
-| `lon`\*     | False    | float  | _(none)_                 | Longitude for the weather location                                     |
-| `lat`\*     | False    | float  | _(none)_                 | Latitude for the weather location                                      |
-| `units`     | True     | string | `metric`                 | Can be _metric_ (for deg. Celsius) or _imperial_ (for deg. Fahrenheit) |
+| key        | optional | type   | default                  | description                                                            |
+| ---------- | -------- | ------ | ------------------------ | ---------------------------------------------------------------------- |
+| `api_key`  | False    | string | _(none)_                 | Unique access key generated at openweathermap.org                      |
+| `endpoint` | True     | string | `api.openweathermap.org` | FQDN of the API endpoint.                                              |
+| `lon`      | False    | float  | _(none)_                 | Longitude for the weather location                                     |
+| `lat`      | False    | float  | _(none)_                 | Latitude for the weather location                                      |
+| `units`    | True     | string | `metric`                 | Can be _metric_ (for deg. Celsius) or _imperial_ (for deg. Fahrenheit) |
 
 ### Device attribute settings and relation with `data_fields.json`
 
@@ -757,12 +762,8 @@ plant_id_list = 123
 [client.solarmanpv]
 username = john.doe@example.com
 password = S3cret!
-
-# Update plant_id_list this to your own plant_id. 123 is an example! Login to the portal
-# and get the pid number from the URL https://www.solarmanpv.com/portal/Terminal/TerminalMain.aspx?pid=123
-# Multiple numbers can be supplied like 123,124
-plant_id_list = 123
-# plant_id_list = <YOUR PLANT_ID> # ,<YOUR 2nd PLANT_ID>, etc
+app_key = 12345678
+app_id = 61510ddemo_api_key9ed2560cc
 
 [output.pvoutput]
 api_key = <YOUR API KEY>

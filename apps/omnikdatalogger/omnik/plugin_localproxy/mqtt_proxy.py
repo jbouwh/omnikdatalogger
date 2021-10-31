@@ -32,6 +32,12 @@ class MQTTproxy(LocalProxyPlugin):
         )
         self.mqtt_host = self.mqttconfig("host", "localhost")
         self.mqtt_port = int(self.mqttconfig("port", "1883"))
+
+        self.tls = bool(self.mqttconfig("tls", fallback=False))
+        self.ca_certs = self.config.get("output.mqtt", "ca_certs", fallback=None)
+        self.client_cert = self.config.get("output.mqtt", "client_cert", fallback=None)
+        self.client_key = self.config.get("output.mqtt", "client_key", fallback=None)
+
         self.mqtt_client_name_prefix = self.mqttconfig(
             "client_name_prefix", "ha-mqttproxy-omniklogger"
         )
@@ -55,6 +61,13 @@ class MQTTproxy(LocalProxyPlugin):
             self._mqtt_on_message
         )  # called on receiving updates on subscibed messages
         self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
+        # TLS support
+        if self.tls:
+            self.mqtt_client.tls_set(
+                ca_certs=self.ca_certs or None,
+                certfile=self.client_cert or None,
+                keyfile=self.client_key or None,
+            )
 
     def _mqtt_on_connect(self, client, userdata, flags, rc=0, properties=None):
         if rc == 0:

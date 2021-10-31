@@ -485,10 +485,12 @@ class DataLogger(object):
 
     def _validate_user_login(self):
         self.omnik_api_level = 0
+        returnvalue = None
         try:
-            self.client.initialize()
+            returnvalue = self.client.initialize()
             # Logged on
             self.omnik_api_level = 1
+            return returnvalue
         except RequestException as errc:
             hybridlogger.ha_log(
                 self.logger,
@@ -502,8 +504,7 @@ class DataLogger(object):
     def _logon(self):
         # Log on to the omnik portal to enable fetching plant's
         if self.omnik_api_level == 0:
-            self._validate_user_login()
-            if self.omnik_api_level == 0:
+            if not self._validate_user_login() or self.omnik_api_level == 0:
                 return False
         return True
 
@@ -513,8 +514,16 @@ class DataLogger(object):
             try:
                 plants = self.client.getPlants()
                 for pid in plants:
+                    lastupdate = (
+                        datetime.fromtimestamp(pid["last_update"]).astimezone(
+                            timezone.utc
+                        )
+                        if pid.get("last_update")
+                        else self.last_update_time.astimezone(timezone.utc)
+                    )
                     self.plant_update[str(pid["plant_id"])] = Plant(
-                        pid["plant_id"], self.last_update_time.astimezone(timezone.utc)
+                        pid["plant_id"],
+                        lastupdate,
                     )
                 self.omnik_api_level = 2
             except requests.exceptions.RequestException as err:
@@ -575,9 +584,11 @@ class DataLogger(object):
                 newreporttime = datetime.fromtimestamp(data["last_update"]).astimezone(
                     timezone.utc
                 )
-                # Only proces updates that occured after we started or start a single measurement (TODO)
+                # Only proces updates that occured after we started or start a single measurement
+                # check for cached last update
                 if (
                     newreporttime > self.plant_update[plant].last_update_time
+                    or data["last_update"] > self.get_last_update(plant)
                     or not self.every
                     or self.sundown
                 ):
@@ -596,14 +607,13 @@ class DataLogger(object):
                     ].last_update_time = newreporttime.astimezone(timezone.utc)
                     data["plant_id"] = plant
                     return data
-                else:
-                    hybridlogger.ha_log(
-                        self.logger,
-                        self.hass_api,
-                        "INFO",
-                        f"No recent report update to process. Last report at UTC {newreporttime}",
-                    )
-                    return None
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "INFO",
+                    f"No recent report update to process aggregated data. Last report at UTC {newreporttime}",
+                )
+                return None
 
         except requests.exceptions.RequestException as err:
             hybridlogger.ha_log(
@@ -636,7 +646,9 @@ class DataLogger(object):
         self._validate_field(
             data,
             "inverter",
-            self.config.get(f"plant.{plant}", "inverter_sn", "n/a"),
+            self.config.get(
+                f"plant.{plant}", "inverter_sn", data.get("inverter") or "n/a"
+            ),
         )
         if plant == "0":
             data["plant_id"] = "0"

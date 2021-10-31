@@ -8,7 +8,7 @@ import threading
 
 logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOGLEVEL", logging.INFO))
 
-__version__ = "1.7.5"
+__version__ = "1.8.0"
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,11 @@ class RepeatedJob(object):
         self.hass_api = hass_api
         self.datalogger = datalogger
         self.client = datalogger.client
+        self.args = args
+        self.kwargs = kwargs
+        # Initialize retry counter
+        self.is_running = False
+        self.last_update_time = None
         self.use_timer = datalogger.client.use_timer
         if self.use_timer:
             self._timer = None
@@ -32,10 +37,6 @@ class RepeatedJob(object):
         else:
             self.semaphore = self.client.semaphore
             self.msgevent = self.client.msgevent
-        self.args = args
-        self.kwargs = kwargs
-        # Initialize retry counter
-        self.is_running = False
         self.start()
 
     def function_thread(self):
@@ -59,10 +60,10 @@ class RepeatedJob(object):
                 if self.new_report_expected_at + timedelta(seconds=-10) < datetime.now(
                     timezone.utc
                 ):
-                    # No recent update of missing update: wait {interval} from now()
+                    # No recent update or missing update: wait {interval}/5 from now()
                     self.new_report_expected_at = datetime.now(
                         timezone.utc
-                    ) + timedelta(seconds=self.interval)
+                    ) + timedelta(seconds=self.interval / 5)
             else:
                 # Skipping dark period
                 self.new_report_expected_at = self.last_update_time
