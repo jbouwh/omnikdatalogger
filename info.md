@@ -124,9 +124,6 @@ omnik_datalogger:
   client.solarmanpv:
     username: john.doe@example.com
     password: some_password
-#   api_key: apitest
-    plant_id_list:
-      - 123
 
 # Influxdb output plugin configuration options
   output.influxdb:
@@ -346,12 +343,12 @@ The plugings for the `localproxy` client are:
 
 #### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml`
 
-| key        | optional | type   | default  | description                                                                                      |
-| ---------- | -------- | ------ | -------- | ------------------------------------------------------------------------------------------------ |
-| `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username                                                           |
-| `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password                                                           |
-| `app_id`   | True     | string | _(none)_ | The API id used to access your data. If configured, this will override the default assigned id.  |
-| `app_key`  | True     | string | _(none)_ | The API key used to access your data. If configured, this will override the default assigned id. |
+| key        | optional | type   | default  | description                                                                                       |
+| ---------- | -------- | ------ | -------- | ------------------------------------------------------------------------------------------------- |
+| `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username                                                            |
+| `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password                                                            |
+| `app_id`   | True     | string | _(none)_ | The API id used to access your data. If configured, this will override the default assigned id.   |
+| `app_key`  | True     | string | _(none)_ | The API key used to access your data. If configured, this will override the default assigned key. |
 
 #### MQTT plugin
 
