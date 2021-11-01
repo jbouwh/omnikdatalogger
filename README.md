@@ -202,12 +202,10 @@ omnik_datalogger:
     listen_address: '0.0.0.0'
     listen_port: '10004'
 
-# SolarmanPV portal options
+# Solarmanpv API options
   client.solarmanpv:
     username: john.doe@example.com
     password: some_password
-    app_key: 12345678
-    app_id: 61510ddemo_api_key9ed2560cc
 
 # Influxdb output plugin configuration options
   output.influxdb:
@@ -391,7 +389,7 @@ Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_
 | `inverter_address` | True     | string | _(none)_                                    | The IP-adres of your inverter. Used by the client `tcpclient` to access the inverter.                                                                                                                  |
 | `logger_sn`        | True     | int    | _(none)_                                    | The logger module serial number of your inverter. Used by the client `tcpclient` to access the inverter.                                                                                               |
 | `inverter_port`    | True     | int    | _8899_                                      | The the tcp port your inverter listens to (default to 8899). Used by the client `tcpclient` to access the inverter.                                                                                    |
-| `inverter_sn`      | False    | string | _(none)_                                    | The serial number of the inverter. Used by the clients `tcpclient` and `localproxy` to map `inverter_sn` and `plant_id` to validate/filter the raw data messages received.              |
+| `inverter_sn`      | False    | string | _(none)_                                    | The serial number of the inverter. Used by the clients `tcpclient` and `localproxy` to map `inverter_sn` and `plant_id` to validate/filter the raw data messages received.                             |
 | `sys_id`           | True     | int    | _`sys_id` setting under [pvoutput] section_ | Your unique system id, generated when creating an account at pvoutput.org. This setting allows the specific inveterdata to be published at pvoutput.org. See `pvoutput` settings for more information. |
 | `logger_entity`    | True     | string | _(none)_                                    | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.                               |
 
@@ -447,12 +445,12 @@ The plugings for the `localproxy` client are:
 
 ### SolarmanPV client settings in the section `client.solarmanpv` of `apps.yaml` or `config.ini`
 
-| key        | optional | type   | default  | description                            |
-| ---------- | -------- | ------ | -------- | -------------------------------------- |
-| `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username |
-| `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password |
-| `app_id`   | True     | string | _(none)_ | The API id used to access your data. If configured, this will override the default assigned id. |
-| `app_key`  | True     | string | _(none)_ | The API key used to access your data. If configured, this will override the default assigned id. |
+| key        | optional | type   | default  | description                                                                                       |
+| ---------- | -------- | ------ | -------- | ------------------------------------------------------------------------------------------------- |
+| `username` | False    | string | _(none)_ | Your Omikportal or SolarmanPV username                                                            |
+| `password` | False    | string | _(none)_ | Your Omikportal or SolarmanPV password                                                            |
+| `app_id`   | True     | string | _(none)_ | The API id used to access your data. If configured, this will override the default assigned id.   |
+| `app_key`  | True     | string | _(none)_ | The API key used to access your data. If configured, this will override the default assigned key. |
 
 ## Output plugins
 
@@ -758,12 +756,10 @@ listen_port = 10004
 plant_id_list = 123
 # The serial number is checked against the section [plant_id] inverter_sn = serialnumber
 
-# solarmanpv portal client settings
+# solarmanpv API client settings
 [client.solarmanpv]
 username = john.doe@example.com
 password = S3cret!
-app_key = 12345678
-app_id = 61510ddemo_api_key9ed2560cc
 
 [output.pvoutput]
 api_key = <YOUR API KEY>
