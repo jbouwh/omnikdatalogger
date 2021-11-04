@@ -1,13 +1,19 @@
 from omnik.ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
-import socket
+from socket import socket, error as sockerror, AF_INET, SOCK_STREAM
 import binascii
+import re
+from datetime import datetime
+import time
+from decimal import Decimal
+from requests import Request, Session
 
 
 class TCPclient(Client):
 
     # IMPORTANT : ONLY WIFI Modules with s/n 602xxxxxx and 604xxxxxx support direct access thru port 8899!
+    # For certain models it is possible to readout http:/{inverter_ip}:80/js/status.js If access through 8899 fails this method will be used as fall back method.
     # Based on: https://github.com/woutrrr/omnik-data-logger by Wouter van der Zwan
     # The script was tested only using simulations, let me know if this works for you
 
@@ -31,6 +37,13 @@ class TCPclient(Client):
             raise Exception("plant_id_list was not specified")
         # Initialize dict with inverter info
         self.inverters = {}
+        self.session = {}
+
+        # self._mode indicates the access mode that will be used
+        # 0: Not initialized
+        # 1: Running in native mode (port 8899)
+        # 2: Running in fallback mode (port 80) fetching http://{inverter_ip}:80/js/status.js
+        self._mode = 0
 
     def getPlants(self):
         data = []
@@ -58,10 +71,7 @@ class TCPclient(Client):
                     self.hass_api,
                     "ERROR",
                     "logger_sn (The serial number of the "
-                    "Wi-Fi datalogger) for plant {plant} was not specified for [TCPclient]",
-                )
-                raise Exception(
-                    "logger_sn (a serial number f the Wi-Fi datalogger) was not specified"
+                    "Wi-Fi datalogger) for plant {plant} was not specified for [TCPclient], http mode only",
                 )
             inverter_sn = self.config.get(
                 f"plant.{plant}", "inverter_sn", fallback=None
@@ -70,12 +80,9 @@ class TCPclient(Client):
                 hybridlogger.ha_log(
                     self.logger,
                     self.hass_api,
-                    "ERROR",
+                    "WARNING",
                     "inverter_sn (The serial number of the inverter) "
-                    "for plant {plant} was not specified for [TCPclient]",
-                )
-                raise Exception(
-                    "inverter_sn (a serial number of the inverter) was not specified"
+                    "for plant {plant} was not specified for [TCPclient], http mode only",
                 )
             inverterdata = {
                 "inverter_address": inverter_address,
@@ -94,15 +101,46 @@ class TCPclient(Client):
         return data
 
     def getPlantData(self, plant_id):
+        data = None
+        if not self._mode:
+            # native mode
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "INFO",
+                f"Initializing: Trying to reach the inverter for plant {plant_id} over port 8899.",
+            )
+        if (
+            self._mode <= 1
+            and self.inverters[plant_id].get("inverter_sn")
+            and self.inverters[plant_id].get("logger_sn")
+        ):
+            data = self._getPlantData_native(plant_id)
+        if data:
+            # set mode to native
+            self._mode = 1
+        if not self._mode:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "INFO",
+                f"Initializing: Trying to reach the inverter for plant {plant_id} over port http (fallback).",
+            )
+        if self._mode == 0 or self._mode == 2:
+            # fall back mode
+            data = self._getPlantData_fallback(plant_id)
 
+        return data
+
+    def _getPlantData_native(self, plant_id):
+        # Create a TCP/IP socket
         valid = False
         data = {}
         # Create request message
         requestmsg = omnik.InverterMsg.request_string(
             self.inverters[plant_id]["logger_sn"]
         )
-        # Create a TCP/IP socket
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket(AF_INET, SOCK_STREAM)
         sock.settimeout(40)
         try:
             hybridlogger.ha_log(
@@ -139,12 +177,12 @@ class TCPclient(Client):
                     f"data size: {len(rawmsg)}.\n"
                     f"Datadump: {str(binascii.b2a_base64(rawmsg))}",
                 )
-        except Exception as e:
+        except sockerror as warn:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "INFO",
-                f"Inverter is not reachable, this is normal when it is dark. {e}",
+                f"Inverter is not reachable over port 8899, this is normal when it is dark. {warn}",
             )
             return None
 
@@ -165,4 +203,51 @@ class TCPclient(Client):
                 "Invalid response, ignoring message",
             )
             data = None
+
+        return data
+
+    def _getPlantData_fallback(self, plant_id):
+        data = None
+        # Get get url for debugging
+        url = self.config.get(
+            f"plant.{plant_id}",
+            "url",
+            fallback=f"http://{self.inverters[plant_id].get('inverter_address')}/js/status.js",
+        )
+        headers = {
+            "User-Agent": "Omnikdatalogger",
+            "Content-Type": "text/xml; charset=utf-8",
+            "Connection": "keep-alive",
+            "Accept": "Content-Type: text/html; charset=UTF-8",
+        }
+        if not self.session.get(plant_id):
+            self.session[plant_id] = Session()
+        request = Request("GET", url=url, headers=headers)
+        prepped_request = self.session[plant_id].prepare_request(request)
+        response = self.session[plant_id].send(prepped_request)
+        # Throw if status is not valid
+        response.raise_for_status()
+
+        # We have response, lets validate it now
+        inverter_data_search = re.search(
+            r'(?<=webData=").*?(?=";)|(?<=myDeviceArray\[0\]=").*?(?=";)',
+            response.content.decode("utf-8"),
+        )
+        if inverter_data_search:
+            # Now extract our data (if valid)
+            inverter_data = inverter_data_search.group(0).split(",")
+            lastupdate = time.time()
+            data = {
+                "plant_id": plant_id,
+                "last_update": lastupdate,
+                "last_update_time": datetime.utcfromtimestamp(lastupdate).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                ),
+                "inverter": inverter_data[0],
+                "current_power": Decimal(inverter_data[5]),
+                "today_energy": Decimal(inverter_data[6]) / 100,
+                "total_energy": Decimal(inverter_data[7]) / 10,
+            }
+            # set mode to http
+            self._mode = 2
         return data
