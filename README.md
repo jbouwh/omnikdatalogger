@@ -4,7 +4,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 Omnik data logger enables you to log the data of your Omnik inverter combine the data with a Dutch or Belgian SLIMME METER and output the data Home Assistant using MQTT discovery.
-You can also choose to log your data to pvoutput or an influx database.
+You can also choose to log your data to pvoutput or an influx database or combine output options.
 
 ## See also
 
@@ -16,7 +16,7 @@ You can also choose to log your data to pvoutput or an influx database.
 The application can be installed:
 
 - Install with the Home Assistant Community Store [HACS](https://hacs.xyz/).
-  - Omnik data logger is include in the default repository. Open the Automation tab. Click on de big orange **+**
+  - Omnik data logger is included in the default repository. Open the Automation tab. Click on de big orange **+**
   - Search for 'Omnik data logger' and select it.
   - Choose 'Install this repository in HACS'
 - Download the latest release from [here](https://github.com/jbouwh/omnikdatalogger/releases)
@@ -31,7 +31,7 @@ The main application files are in the folder `apps/omnikdatalogger`
 The application can be configured using:
 
 - Commandline (limited options available)
-- Configuration file (config.ini)
+- Configuration file (config.yaml)
 - apps.yaml configuration file (with AppDaemon) _(This applies tot HACS-users)_
 
 ### Commandline
@@ -43,14 +43,13 @@ optional arguments:
   -h, --help     show this help message and exit
   --settings FILE  Path to .yaml configuration file
   --section  Section to .yaml configuration file to use. Defaults to the first section found.
-  --config FILE  path to configuration file (ini) (DECREPATED!)
   --data_config FILE  Path to data_fields.json configuration file
   --persistant_cache_file FILE  Path to writable cache json file to store last power en total energy
   --interval n  execute every n seconds
   -d, --debug    debug mode
 ```
 
-> De default location for config using the commandline is `~/.omnik/config.yaml` with fallback to `~/.omnik/config.ini` other parameters can also be set using a configuration file.
+> De default location for config using the commandline is `~/.omnik/config.yaml`.
 
 ### Configuration using apps.yaml (AppDeamon) (with possible HomeAssistant integration)
 

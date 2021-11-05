@@ -175,7 +175,7 @@ def main(c: ha_ConfigParser, hass_api=None):
 
     set_data_config_path(c)
     datalogger = DataLogger(c, hass_api=hass_api)
-    if c.has_option("default", "interval"):
+    if c.get("default", "interval"):
         # running repeatedly
         if datalogger.client.use_timer:
             hybridlogger.ha_log(
