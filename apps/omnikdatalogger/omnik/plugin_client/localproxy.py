@@ -134,7 +134,7 @@ class LocalProxy(Client):
                     hybridlogger.ha_log(
                         self.logger,
                         self.hass_api,
-                        "INFO",
+                        "DEBUG",
                         f"New message received from inverter '{serialnr}. Plugin: {self.msg['plugin']}'",
                     )
                 else:
