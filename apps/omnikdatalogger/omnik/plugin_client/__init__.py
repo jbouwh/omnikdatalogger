@@ -19,7 +19,7 @@ class Client(object, metaclass=BaseClient):
     plant_id_list = []
 
     def initialize(self):
-        pass
+        return True
 
     def terminate(self):
-        pass
+        return True
