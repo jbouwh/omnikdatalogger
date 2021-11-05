@@ -670,13 +670,13 @@ $ git clone https://github.com/jbouwh/omnikdatalogger
 > onmiklogger.py can be found in the `./apps` folder
 # check if properly installed
 $ omniklogger.py -h
-usage: omniklogger.py [-h] [--config FILE] [--interval n] [-d]
+usage: omniklogger.py [-h] [--settings FILE] [--interval n] [-l]
 
 optional arguments:
   -h, --help     show this help message and exit
-  --config FILE  Path to configuration file
+  --settings FILE  Path to yaml configuration file
   --interval n   Execute every n seconds
-  -d, --debug    Debug mode
+  -l {DEBUG,INFO,WARNING,ERROR}, --loglevel {DEBUG,INFO,WARNING,ERROR} Loglevel
 ```
 
 An example systemd script is available from `scripts/omnikdatalogger.service`. Copy it so you can customize it to your use.
