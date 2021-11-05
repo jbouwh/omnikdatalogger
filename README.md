@@ -46,7 +46,7 @@ optional arguments:
   --data_config FILE  Path to data_fields.json configuration file
   --persistant_cache_file FILE  Path to writable cache json file to store last power en total energy
   --interval n  execute every n seconds
-  -d, --debug    debug mode
+  -l {DEBUG,INFO,WARNING,ERROR}, --loglevel {DEBUG,INFO,WARNING,ERROR} Loglevel
 ```
 
 > De default location for config using the commandline is `~/.omnik/config.yaml`.
