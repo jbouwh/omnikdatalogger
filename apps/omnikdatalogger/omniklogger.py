@@ -24,10 +24,10 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 LOGLEVEL = {
-    "DEBUG": logger.setLevel(logging.DEBUG),
-    "INFO": logger.setLevel(logging.INFO),
-    "WARNING": logger.setLevel(logging.WARNING),
-    "ERROR": logger.setLevel(logging.ERROR),
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
 }
 
 # customize config parser with dict based lookup for AppDaemon and command line options

@@ -65,6 +65,9 @@ class TCPclient(Client):
             )
             inverter_connection = (inverter_address, int(inverter_port))
             logger_sn = self.config.get(f"plant.{plant}", "logger_sn", fallback=None)
+            http_only = bool(
+                self.config.get(f"plant.{plant}", "http_only", fallback="False")
+            )
             if not logger_sn:
                 hybridlogger.ha_log(
                     self.logger,
@@ -90,6 +93,7 @@ class TCPclient(Client):
                 "logger_sn": int(logger_sn),
                 "inverter_sn": inverter_sn,
                 "inverter_connection": inverter_connection,
+                "http_only": http_only,
             }
             self.inverters[plant] = inverterdata
             data.append({"plant_id": plant})
@@ -102,7 +106,8 @@ class TCPclient(Client):
 
     def getPlantData(self, plant_id):
         data = None
-        if not self._mode:
+        http_only = self.inverters[plant_id].get("http_only")
+        if not self._mode and not http_only:
             # native mode
             hybridlogger.ha_log(
                 self.logger,
@@ -114,6 +119,7 @@ class TCPclient(Client):
             self._mode <= 1
             and self.inverters[plant_id].get("inverter_sn")
             and self.inverters[plant_id].get("logger_sn")
+            and not http_only
         ):
             data = self._getPlantData_native(plant_id)
         if data:
