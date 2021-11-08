@@ -66,7 +66,7 @@ class TCPclient(Client):
             inverter_connection = (inverter_address, int(inverter_port))
             logger_sn = self.config.get(f"plant.{plant}", "logger_sn", fallback=None)
             http_only = bool(
-                self.config.get(f"plant.{plant}", "http_only", fallback="False")
+                self.config.get(f"plant.{plant}", "http_only", fallback=None)
             )
             if not logger_sn:
                 hybridlogger.ha_log(
