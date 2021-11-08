@@ -23,6 +23,13 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+LOGLEVEL = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+}
+
 # customize config parser with dict based lookup for AppDaemon and command line options
 # has_option and get function have been adapted
 ha_args = {}
@@ -172,10 +179,12 @@ def main(c: ha_ConfigParser, hass_api=None):
     # Enabled debugging if the flag is set
     if c.get("default", "debug", False):
         logger.setLevel(logging.DEBUG)
+    if c.get("default", "loglevel"):
+        logger.setLevel(LOGLEVEL.get(c.get("default", "loglevel")))
 
     set_data_config_path(c)
     datalogger = DataLogger(c, hass_api=hass_api)
-    if c.has_option("default", "interval"):
+    if c.get("default", "interval"):
         # running repeatedly
         if datalogger.client.use_timer:
             hybridlogger.ha_log(
@@ -346,8 +355,14 @@ if __name__ == "__main__":
         metavar="FILE",
     )
     parser.add_argument("--interval", type=int, help="Execute every n seconds")
-
     parser.add_argument("-d", "--debug", action="store_true", help="Debug mode")
+    parser.add_argument(
+        "-l",
+        "--loglevel",
+        help="Loglevel",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+    )
 
     args = parser.parse_args()
 

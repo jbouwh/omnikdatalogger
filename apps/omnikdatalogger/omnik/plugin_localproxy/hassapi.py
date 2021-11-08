@@ -72,7 +72,7 @@ class HASSAPI(LocalProxyPlugin):
         hybridlogger.ha_log(
             self.logger,
             self.hass_api,
-            "INFO",
+            "DEBUG",
             f"HASSapi state change for {self.hass_api.get_state(entity, 'inverter', 'n/a')} "
             f"at {self.hass_api.get_state(entity, 'last_update', 'n/a')}",
         )
