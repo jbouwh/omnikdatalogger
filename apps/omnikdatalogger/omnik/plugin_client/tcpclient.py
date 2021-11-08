@@ -43,7 +43,7 @@ class TCPclient(Client):
         # 0: Not initialized
         # 1: Running in native mode (port 8899)
         # 2: Running in fallback mode (port 80) fetching http://{inverter_ip}:80/js/status.js
-        self._mode = 0
+        self._mode = {}
 
     def getPlants(self):
         data = []
@@ -96,6 +96,7 @@ class TCPclient(Client):
                 "http_only": http_only,
             }
             self.inverters[plant] = inverterdata
+            self._mode[plant] = 0
             data.append({"plant_id": plant})
 
         hybridlogger.ha_log(
@@ -107,7 +108,7 @@ class TCPclient(Client):
     def getPlantData(self, plant_id):
         data = None
         http_only = self.inverters[plant_id].get("http_only")
-        if not self._mode and not http_only:
+        if not self._mode.get(plant_id) and not http_only:
             # native mode
             hybridlogger.ha_log(
                 self.logger,
@@ -116,7 +117,7 @@ class TCPclient(Client):
                 f"Initializing: Trying to reach the inverter for plant {plant_id} over port 8899.",
             )
         if (
-            self._mode <= 1
+            self._mode.get(plant_id) <= 1
             and self.inverters[plant_id].get("inverter_sn")
             and self.inverters[plant_id].get("logger_sn")
             and not http_only
@@ -124,7 +125,7 @@ class TCPclient(Client):
             data = self._getPlantData_native(plant_id)
         if data:
             # set mode to native
-            self._mode = 1
+            self._mode[plant_id] = 1
         if not self._mode:
             hybridlogger.ha_log(
                 self.logger,
@@ -132,7 +133,7 @@ class TCPclient(Client):
                 "INFO",
                 f"Initializing: Trying to reach the inverter for plant {plant_id} over port http (fallback).",
             )
-        if self._mode == 0 or self._mode == 2:
+        if self._mode.get(plant_id) == 0 or self._mode.get(plant_id) == 2:
             # fall back mode
             data = self._getPlantData_fallback(plant_id)
 
@@ -255,5 +256,5 @@ class TCPclient(Client):
                 "total_energy": Decimal(inverter_data[7]) / 10,
             }
             # set mode to http
-            self._mode = 2
+            self._mode[plant_id] = 2
         return data
