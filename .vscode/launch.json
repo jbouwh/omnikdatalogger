@@ -5,11 +5,18 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Omnikdatalogger",
+        "name": "Omnikdatalogger (Debug)",
         "type": "python",
         "request": "launch",
         "program": "${workspaceFolder}/apps/omnikdatalogger/omniklogger.py",
-        "args": ["--debug", "--settings", "${workspaceFolder}/.omnik/config.yaml", "--config", "${workspaceFolder}/.omnik/config.ini", "--persistant_cache_file", "${workspaceFolder}/.omnik/persistant_cache.json"],
+        "args": ["--debug", "--settings", "${workspaceFolder}/.omnik/config.yaml", "--persistant_cache_file", "${workspaceFolder}/.omnik/persistant_cache.json"],
+      },
+      {
+        "name": "Omnikdatalogger (Normal)",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/apps/omnikdatalogger/omniklogger.py",
+        "args": ["--settings", "${workspaceFolder}/.omnik/config.yaml", "--persistant_cache_file", "${workspaceFolder}/.omnik/persistant_cache.json"],
       },
       {
         "name": "Omnikdatalogger (AppDaemon)",
@@ -20,4 +27,3 @@
       }
     ]
   }
-  
