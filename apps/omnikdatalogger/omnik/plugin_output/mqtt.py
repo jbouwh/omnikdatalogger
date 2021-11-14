@@ -1,7 +1,6 @@
 import pytz
 import json
 import time
-import ssl
 
 from omnik.ha_logger import hybridlogger
 
