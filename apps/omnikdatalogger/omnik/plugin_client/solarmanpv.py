@@ -145,13 +145,13 @@ class OmnikPortalClient(Client):
                     data.append(
                         {
                             "plant_id": f'{str(station.get("id"))},{str(device.get("deviceSn"))}',
-                            "last_update": device.get("collectionTime"),
                         }
                     )
 
         return data
 
     def getPlantData(self, plant_id):
+        """Get the data for a specific plant."""
 
         # we collect our data in `data` but we need a serial number to query the API, we extract this from plant_id
         data = {}

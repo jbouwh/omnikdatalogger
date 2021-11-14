@@ -10,7 +10,7 @@ import requests
 import json
 from .daylight import daylight
 import threading
-import time
+from time import time, sleep
 from decimal import Decimal
 from datetime import datetime, timedelta, timezone
 
@@ -39,7 +39,7 @@ class DataLogger(object):
         self.every = self._get_interval()
         self.interval_aggregated = self._get_interval_aggregated()
         # Wait at least a polling interval before submitting net data without solar aggegation
-        self.pasttime = time.time() + self.every
+        self.pasttime = time() + self.every
         tz = self.config.get("default", "timezone", fallback="Europe/Amsterdam")
         self.timezone = pytz.timezone(tz)
 
@@ -346,10 +346,17 @@ class DataLogger(object):
             Plugin.hass_api = self.hass_api
 
             for plugin in self.plugins:
-                spec = importlib.util.find_spec(plugin)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                # importlib.import_module(plugin)
+                try:
+                    spec = importlib.util.find_spec(plugin)
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                except AttributeError:
+                    hybridlogger.ha_log(
+                        self.logger,
+                        self.hass_api,
+                        "ERROR",
+                        f"Output plugin {plugin} cannot be initialized!",
+                    )
 
     def _terminate_output_plugins(self):
         while Plugin.plugins:
@@ -390,7 +397,7 @@ class DataLogger(object):
             self.dsmr_access.release()
             tries -= 1
             if not complete:
-                time.sleep(1)
+                sleep(1)
             else:
                 break
         if not tries:
@@ -434,7 +441,7 @@ class DataLogger(object):
                 "1000"
             )
             data["power_direct_use"] = Decimal("0")
-        data["last_update_calc"] = time.time()
+        data["last_update_calc"] = time()
 
     def dsmr_callback(self, terminal, dsmr_message):
         # print(f"{dsmr_message['gas_consumption_totall']} =
@@ -519,7 +526,10 @@ class DataLogger(object):
                             timezone.utc
                         )
                         if pid.get("last_update")
-                        else self.last_update_time.astimezone(timezone.utc)
+                        else self.get_last_update(
+                            str(pid["plant_id"]),
+                            default=0.0,
+                        )
                     )
                     self.plant_update[str(pid["plant_id"])] = Plant(
                         pid["plant_id"],
@@ -659,7 +669,11 @@ class DataLogger(object):
         data = self._validate_client_data(plant, data)
         # Process for each plugin, but only when valid
         for plugin in Plugin.plugins:
-            if not plugin.process_aggregates or "sys_id" in data:
+            if (
+                plugin.process_output
+                or not plugin.process_aggregates
+                or "sys_id" in data
+            ):
                 hybridlogger.ha_log(
                     self.logger,
                     self.hass_api,
@@ -691,6 +705,9 @@ class DataLogger(object):
                 "current_power",
                 "today_energy",
                 "total_energy",
+                "current_ac1",
+                "current_ac2",
+                "current_ac3",
                 "voltage_ac1",
                 "voltage_ac2",
                 "voltage_ac3",
@@ -802,6 +819,10 @@ class DataLogger(object):
                 self._adapt_max_value(aggregated_data, data, "voltage_ac2")
                 self._adapt_max_value(aggregated_data, data, "voltage_ac3")
                 self._adapt_max_value(aggregated_data, data, "net_voltage_max")
+                # Max current
+                self._adapt_max_value(aggregated_data, data, "current_ac1")
+                self._adapt_max_value(aggregated_data, data, "current_ac2")
+                self._adapt_max_value(aggregated_data, data, "current_ac3")
                 # Max inverter temperature
                 self._adapt_max_value(aggregated_data, data, "inverter_temperature")
             if sys_id and self.dsmr:
@@ -973,12 +994,12 @@ class DataLogger(object):
                 f"Cache file '{self.persistant_cache_file}' can not be written! Error: {e.args}",
             )
 
-    def get_last_update(self, plant, default=time.time()):
+    def get_last_update(self, plant, default=time()):
         last_update_key = f"{plant}.last_update"
         cache = self.cache.get(last_update_key)
         if cache:
             return datetime.timestamp(datetime.strptime(cache, "%Y-%m-%dT%H:%M:%S"))
-        return default if default else time.time().replace(microsecond=0)
+        return default
 
     def total_energy(
         self,

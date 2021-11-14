@@ -1,0 +1,141 @@
+import csv
+import threading
+from time import strftime, localtime
+from os import path
+from omnik.ha_logger import hybridlogger
+
+from omnik.plugin_output import Plugin
+
+DEFAULT_FIELDS = [
+    "date",
+    "time",
+    "current_power",
+    "today_energy",
+    "total_energy",
+]
+
+
+def _ensure_headers(csvfile, fields, separator):
+    """Open the file and make sure the correct headers are present."""
+    headers = None
+    if path.isfile(csvfile):
+        # Check existing file
+        with open(csvfile, "r", newline="\n") as file_object:
+            reader = csv.reader(file_object, delimiter=separator)
+            for row in reader:
+                headers = row
+                break
+
+        # return existing headers or None if an existing file does not comply the field and seperator settings
+        if headers:
+            return headers if len(fields) == len(set(fields) & set(headers)) else None
+    # Create a file with headers
+    with open(csvfile, "a+", newline="\n") as file_object:
+        headers = fields.copy()
+        writer = csv.writer(file_object, delimiter=separator)
+        writer.writerow(headers)
+
+    return headers
+
+
+class csvoutput(Plugin):
+    def __init__(self):
+        super().__init__()
+        self.name = "csvoutput"
+        self.description = "Write output to a text file"
+        # Enable support for aggregates and detail output
+        self.process_aggregates = True
+        self.process_output = True
+        # Make instance to run exclusively
+        self.access = threading.Condition(threading.Lock())
+        hybridlogger.ha_log(
+            self.logger,
+            self.hass_api,
+            "INFO",
+            "CSV output plugin enabled.",
+        )
+
+    def _get_temperature(self, msg):
+        """Get the temperature from the open weater API"""
+        if self.config.getboolean("output.csv", "use_temperature", fallback=False):
+            weather = self.get_weather()
+            msg["temperature"] = weather["main"]["temp"]
+
+    def process(self, **args):
+        """
+        Send data to csv
+        """
+        # Assign output file and fields to log
+        msg = args["msg"]
+        config_section = (
+            f'plant.{msg.get("plant_id")}' if msg.get("plant_id") else "output.csv"
+        )
+        csvfile = self.config.get(config_section, "csvfile", fallback=None)
+        separator = self.config.get(config_section, "separator", fallback=";")
+        fields = self.config.getlist(config_section, "fields", fallback=DEFAULT_FIELDS)
+        if fields and fields[0] and csvfile:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "DEBUG",
+                f"CSV output: {fields}. Config key '{config_section}'.",
+            )
+        else:
+            if not csvfile:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "DEBUG",
+                    f"Skipping CSV logging, no output file defined. Config key '{config_section}'",
+                )
+            else:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "WARNING",
+                    f"No output fields configured! CSV monitoring disabled. Config key '{config_section}'",
+                )
+            return
+
+        # Ensure headers
+        headers = _ensure_headers(csvfile, fields, separator)
+        if not headers:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "ERROR",
+                "Skipping CSV logging, file exists with invalid header structure.",
+            )
+            return
+        try:
+            self.access.acquire()
+            # Append the log
+            with open(csvfile, "a") as file_object:
+                reporttime = localtime(msg["last_update"])
+                self._get_temperature(msg)
+                msg.update(
+                    {
+                        "date": strftime("%Y-%m-%d", reporttime),
+                        "time": strftime("%H:%M:%S", reporttime),
+                    }
+                )
+                fields = list()
+                for field in headers:
+                    fields.append(msg.get(field))
+                writer = csv.writer(file_object, delimiter=separator)
+                writer.writerow(fields)
+
+        except OSError as os_err:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "ERROR",
+                f"File exception error: {os_err.args}",
+            )
+
+        except Exception as exp:
+            hybridlogger.ha_log(
+                self.logger, self.hass_api, "ERROR", f"Unexpected error: {exp.args}"
+            )
+        finally:
+            self.access.release()
