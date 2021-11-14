@@ -90,6 +90,9 @@ class csvoutput(Plugin):
         no_headers = self.config.getboolean(
             config_section, "no_headers", fallback=False
         )
+        use_temperature = self.config.getboolean(
+            config_section, "use_temperature", fallback=False
+        )
         if fields and fields[0] and csvfile:
             hybridlogger.ha_log(
                 self.logger,
@@ -129,7 +132,8 @@ class csvoutput(Plugin):
             # Append the log
             with open(csvfile, "a") as file_object:
                 reporttime = localtime(msg["last_update"])
-                self._get_temperature(msg)
+                if use_temperature:
+                    msg.update({"temperature": self._get_temperature(msg)})
                 msg.update(
                     {
                         "date": strftime("%Y-%m-%d", reporttime),

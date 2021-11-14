@@ -41,70 +41,82 @@ See for more information and documentation about AppDaemon: https://appdaemon.re
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
 omnik_datalogger:
-# General options
+  # General options
   module: omniklogger
   class: HA_OmnikDataLogger
   city: Amsterdam
   interval: 360
 
-# plugin section
+  # plugin section
   plugins:
-# plugins for data logging (output)
+    # plugins for data logging (output)
     output:
       - pvoutput
       - mqtt
       - influxdb
-# plugins for local proxy client (list)
+      - csvoutput
+    # plugins for local proxy client (list)
     localproxy:
       - hassapi
-#     - mqtt_proxy
-#     - tcp_proxy
-# the client that is beging used (choose one)
-# valid clients are localproxy, solarmanpv and tcpclient
+    #     - mqtt_proxy
+    #     - tcp_proxy
+    # the client that is beging used (choose one)
+    # valid clients are localproxy, solarmanpv and tcpclient
     client: localproxy
 
-# attributes override
+  # attributes override
   attributes:
     devicename.omnik: Omvormer
-#   model.omnik: Omnik data logger
+  #   model.omnik: Omnik data logger
 
-#DSMR support
+  #DSMR support
   dsmr:
     terminals:
       - term1
     tarif:
-      - '0001'
-      - '0002'
+      - "0001"
+      - "0002"
     tarif.0001: laag
     tarif.0002: normaal
 
   dsmr.term1:
-# use mode tcp or device
+    # use mode tcp or device
     mode: tcp
     host: 172.17.0.1
     port: 3333
     device: /dev/ttyUSB0
-    dsmr_version: '5'
+    dsmr_version: "5"
     # plant_id: '123' # not needed in most cases
     total_energy_offset: 15338.0
     gas_meter: true
 
-# Section for your inverters specific settings
+  # Section for your inverters specific settings
   plant.123:
     inverter_address: 192.168.1.1
     logger_sn: 123456789
     inverter_port: 8899
     inverter_sn: NLxxxxxxxxxxxxxx
     sys_id: <YOUR SYSTEM ID>
+    # CSV output for specific plant
+    csvfile: "/some_path/output.178735.csv"
+    separator: ";"
+    no_headers: false
+    fields:
+      - date
+      - time
+      - current_power
+      - today_energy
+      - total_energy
+      - inverter
 
-# Section for the localproxy client
+  # Section for the localproxy client
   client.localproxy:
     plant_id_list:
-      - '123'
-# Section for the localproxy plugin hassapi
+      - "123"
+  # Section for the localproxy plugin hassapi
   client.localproxy.hassapi:
     logger_entity: binary_sensor.datalogger
-# Section for the localproxy plugin mqtt_proxy
+  # Section for the localproxy plugin mqtt_proxy
   client.localproxy.mqtt_proxy:
     logger_sensor_name: Datalogger
     discovery_prefix: homeassistant
@@ -113,17 +125,17 @@ omnik_datalogger:
     client_name_prefix: ha-mqtt-omniklogger
     username: mqttuername
     password: mqttpasswordabcdefgh
-# Section for the localproxy plugin tcp_proxy
+  # Section for the localproxy plugin tcp_proxy
   client.localproxy.tcp_proxy:
-    listen_address: '0.0.0.0'
-    listen_port: '10004'
+    listen_address: "0.0.0.0"
+    listen_port: "10004"
 
-# SolarmanPV portal options
+  # SolarmanPV portal options
   client.solarmanpv:
     username: john.doe@example.com
     password: some_password
 
-# Influxdb output plugin configuration options
+  # Influxdb output plugin configuration options
   output.influxdb:
     host: localhost
     port: 8086
@@ -131,9 +143,23 @@ omnik_datalogger:
     username: omnikdatalogger
     password: mysecretpassword
     #jwt_token=
-    use_temperature=true
+    use_temperature: true
 
-# PVoutput output plugin configuration options
+  # csvoutput output plugin configuration options
+  output.csvoutput:
+    # CSV output for aggregated data
+    csvfile: "/some_path/output.csv"
+    separator: ";"
+    no_headers: false
+    fields:
+      - date
+      - time
+      - current_power
+      - today_energy
+      - total_energy
+      - inverter
+
+  # PVoutput output plugin configuration options
   output.pvoutput:
     sys_id: 12345
     api_key: jadfjlasexample0api0keykfjasldfkajdflasd
@@ -141,7 +167,7 @@ omnik_datalogger:
     use_inverter_temperature: true
     publish_voltage: voltage_ac_max
 
-# Open Weather map options
+  # Open Weather map options
   openweathermap:
     api_key: someexampleapikeygenerateone4you
     endpoint: api.openweathermap.org
@@ -149,7 +175,7 @@ omnik_datalogger:
     lat: 50.1234567
     units: metric
 
-# MQTT output plugin configuration options
+  # MQTT output plugin configuration options
   output.mqtt:
     username: mqttuername
     password: mqttpasswordabcdefgh
@@ -250,11 +276,11 @@ omnik_datalogger:
 
 #### Enable plugins in the section `plugins`
 
-| key          | optional | type   | default        | description                                                                                                                                                                                                             |
-| ------------ | -------- | ------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `client`     | False    | string | _(none)_       | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client` or `solarmanpv`.                                                                                                   |
-| `localproxy` | True     | list   | _(none)_       | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.                                                                          |
-| `output`     | True     | list   | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are _pvoutput_, _influxdb_ and _mqtt_. If no plugins are configured, nothing will be logged. |
+| key          | optional | type   | default        | description                                                                                                                                                                                                                          |
+| ------------ | -------- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `client`     | False    | string | _(none)_       | Name of the client that will be used to fetch the data. Valid choices are `localproxy`, `tcp_client` or `solarmanpv`.                                                                                                                |
+| `localproxy` | True     | list   | _(none)_       | The client plugings for the `localproxy` client that will be used to fetch the data. Valid choices are `tcp_proxy`, `mqtt_proxy` or `hassapi`.                                                                                       |
+| `output`     | True     | list   | _(empty list)_ | A (comma separated) list or yaml list of string specifying the name(s) of the output plugins to be used. Available plugins are `pvoutput`, `influxdb`, `mqtt` and `csvoutput`. If no plugins are configured, nothing will be logged. |
 
 #### DSMR settings in the section `dsmr` of `apps.yaml`
 
@@ -294,6 +320,18 @@ Details for each plant are set in section `plant.{plant id}]`. Every plant has i
 | `http_only`        | True     | bool   | _False_                                | Used by the client `tcpclient`. The client will not try to connect the inverter over port `8899` but will use the fallback method to fetch a status update using http://{inverter_address}:80/js/status.js |
 | `sys_id`           | True     | int    | _`sys_id` at the `[pvoutput]` section_ | Your unique system id, generated when creating an account at pvoutput.org. This setting allows the specific inveterdata to be published at pvoutput.org. See `pvoutput` settings for more information.     |
 | `logger_entity`    | True     | string | _(none)_                               | When using the `localproxy` client with `hassapi`, this specifies the inverter entity created through `omnikdataloggerproxy` that receives new updates for the inverter.                                   |
+| `csvfile`          | True     | string | _(none)_                               | Used by the client `csvoutput`. The file and path to append or create for csv logging.                                                                                                                     |
+| `separator`        | True     | string | _;_                                    | Used by the client `csvoutput`. The separator/delimiter to use between headers and fields. Use '\t' to use a tab as separator.                                                                             |
+| `no_headers`       | True     | bool   | _False_                                | Used by the client `csvoutput`. If `csvoutput` will not write headers to the `csvfile`.                                                                                                                    |
+| `fields`           | True     | list   | _[*]_                                  | Used by the client `csvoutput`. A list of fields to log. The fields `date` and `time` are specials fields to log the local date and time.                                                                  |
+
+[*] == [
+"date",
+"time",
+"current_power",
+"today_energy",
+"total_energy",
+]
 
 #### LocalProxy client settings in the section `client.localproxy` of `apps.yaml`
 
@@ -484,6 +522,24 @@ Register a free acount and API key at https://pvoutput.org/register.jsp
 | `use__inverter_temperature` | True     | bool   | `false`  | When set to true and `use_temperature` is set, the inverter temperature is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported.                                                                                                                                                                                                                                                                                                                                                                                         |
 | `publish_voltage`           | True     | string | _(none)_ | The _fieldname_ key of the voltage property to use for pvoutput 'addstatus' publishing. When set to `'voltage_ac_max'`, the maximal inverter AC voltage over all fases is submitted to pvoutput.org when logging the data. Only the clients `tcpclient` and `localproxy` are supported. Supported values are `voltage_ac1`, `voltage_ac2`, `voltage_ac3` or `voltage_ac_max` or one ofe the DSMR voltage fields (INSTANTANEOUS_VOLTAGE_L1 / \_L2, \_L3 or net_voltage_max) if DSMR is available. The field `net_voltage_max` holds the highest voltage over all available fases. |
 | `net_voltage_fallback `     | True     | string | _(none)_ | The _fieldname_ key of the voltage property to use for pvoutput 'addstatus' publishing in case no solar data is available during sun down. When set to `'net_voltage_max'`, the maximal net voltage over all fases is submitted as alternative to pvoutput.org. This key only makes sens when using the DSMR integration.                                                                                                                                                                                                                                                        |
+
+### CSVoutput plugin settings in the section `output.csvoutput` of `apps.yaml`
+
+| key               | optional | type   | default  | description                                                                                                                               |
+| ----------------- | -------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `csvfile`         | True     | string | _(none)_ | Used by the client `csvoutput`. The file and path to append or create for csv logging.                                                    |
+| `separator`       | True     | string | _;_      | Used by the client `csvoutput`. The separator/delimiter to use between headers and fields. Use '\t' to use a tab as separator.            |
+| `no_headers`      | True     | bool   | _False_  | Used by the client `csvoutput`. If `csvoutput` will not write headers to the `csvfile`.                                                   |
+| `fields`          | True     | list   | _[*]_    | Used by the client `csvoutput`. A list of fields to log. The fields `date` and `time` are specials fields to log the local date and time. |
+| `use_temperature` | True     | bool   | _False_  | When set to true the `temperature` field is set in the data set which can be logged. The value is obtained from OpenWeatherMap.           |
+
+[*] == [
+"date",
+"time",
+"current_power",
+"today_energy",
+"total_energy",
+]
 
 ### InfluxDB plugin settings in the section `output.influxdb` of `apps.yaml`
 
