@@ -34,7 +34,7 @@ def _ensure_headers(csvfile, fields, separator, no_headers):
             return headers if len(fields) == len(set(fields) & set(headers)) else None
     # Create a file with headers
 
-    with open(csvfile, "a+", newline="\n") as file_object:
+    with open(csvfile, "w", newline="\n") as file_object:
         headers = fields.copy()
         if not no_headers:
             writer = csv.writer(file_object, delimiter=separator)
@@ -60,9 +60,9 @@ class csvoutput(Plugin):
             "CSV output plugin enabled.",
         )
 
-    def _get_temperature(self, msg):
+    def _get_temperature(self, msg, config_section):
         """Get the temperature from the open weater API"""
-        if self.config.getboolean("output.csv", "use_temperature", fallback=False):
+        if self.config.getboolean(config_section, "use_temperature", fallback=False):
             weather = self.get_weather()
             msg["temperature"] = weather["main"]["temp"]
 
@@ -116,42 +116,40 @@ class csvoutput(Plugin):
                     f"No output fields configured! CSV monitoring disabled. Config key '{config_section}'",
                 )
             return
-
-        # Ensure headers
-        headers = _ensure_headers(csvfile, fields, separator, no_headers)
-        if not headers:
-            hybridlogger.ha_log(
-                self.logger,
-                self.hass_api,
-                "ERROR",
-                "Skipping CSV logging, file exists with invalid header structure or unequal field count.",
-            )
-            return
         try:
             self.access.acquire()
-            # Append the log
-            with open(csvfile, "a") as file_object:
-                reporttime = localtime(msg["last_update"])
-                if use_temperature:
-                    msg.update({"temperature": self._get_temperature(msg)})
-                msg.update(
-                    {
-                        "date": strftime("%Y-%m-%d", reporttime),
-                        "time": strftime("%H:%M:%S", reporttime),
-                    }
+            # Ensure headers
+            headers = _ensure_headers(csvfile, fields, separator, no_headers)
+            if not headers:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "ERROR",
+                    "Skipping CSV logging, file exists with invalid header structure or unequal field count.",
                 )
-                fields = list()
-                for field in headers:
-                    fields.append(msg.get(field))
-                writer = csv.writer(file_object, delimiter=separator)
-                writer.writerow(fields)
+            else:
+                # Append the log
+                with open(csvfile, "a") as file_object:
+                    reporttime = localtime(msg["last_update"])
+                    self._get_temperature(msg, config_section)
+                    msg.update(
+                        {
+                            "date": strftime("%Y-%m-%d", reporttime),
+                            "time": strftime("%H:%M:%S", reporttime),
+                        }
+                    )
+                    fields = list()
+                    for field in headers:
+                        fields.append(msg.get(field))
+                    writer = csv.writer(file_object, delimiter=separator)
+                    writer.writerow(fields)
 
         except OSError as os_err:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                f"File exception error: {os_err.args}",
+                f"File exception error for '{csvfile}': {os_err.args}",
             )
 
         except Exception as exp:

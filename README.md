@@ -416,6 +416,7 @@ Details for the plant are set in section `plant.{plant id}]`. Replace _plant_id_
 | `separator`        | True     | string | _;_                                    | Used by the client `csvoutput`. The separator/delimiter to use between headers and fields. Use '\t' to use a tab as separator.                                                                             |
 | `no_headers`       | True     | bool   | _False_                                | Used by the client `csvoutput`. If `csvoutput` will not write headers to the `csvfile`.                                                                                                                    |
 | `fields`           | True     | list   | _[*]_                                  | Used by the client `csvoutput`. A list of fields to log. The fields `date` and `time` are specials fields to log the local date and time.                                                                  |
+| `use_temperature`  | True     | bool   | _False_                                | When set to true the `temperature` field is set in the data set which can be logged to CSV. The value is obtained from OpenWeatherMap.                                                                     |
 
 [*] == [
 "date",
