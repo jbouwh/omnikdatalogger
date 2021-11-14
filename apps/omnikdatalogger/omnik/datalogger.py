@@ -715,6 +715,8 @@ class DataLogger(object):
                 "inverter_temperature",
             ]:
                 self._init_aggregated_data_field(aggregated_data, data, field)
+            if data.get("cached"):
+                aggregated_data["cached"] = True
             if self.dsmr:
                 for field in [
                     # Attributes Electricity for pvoutput
@@ -803,29 +805,28 @@ class DataLogger(object):
         else:
             # Get sys_id from pvoutput section, cannot aggregate without sys_id
             sys_id = global_sys_id
-            if sys_id:
-                # Aggerate data (initialize dict and set sys_id)
-                self._init_aggregated_data(aggregated_data, data, sys_id)
-                # Timestamp
-                self._adapt_max_value(aggregated_data, data, "last_update")
-                # Add energy
-                self._adapt_add_value(aggregated_data, data, "today_energy")
-                self._adapt_add_value(aggregated_data, data, "total_energy")
-                # Add power
-                self._adapt_add_value(aggregated_data, data, "current_power")
-                # Max voltage
-                self._adapt_max_value(aggregated_data, data, "voltage_ac_max")
-                self._adapt_max_value(aggregated_data, data, "voltage_ac1")
-                self._adapt_max_value(aggregated_data, data, "voltage_ac2")
-                self._adapt_max_value(aggregated_data, data, "voltage_ac3")
-                self._adapt_max_value(aggregated_data, data, "net_voltage_max")
-                # Max current
-                self._adapt_max_value(aggregated_data, data, "current_ac1")
-                self._adapt_max_value(aggregated_data, data, "current_ac2")
-                self._adapt_max_value(aggregated_data, data, "current_ac3")
-                # Max inverter temperature
-                self._adapt_max_value(aggregated_data, data, "inverter_temperature")
-            if sys_id and self.dsmr:
+            # Aggerate data (initialize dict and set sys_id)
+            self._init_aggregated_data(aggregated_data, data, sys_id)
+            # Timestamp
+            self._adapt_max_value(aggregated_data, data, "last_update")
+            # Add energy
+            self._adapt_add_value(aggregated_data, data, "today_energy")
+            self._adapt_add_value(aggregated_data, data, "total_energy")
+            # Add power
+            self._adapt_add_value(aggregated_data, data, "current_power")
+            # Max voltage
+            self._adapt_max_value(aggregated_data, data, "voltage_ac_max")
+            self._adapt_max_value(aggregated_data, data, "voltage_ac1")
+            self._adapt_max_value(aggregated_data, data, "voltage_ac2")
+            self._adapt_max_value(aggregated_data, data, "voltage_ac3")
+            self._adapt_max_value(aggregated_data, data, "net_voltage_max")
+            # Max current
+            self._adapt_max_value(aggregated_data, data, "current_ac1")
+            self._adapt_max_value(aggregated_data, data, "current_ac2")
+            self._adapt_max_value(aggregated_data, data, "current_ac3")
+            # Max inverter temperature
+            self._adapt_max_value(aggregated_data, data, "inverter_temperature")
+            if self.dsmr:
                 self._adapt_add_value(aggregated_data, data, "power_consumption")
                 self._adapt_add_value(aggregated_data, data, "energy_used_net")
                 self._adapt_add_value(aggregated_data, data, "energy_used")
@@ -1228,6 +1229,7 @@ class DataLogger(object):
                     # Use cached data for aggregation with DSMR
                     data = {}
                     try:
+                        data["cached"] = True
                         data["plant_id"] = plant
                         data["last_update"] = self.get_last_update(plant)
                         data["total_energy"] = self.total_energy(plant)

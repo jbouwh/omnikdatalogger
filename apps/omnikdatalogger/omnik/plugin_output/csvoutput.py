@@ -15,7 +15,7 @@ DEFAULT_FIELDS = [
 ]
 
 
-def _ensure_headers(csvfile, fields, separator):
+def _ensure_headers(csvfile, fields, separator, no_headers):
     """Open the file and make sure the correct headers are present."""
     headers = None
     if path.isfile(csvfile):
@@ -26,14 +26,19 @@ def _ensure_headers(csvfile, fields, separator):
                 headers = row
                 break
 
+        # If no headers are used, we cannot check them, but we check the number fields, return None if there is no count match
+        if no_headers:
+            return fields.copy() if len(headers) == len(fields) else None
         # return existing headers or None if an existing file does not comply the field and seperator settings
         if headers:
             return headers if len(fields) == len(set(fields) & set(headers)) else None
     # Create a file with headers
+
     with open(csvfile, "a+", newline="\n") as file_object:
         headers = fields.copy()
-        writer = csv.writer(file_object, delimiter=separator)
-        writer.writerow(headers)
+        if not no_headers:
+            writer = csv.writer(file_object, delimiter=separator)
+            writer.writerow(headers)
 
     return headers
 
@@ -67,12 +72,24 @@ class csvoutput(Plugin):
         """
         # Assign output file and fields to log
         msg = args["msg"]
+        # Do not log cached data
+        if msg.get("cached"):
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "DEBUG",
+                "Ignoring previously cached data for CSV output.",
+            )
+            return
         config_section = (
             f'plant.{msg.get("plant_id")}' if msg.get("plant_id") else "output.csv"
         )
         csvfile = self.config.get(config_section, "csvfile", fallback=None)
         separator = self.config.get(config_section, "separator", fallback=";")
         fields = self.config.getlist(config_section, "fields", fallback=DEFAULT_FIELDS)
+        no_headers = self.config.getboolean(
+            config_section, "no_headers", fallback=False
+        )
         if fields and fields[0] and csvfile:
             hybridlogger.ha_log(
                 self.logger,
@@ -98,13 +115,13 @@ class csvoutput(Plugin):
             return
 
         # Ensure headers
-        headers = _ensure_headers(csvfile, fields, separator)
+        headers = _ensure_headers(csvfile, fields, separator, no_headers)
         if not headers:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                "Skipping CSV logging, file exists with invalid header structure.",
+                "Skipping CSV logging, file exists with invalid header structure or unequal field count.",
             )
             return
         try:
