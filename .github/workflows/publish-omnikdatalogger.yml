@@ -5,12 +5,13 @@ name: Upload Python Package omnikdatalogger
 
 on:
   release:
-    types: [released]
+    types: [published]
     branches:
       - main
 
 jobs:
   docker:
+    if: "!github.event.release.prerelease"
     runs-on: ubuntu-latest
     steps:
       -
@@ -38,9 +39,9 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
   deploy:
+    if: "!github.event.release.prerelease"
 
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Publish omnikdatalogger
