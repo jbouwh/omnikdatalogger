@@ -155,13 +155,14 @@ omnik_datalogger:
     csvfile: "/some_path/output.csv"
     separator: ";"
     no_headers: false
+    use_temperature: true
     fields:
       - date
       - time
       - current_power
       - today_energy
       - total_energy
-      - inverter
+      - temperature
 
   # PVoutput output plugin configuration options
   output.pvoutput:
