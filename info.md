@@ -36,7 +36,7 @@ The `dsmr-parser` package is needed when you are using a Dutch Smart Meter (DSMR
 The basescript `omniklogger.py` holds a class HA_OmnikDataLogger that implements appdaemon.plugins.hass.hassapi
 See for more information and documentation about AppDaemon: https://appdaemon.readthedocs.io/en/latest/APPGUIDE.html
 
-#### Configuration example
+#### Full Configuration Example
 
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.

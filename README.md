@@ -117,7 +117,7 @@ Next step is to configure AppDaemon to load an instance of the datalogger. It is
 
 This configuration is placed in the file: `/config/appdaemon/apps/apps.yaml`.
 
-#### Example of `config.yaml`/`apps.yaml`:
+#### Full Configuration Example of `config.yaml`/`apps.yaml`:
 
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
