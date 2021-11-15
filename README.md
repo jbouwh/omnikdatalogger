@@ -632,13 +632,23 @@ Register a free acount and API key at https://pvoutput.org/register.jsp
 | `fields`          | True     | list   | _[*]_    | Used by the client `csvoutput`. A list of fields to log. The fields `date` and `time` are specials fields to log the local date and time. |
 | `use_temperature` | True     | bool   | _False_  | When set to true the `temperature` field is set in the data set which can be logged. The value is obtained from OpenWeatherMap.           |
 
-[*] == [
-"date",
-"time",
-"current_power",
-"today_energy",
-"total_energy",
-]
+#### Default fields and additional fields
+
+Default fields assignment [*]:
+
+- `date`
+- `time`
+- `current_power`
+- `today_energy`
+- `total_energy`
+
+The following additional fields are available if DSMR data can be matched with the aggregated solar data:
+
+- `energy_direct_use`
+- `energy_used_net`
+- `power_direct_use`
+- `power_consumption`
+- `last_update_calc`
 
 ### InfluxDB plugin settings in the section `output.influxdb` in of `apps.yaml` or `config.yaml`
 
@@ -768,12 +778,3 @@ $ systemd status omnikdatalogger
    CGroup: /system.slice/omnikdatalogger.service
            └─2445 /usr/bin/python3 /usr/local/bin/omniklogger.py --settings /etc/omnik/config.yaml --interval 300
 ```
-
-## Plugins in development
-
-Working on a couple of plugins to customize processing of the omnik inverter data:
-
-- `mariadb` ~ mariadb/mysql output plugin
-- `csv` ~ csv output plugin
-
-~ the end
