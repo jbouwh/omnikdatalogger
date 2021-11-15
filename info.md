@@ -36,7 +36,7 @@ The `dsmr-parser` package is needed when you are using a Dutch Smart Meter (DSMR
 The basescript `omniklogger.py` holds a class HA_OmnikDataLogger that implements appdaemon.plugins.hass.hassapi
 See for more information and documentation about AppDaemon: https://appdaemon.readthedocs.io/en/latest/APPGUIDE.html
 
-#### Configuration example
+#### Full Configuration Example
 
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
@@ -155,13 +155,14 @@ omnik_datalogger:
     csvfile: "/some_path/output.csv"
     separator: ";"
     no_headers: false
+    use_temperature: true
     fields:
       - date
       - time
       - current_power
       - today_energy
       - total_energy
-      - inverter
+      - temperature
 
   # PVoutput output plugin configuration options
   output.pvoutput:
@@ -269,6 +270,8 @@ omnik_datalogger:
 ### Configuration options (required, optional and defaults)
 
 #### General settings
+
+> All configuration settings are placed unther the instance_name key default is `omnik_datalogger:`.
 
 | key           | optional | type    | default                                | description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------- | -------- | ------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -538,13 +541,23 @@ Register a free acount and API key at https://pvoutput.org/register.jsp
 | `fields`          | True     | list   | _[*]_    | Used by the client `csvoutput`. A list of fields to log. The fields `date` and `time` are specials fields to log the local date and time. |
 | `use_temperature` | True     | bool   | _False_  | When set to true the `temperature` field is set in the data set which can be logged. The value is obtained from OpenWeatherMap.           |
 
-[*] == [
-"date",
-"time",
-"current_power",
-"today_energy",
-"total_energy",
-]
+#### Default fields and additional fields
+
+Default fields assignment [*]:
+
+- `date`
+- `time`
+- `current_power`
+- `today_energy`
+- `total_energy`
+
+The following additional fields are available if DSMR data can be matched with the aggregated solar data:
+
+- `energy_direct_use`
+- `energy_used_net`
+- `power_direct_use`
+- `power_consumption`
+- `last_update_calc`
 
 ### InfluxDB plugin settings in the section `output.influxdb` of `apps.yaml`
 

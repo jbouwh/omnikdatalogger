@@ -117,7 +117,7 @@ Next step is to configure AppDaemon to load an instance of the datalogger. It is
 
 This configuration is placed in the file: `/config/appdaemon/apps/apps.yaml`.
 
-#### Example of `config.yaml`/`apps.yaml`:
+#### Full Configuration Example of `config.yaml`/`apps.yaml`:
 
 ```yaml
 # The instance name is omnik_datalogger, this can be changed. Multiple instances are supported.
@@ -231,13 +231,14 @@ omnik_datalogger:
     csvfile: "/some_path/output.csv"
     separator: ";"
     no_headers: false
+    use_temperature: true
     fields:
       - date
       - time
       - current_power
       - today_energy
       - total_energy
-      - inverter
+      - temperature
 
   # PVoutput output plugin configuration options
   output.pvoutput:
@@ -352,12 +353,16 @@ The first section in `config.yaml` will be used (see event log).
 
 #### General settings - `apps.yaml` 'only' configuration options
 
+> All configuration settings are placed unther the instance_name key default is `omnik_datalogger:`.
+
 | key      | optional | type   | default  | description                                                                                                                        |
 | -------- | -------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `module` | False    | string | _(none)_ | Should be the name of the base script `omniklogger`. A path should not be configured. AppDaemon wil find the module automatically. |
 | `class`  | False    | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.        |
 
-#### General settings of `apps.yaml` or `config.ini`
+#### General settings of `apps.yaml` or `config.yaml`
+
+> All configuration settings are placed unther the instance_name key default is `omnik_datalogger:`.
 
 | key                     | optional | type    | default                                | description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ----------------------- | -------- | ------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -632,13 +637,23 @@ Register a free acount and API key at https://pvoutput.org/register.jsp
 | `fields`          | True     | list   | _[*]_    | Used by the client `csvoutput`. A list of fields to log. The fields `date` and `time` are specials fields to log the local date and time. |
 | `use_temperature` | True     | bool   | _False_  | When set to true the `temperature` field is set in the data set which can be logged. The value is obtained from OpenWeatherMap.           |
 
-[*] == [
-"date",
-"time",
-"current_power",
-"today_energy",
-"total_energy",
-]
+#### Default fields and additional fields
+
+Default fields assignment [*]:
+
+- `date`
+- `time`
+- `current_power`
+- `today_energy`
+- `total_energy`
+
+The following additional fields are available if DSMR data can be matched with the aggregated solar data:
+
+- `energy_direct_use`
+- `energy_used_net`
+- `power_direct_use`
+- `power_consumption`
+- `last_update_calc`
 
 ### InfluxDB plugin settings in the section `output.influxdb` in of `apps.yaml` or `config.yaml`
 
@@ -768,12 +783,3 @@ $ systemd status omnikdatalogger
    CGroup: /system.slice/omnikdatalogger.service
            └─2445 /usr/bin/python3 /usr/local/bin/omniklogger.py --settings /etc/omnik/config.yaml --interval 300
 ```
-
-## Plugins in development
-
-Working on a couple of plugins to customize processing of the omnik inverter data:
-
-- `mariadb` ~ mariadb/mysql output plugin
-- `csv` ~ csv output plugin
-
-~ the end
