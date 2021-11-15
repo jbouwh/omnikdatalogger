@@ -1,11 +1,11 @@
-# This workflow will upload a Python Package using Twine when a release is created
+# This workflow will upload a Python Package using Twine when a new version is released (pre-releases are excluded)
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
 name: Upload Python Package omnikdatalogger
 
 on:
   release:
-    types: [created]
+    types: [released]
     branches:
       - main
 
