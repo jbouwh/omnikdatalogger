@@ -353,12 +353,16 @@ The first section in `config.yaml` will be used (see event log).
 
 #### General settings - `apps.yaml` 'only' configuration options
 
+> All configuration settings are placed unther the instance_name key default is `omnik_datalogger:`.
+
 | key      | optional | type   | default  | description                                                                                                                        |
 | -------- | -------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `module` | False    | string | _(none)_ | Should be the name of the base script `omniklogger`. A path should not be configured. AppDaemon wil find the module automatically. |
 | `class`  | False    | string | _(none)_ | Should be the name of the class hat implements 'appdaemon.plugins.hass.hassapi'. This value should be `HA_OmnikDataLogger`.        |
 
-#### General settings of `apps.yaml` or `config.ini`
+#### General settings of `apps.yaml` or `config.yaml`
+
+> All configuration settings are placed unther the instance_name key default is `omnik_datalogger:`.
 
 | key                     | optional | type    | default                                | description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ----------------------- | -------- | ------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
