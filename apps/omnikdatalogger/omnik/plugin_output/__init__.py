@@ -24,6 +24,7 @@ class Plugin(object, metaclass=BasePlugin):
     logger = None
     hass_api = None
     process_aggregates = False
+    process_output = False
 
     cache = TTLCache(maxsize=1, ttl=300)
 

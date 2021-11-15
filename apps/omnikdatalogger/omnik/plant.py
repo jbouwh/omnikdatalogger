@@ -1,12 +1,13 @@
-from datetime import datetime, timezone, time
+from datetime import datetime, timezone
+from time import time
 from decimal import Decimal
 
 
 class Plant:
-    def __init__(self, plant_id=None, last_update_time=None, *args, **kwargs):
+    def __init__(self, plant_id=None, last_update_time=time(), *args, **kwargs):
         self._plant_id = plant_id
-        self._last_update_time = (
-            last_update_time if last_update_time else datetime.now(timezone.utc)
+        self._last_update_time = datetime.fromtimestamp(last_update_time).astimezone(
+            timezone.utc
         )
         self._updated = bool(last_update_time)
         self._data = None
@@ -30,7 +31,7 @@ class Plant:
                     f"{self._plant_id}.last_today_energy"
                 ]
                 self._data["current_power"] = Decimal("0.0")
-                self._data["last_update"] = time.time()
+                self._data["last_update"] = time()
             except:
                 return False
             return True
