@@ -25,6 +25,8 @@ class Plugin(object, metaclass=BasePlugin):
     hass_api = None
     process_aggregates = False
     process_output = False
+    name = "plugin_output"
+    description = "Parent class for autout plugins"
 
     cache = TTLCache(maxsize=1, ttl=300)
 
@@ -77,6 +79,16 @@ class Plugin(object, metaclass=BasePlugin):
                 ),
             )
             raise e
+
+    def log_available_fields(self, msg={}):
+        """Logs the available output fields to the debug log. This helps to determine waht fields are available."""
+        # Log available fields
+        hybridlogger.ha_log(
+            self.logger,
+            self.hass_api,
+            "DEBUG",
+            f"Output for '{self.name}'. Fields: {list(msg.keys())}",
+        )
 
     def process(self, **args):
         pass

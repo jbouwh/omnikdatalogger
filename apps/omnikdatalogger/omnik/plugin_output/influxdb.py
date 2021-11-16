@@ -83,7 +83,9 @@ class influxdb(Plugin):
 
         asset_class = self.config.data_field_config[field]["asset"]
         attributes = self._get_attributes(values, asset_class)
-        nanoepoch = int(values[self.timestamp_field.get(asset_class) or 'last_update'] * 1000000000)
+        nanoepoch = int(
+            values[self.timestamp_field.get(asset_class) or "last_update"] * 1000000000
+        )
 
         if field in values and self.config.data_field_config:
             # Get tags
@@ -103,9 +105,9 @@ class influxdb(Plugin):
         try:
             self.access.acquire()
             msg = args["msg"]
-            hybridlogger.ha_log(
-                self.logger, self.hass_api, "DEBUG", f"Logging data to InfluxDB: {msg}"
-            )
+            # Log output fields
+            self.log_available_fields(msg)
+
             values = msg.copy()
             # self._get_temperature(values)
 
@@ -125,25 +127,13 @@ class influxdb(Plugin):
             r = requests.post(url, data=encoded, headers=self.headers, auth=self.auth)
 
             r.raise_for_status()
-            hybridlogger.ha_log(
-                self.logger,
-                self.hass_api,
-                "DEBUG",
-                f"Submit to Influxdb {url} successful.",
-            )
-        except requests.exceptions.HTTPError as e:
+
+        except requests.exceptions.ConnectionError as e:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "WARNING",
                 f"Got error from influxdb: {e.args} (ignoring: if this happens a lot ... fix it)",
-            )
-        except Exception as e:
-            hybridlogger.ha_log(
-                self.logger,
-                self.hass_api,
-                "ERROR",
-                f"Got unknown submitting to influxdb: {e.args} (ignoring: if this happens a lot ... fix it)",
             )
         finally:
             self.access.release()
