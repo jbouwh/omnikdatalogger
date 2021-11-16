@@ -90,9 +90,6 @@ class csvoutput(Plugin):
         no_headers = self.config.getboolean(
             config_section, "no_headers", fallback=False
         )
-        use_temperature = self.config.getboolean(
-            config_section, "use_temperature", fallback=False
-        )
         if fields and fields[0] and csvfile:
             hybridlogger.ha_log(
                 self.logger,
@@ -138,6 +135,9 @@ class csvoutput(Plugin):
                             "time": strftime("%H:%M:%S", reporttime),
                         }
                     )
+                    # Log output fields
+                    self.log_available_fields(msg)
+                    # write field to csv file
                     fields = list()
                     for field in headers:
                         fields.append(msg.get(field))
@@ -150,11 +150,6 @@ class csvoutput(Plugin):
                 self.hass_api,
                 "ERROR",
                 f"File exception error for '{csvfile}': {os_err.args}",
-            )
-
-        except Exception as exp:
-            hybridlogger.ha_log(
-                self.logger, self.hass_api, "ERROR", f"Unexpected error: {exp.args}"
             )
         finally:
             self.access.release()

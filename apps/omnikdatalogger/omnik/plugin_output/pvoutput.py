@@ -8,7 +8,6 @@ from omnik.plugin_output import Plugin
 from decimal import Decimal
 import threading
 
-
 class pvoutput(Plugin):
     def __init__(self):
         super().__init__()
@@ -77,6 +76,9 @@ class pvoutput(Plugin):
             self.access.acquire()
 
             msg = args["msg"]
+            # Log output fields
+            self.log_available_fields(msg)
+
             if str(msg["sys_id"]) == "0":
                 hybridlogger.ha_log(
                     self.logger,
@@ -156,13 +158,9 @@ class pvoutput(Plugin):
 
             r.raise_for_status()
 
-        except requests.exceptions.RequestException as err:
+        except requests.exceptions.ConnectionError as err:
             hybridlogger.ha_log(
                 self.logger, self.hass_api, "WARNING", f"Unhandled request error: {err}"
-            )
-        except Exception as e:
-            hybridlogger.ha_log(
-                self.logger, self.hass_api, "ERROR", f"Unexpected error: {e.args}"
             )
         finally:
             self.access.release()
