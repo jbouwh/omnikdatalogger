@@ -40,7 +40,7 @@
         "unit": "",
         "measurement": null,
         "tags": {},
-        "filter": "|timestamp_local",
+        "filter": "|as_datetime",
         "asset": "omnik"
     },
     "inverter_temperature": {
@@ -70,7 +70,7 @@
         "unit": "",
         "measurement": null,
         "tags": { "source": "openweather.org" },
-        "filter": "|timestamp_local",
+        "filter": "|as_datetime",
         "asset": "openweather"
     },
     "current_ac1": {
@@ -387,7 +387,7 @@
         "unit": "",
         "measurement": null,
         "tags": {},
-        "filter": "|timestamp_local",
+        "filter": "|as_datetime",
         "asset": "dsmr_gas"
     },
     "gas_consumption_total": {
@@ -417,7 +417,7 @@
         "unit": "",
         "measurement": null,
         "tags": {},
-        "filter": "|timestamp_local",
+        "filter": "|as_datetime",
         "asset": "dsmr"
     },
     "ELECTRICITY_USED_TARIFF_1": {
@@ -873,7 +873,7 @@
         "unit": "",
         "measurement": null,
         "tags": {},
-        "filter": "|timestamp_local",
+        "filter": "|as_datetime",
         "asset": "omnik_dsmr"
     },
     "energy_used": {
