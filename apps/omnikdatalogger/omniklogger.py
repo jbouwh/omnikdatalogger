@@ -9,7 +9,7 @@ import time
 import logging
 import yaml
 from omnik.ha_logger import hybridlogger
-from omnik import RepeatedJob
+from omnik import RepeatedJob, LOGLEVEL
 from omnik.datalogger import DataLogger
 
 try:
@@ -22,13 +22,6 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
-
-LOGLEVEL = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-}
 
 # customize config parser with dict based lookup for AppDaemon and command line options
 # has_option and get function have been adapted
