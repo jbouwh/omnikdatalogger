@@ -8,7 +8,6 @@ from omnik.plugin_output import Plugin
 from decimal import Decimal
 import threading
 
-
 class pvoutput(Plugin):
     def __init__(self):
         super().__init__()
