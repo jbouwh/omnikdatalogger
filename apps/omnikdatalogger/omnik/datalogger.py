@@ -3,6 +3,7 @@ import sys
 import logging
 import pytz
 
+from omnik import LOGLEVEL
 from requests.exceptions import RequestException
 from omnik.ha_logger import hybridlogger
 from omnik.plant import Plant
@@ -47,6 +48,8 @@ class DataLogger(object):
 
         if self.config.get("default", "debug", fallback=False):
             logger.setLevel(logging.DEBUG)
+        if self.config.get("default", "loglevel"):
+            logger.setLevel(LOGLEVEL.get(self.config.get("default", "loglevel")))
 
         if not self._init_data_fields():
             sys.exit(1)
