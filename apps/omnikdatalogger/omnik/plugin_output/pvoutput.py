@@ -8,6 +8,7 @@ from omnik.plugin_output import Plugin
 from decimal import Decimal
 import threading
 
+
 class pvoutput(Plugin):
     def __init__(self):
         super().__init__()
@@ -161,6 +162,13 @@ class pvoutput(Plugin):
         except requests.exceptions.ConnectionError as err:
             hybridlogger.ha_log(
                 self.logger, self.hass_api, "WARNING", f"Unhandled request error: {err}"
+            )
+        except requests.exceptions.RequestException as err:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Unhandled HTTPerror error: {err}",
             )
         finally:
             self.access.release()

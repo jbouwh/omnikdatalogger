@@ -135,5 +135,14 @@ class influxdb(Plugin):
                 "WARNING",
                 f"Got error from influxdb: {e.args} (ignoring: if this happens a lot ... fix it)",
             )
+
+        except requests.exceptions.RequestException as err:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Unhandled RequestException error: {err}",
+            )
+
         finally:
             self.access.release()
