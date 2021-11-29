@@ -162,5 +162,12 @@ class pvoutput(Plugin):
             hybridlogger.ha_log(
                 self.logger, self.hass_api, "WARNING", f"Unhandled request error: {err}"
             )
+        except requests.exceptions.RequestException as err:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Unhandled HTTPerror error: {err}",
+            )
         finally:
             self.access.release()

@@ -8,15 +8,25 @@ import threading
 
 logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOGLEVEL", logging.INFO))
 
-__version__ = "1.10.1"
+__version__ = "1.10.2"
 
 logger = logging.getLogger(__name__)
+
+LOGLEVEL = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+}
 
 
 class RepeatedJob(object):
     def __init__(self, c, datalogger, hass_api, *args, **kwargs):
         if c.get("default", "debug", fallback=False):
             logger.setLevel(logging.DEBUG)
+        if c.get("default", "loglevel"):
+            logger.setLevel(LOGLEVEL.get(c.get("default", "loglevel")))
+
         self.logger = logger
         self.hass_api = hass_api
         self.datalogger = datalogger
