@@ -12,7 +12,7 @@ Add `--device=/dev/ttyUSB0` as option to the docker run command (assuming this i
 If you wish you could use the home assistant config volume to store your configuration. You need root access to your host, or use portainer.
 If you have root access, go to the folder: `/mnt/data/supervisor/homeassistant`.
 Use the following command to create and start the container (omit the device part if you wish).
-`docker run --name omnikdatalogger -d -v ${PWD}/omnikdatalogger.yaml:/config.yaml -p 10004:10004 --device=/dev/ttyUSB0 --restart unless-stopped --name omnikdatalogger jbouwh/omnikdatalogger:latest`
+`docker run --name omnikdatalogger -d -v ${PWD}/omnikdatalogger.yaml:/config/config.yaml -p 10004:10004 --device=/dev/ttyUSB0 --restart unless-stopped --name omnikdatalogger jbouwh/omnikdatalogger:latest`
 
 I also added a `docker-compose.yml` that can be used.  Run it at the folder where your `config.yaml` file resites.
 
