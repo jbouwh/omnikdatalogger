@@ -7,7 +7,7 @@ import re
 from datetime import datetime
 import time
 from decimal import Decimal
-from requests import Request, Session
+from requests import Request, Session, RequestException
 
 
 class TCPclient(Client):
@@ -66,7 +66,7 @@ class TCPclient(Client):
             inverter_connection = (inverter_address, int(inverter_port))
             logger_sn = self.config.get(f"plant.{plant}", "logger_sn", fallback=None)
             http_only = bool(
-                self.config.get(f"plant.{plant}", "http_only", fallback=None)
+                self.config.get(f"plant.{plant}", "http_only", fallback=False)
             )
             if not logger_sn:
                 hybridlogger.ha_log(
@@ -199,7 +199,7 @@ class TCPclient(Client):
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
-                "INFO",
+                "DEBUG",
                 f"New message received from inverter '{serialnr}'",
             )
         else:
@@ -229,11 +229,34 @@ class TCPclient(Client):
         }
         if not self.session.get(plant_id):
             self.session[plant_id] = Session()
+        hybridlogger.ha_log(
+            self.logger,
+            self.hass_api,
+            "DEBUG",
+            "Try to fetch information from url %s" % url,
+        )
         request = Request("GET", url=url, headers=headers)
         prepped_request = self.session[plant_id].prepare_request(request)
         response = self.session[plant_id].send(prepped_request)
         # Throw if status is not valid
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except RequestException as warn:
+            if response.status_code == 401:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "WARNING",
+                    f"Inverter access over HTTP is not supported!. {warn}",
+                )
+            else:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "INFO",
+                    f"Inverter is not reachable over HTTP, this is normal when it is dark. {warn}",
+                )
+            return None
 
         # We have response, lets validate it now
         inverter_data_search = re.search(
@@ -255,6 +278,21 @@ class TCPclient(Client):
                 "today_energy": Decimal(inverter_data[6]) / 100,
                 "total_energy": Decimal(inverter_data[7]) / 10,
             }
-            # set mode to http
-            self._mode[plant_id] = 2
+            # set mode to http only if not set to fallback, keep retrying over port 8899 if this option is not set
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "DEBUG",
+                f"New message received from inverter '{inverter_data[0]}'",
+            )
+            if self.inverters[plant_id].get("http_only"):
+                self._mode[plant_id] = 2
+            else:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "WARNING",
+                    f"Inverter information was received using HTTP correctly, but a 'http_only' option is not set. Set this option to `true` if yor inverter only supports 'HTTP'",
+                )
+
         return data
