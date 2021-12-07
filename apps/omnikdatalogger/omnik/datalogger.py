@@ -1048,7 +1048,7 @@ class DataLogger(object):
             self.cache[last_current_power] = Decimal("0.0")
             self.cache[last_reset] = str(last_reset_payload)
             if self.cache.get(last_total_energy):
-                # reset start energy in memory now today energy is reset
+                # reset initial energy in memory since today_energy is reset
                 self.start_total_energy[plant] = self.cache.get(last_total_energy)
             self._update_persistant_cache()
             return self.cache[last_today_energy]
@@ -1139,6 +1139,8 @@ class DataLogger(object):
                 cached_data["today_energy"] = self.total_energy(
                     plant_id, lifetime=False
                 )
+                # Assume we have no solar power currently
+                cached_data["current_power"] = Decimal("0.0")
                 self._aggregate_data(aggegated_data, cached_data)
                 cached_last_update = self.get_last_update(plant_id, 0.0)
                 if cached_last_update > last_solar_update:
@@ -1146,8 +1148,6 @@ class DataLogger(object):
 
             if aggegated_data:
                 aggegated_data.update(data)
-            # Do not publish the current power, since we do not know the last state
-            # set next time block for update
             self.pasttime = (
                 dsmr_timestamp
                 - (dsmr_timestamp % self.interval_aggregated)
