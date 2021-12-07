@@ -1127,6 +1127,8 @@ class DataLogger(object):
                     cached_data["today_energy"] = self.total_energy(
                         plant, lifetime=False
                     )
+                    # Assume we have no solar power currently
+                    cached_data["current_power"] = Decimal("0.0")
                     self._aggregate_data(aggegated_data, cached_data)
                     cached_last_update = self.get_last_update(plant, 0.0)
                     if cached_last_update > last_solar_update:
