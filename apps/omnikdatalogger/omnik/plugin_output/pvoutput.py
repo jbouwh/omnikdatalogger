@@ -152,7 +152,7 @@ class pvoutput(Plugin):
             self.logger.debug(json.dumps(data, indent=2))
 
             r = requests.post(
-                "http://pvoutput.org/service/r2/addstatus.jsp",
+                "https://pvoutput.org/service/r2/addstatus.jsp",
                 data=encoded,
                 headers=headers,
             )
