@@ -158,6 +158,9 @@ class pvoutput(Plugin):
             )
 
             r.raise_for_status()
+            hybridlogger.ha_log(
+                self.logger, self.hass_api, "DEBUG", f"pvoutput upload: {data}"
+            )
 
         except requests.exceptions.ConnectionError as err:
             hybridlogger.ha_log(

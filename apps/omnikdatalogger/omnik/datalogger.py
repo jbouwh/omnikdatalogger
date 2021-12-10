@@ -1150,6 +1150,7 @@ class DataLogger(object):
 
             if aggegated_data:
                 aggegated_data.update(data)
+
             self.pasttime = (
                 dsmr_timestamp
                 - (dsmr_timestamp % self.interval_aggregated)
@@ -1183,7 +1184,7 @@ class DataLogger(object):
                 hybridlogger.ha_log(
                     self.logger,
                     self.hass_api,
-                    "INFO",
+                    "DEBUG",
                     f"Combining cached logging {target} with DSRM data.",
                 )
                 # use last solar update time stamp for real time data output (not a dsmr_time stamp)
