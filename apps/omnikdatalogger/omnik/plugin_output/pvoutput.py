@@ -8,6 +8,7 @@ from omnik.plugin_output import Plugin
 from decimal import Decimal
 import threading
 
+
 class pvoutput(Plugin):
     def __init__(self):
         super().__init__()
@@ -127,11 +128,11 @@ class pvoutput(Plugin):
                 # v4 = bruto power_consumption (W)
                 # c1 = 1 ; v3 is cumulative so the c1 flag is set
                 # see note about Cumulative Enery at https://pvoutput.org/help.html#api-addstatus
-            if "current_power" in msg:
+            if "today_energy" in msg:
                 data.update(
                     {
                         "v1": f"{msg['today_energy'] * Decimal('1000')}",
-                        "v2": f"{msg['current_power']}",
+                        "v2": f"{msg.get('current_power') or 0}",
                     }
                 )
                 # v1 = energy_generated (Wh) * 1000 ; this value is on a daily basis
@@ -151,12 +152,15 @@ class pvoutput(Plugin):
             self.logger.debug(json.dumps(data, indent=2))
 
             r = requests.post(
-                "http://pvoutput.org/service/r2/addstatus.jsp",
+                "https://pvoutput.org/service/r2/addstatus.jsp",
                 data=encoded,
                 headers=headers,
             )
 
             r.raise_for_status()
+            hybridlogger.ha_log(
+                self.logger, self.hass_api, "DEBUG", f"pvoutput upload: {data}"
+            )
 
         except requests.exceptions.ConnectionError as err:
             hybridlogger.ha_log(

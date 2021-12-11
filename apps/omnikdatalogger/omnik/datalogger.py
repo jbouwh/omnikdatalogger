@@ -1048,7 +1048,7 @@ class DataLogger(object):
             self.cache[last_current_power] = Decimal("0.0")
             self.cache[last_reset] = str(last_reset_payload)
             if self.cache.get(last_total_energy):
-                # reset start energy in memory now today energy is reset
+                # reset initial energy in memory since today_energy is reset
                 self.start_total_energy[plant] = self.cache.get(last_total_energy)
             self._update_persistant_cache()
             return self.cache[last_today_energy]
@@ -1127,10 +1127,13 @@ class DataLogger(object):
                     cached_data["today_energy"] = self.total_energy(
                         plant, lifetime=False
                     )
+                    # Assume we have no solar power currently
+                    cached_data["current_power"] = Decimal("0.0")
                     self._aggregate_data(aggegated_data, cached_data)
                     cached_last_update = self.get_last_update(plant, 0.0)
                     if cached_last_update > last_solar_update:
                         last_solar_update = cached_last_update
+                aggegated_data.update(data)
             elif self.total_energy(plant_id):
                 cached_data = {}
                 cached_data["plant_id"] = plant_id
@@ -1139,15 +1142,13 @@ class DataLogger(object):
                 cached_data["today_energy"] = self.total_energy(
                     plant_id, lifetime=False
                 )
+                # Assume we have no solar power currently
+                cached_data["current_power"] = Decimal("0.0")
                 self._aggregate_data(aggegated_data, cached_data)
                 cached_last_update = self.get_last_update(plant_id, 0.0)
                 if cached_last_update > last_solar_update:
                     last_solar_update = cached_last_update
 
-            if aggegated_data:
-                aggegated_data.update(data)
-            # Do not publish the current power, since we do not know the last state
-            # set next time block for update
             self.pasttime = (
                 dsmr_timestamp
                 - (dsmr_timestamp % self.interval_aggregated)
@@ -1169,27 +1170,25 @@ class DataLogger(object):
                     self.plant_update[plant_id].last_update_time
                 )
             # we will send (net) updates when inverers do not retreive new updates
-            if aggegated_data and (dsmr_timestamp - last_update) > self.every:
+            if (dsmr_timestamp - last_update) > self.every:
+                if aggegated_data:
+                    data.update(aggegated_data)
+                else:
+                    data.update(cached_data)
+                # calculate energy_use
+                self._calculate_consumption(data)
                 self._process_received_update(
-                    aggegated_data, netdata=True, plant=plant_id
+                    data, netdata=True, plant=plant_id
                 )
-                # Add omnik specific data for self._output_update to dataset
-                self._calculate_consumption(aggegated_data)
-                # Export combined to pvoutput
-                self._output_update_aggregated_data(plant_id, aggegated_data)
                 target = f"for plant {plant_id} " if plant_id else ""
                 hybridlogger.ha_log(
                     self.logger,
                     self.hass_api,
-                    "INFO",
+                    "DEBUG",
                     f"Combining cached logging {target} with DSRM data.",
                 )
-                # use last solar update time stamp for real time data output (not a dsmr_time stamp)
-                data.update(aggegated_data)
-                data["last_update"] = (
-                    last_solar_update if last_solar_update else dsmr_timestamp
-                )
-        # TODO process net update for other clients
+                # update the output for aggregated logging
+        # process net update for other clients
         self._output_update(plant_id, data)
 
     def _process_timed_event(self):
