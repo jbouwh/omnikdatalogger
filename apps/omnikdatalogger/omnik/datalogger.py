@@ -1122,7 +1122,7 @@ class DataLogger(object):
                         continue
                     cached_data = {}
                     cached_data["plant_id"] = plant
-                    cached_data["last_update"] = dsmr_timestamp
+                    cached_data["last_update"] = self.get_last_update(plant, 0.0)
                     cached_data["total_energy"] = self.total_energy(plant)
                     cached_data["today_energy"] = self.total_energy(
                         plant, lifetime=False
@@ -1137,7 +1137,7 @@ class DataLogger(object):
             elif self.total_energy(plant_id):
                 cached_data = {}
                 cached_data["plant_id"] = plant_id
-                cached_data["last_update"] = dsmr_timestamp
+                cached_data["last_update"] = self.get_last_update(plant_id, 0.0)
                 cached_data["total_energy"] = self.total_energy(plant_id)
                 cached_data["today_energy"] = self.total_energy(
                     plant_id, lifetime=False
@@ -1169,17 +1169,16 @@ class DataLogger(object):
                 last_update = datetime.timestamp(
                     self.plant_update[plant_id].last_update_time
                 )
-            # we will send (net) updates when inverers do not retreive new updates
+            # we will send (net) updates when inverters do not retreive new updates
             if (dsmr_timestamp - last_update) > self.every:
                 if aggegated_data:
                     data.update(aggegated_data)
                 else:
                     data.update(cached_data)
+                data["net_update"] = True
                 # calculate energy_use
                 self._calculate_consumption(data)
-                self._process_received_update(
-                    data, netdata=True, plant=plant_id
-                )
+                self._process_received_update(data, netdata=True, plant=plant_id)
                 target = f"for plant {plant_id} " if plant_id else ""
                 hybridlogger.ha_log(
                     self.logger,
@@ -1322,7 +1321,16 @@ class DataLogger(object):
             self._output_update_aggregated_data("0", aggegated_data)
             #
             hybridlogger.ha_log(
-                self.logger, self.hass_api, "DEBUG", "Aggregated data processed."
+                self.logger, self.hass_api, "DEBUG", "Aggregated data processed"
+            )
+        elif data.get("sys_id"):
+            # Export plant specific data without aggreation
+            self._output_update_aggregated_data(data.get("plant_id"), data)
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "DEBUG",
+                "Plant specific data aggregation processed",
             )
 
         # Finish datalogging process

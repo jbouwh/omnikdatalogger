@@ -88,8 +88,11 @@ class pvoutput(Plugin):
                     "ignoring publishing to pvoutput, no sys_id was set",
                 )
                 return
-            reporttime = time.localtime(msg["last_update"])
-
+            # Always use current time for net updates
+            if msg.get("net_update"):
+                reporttime = time.localtime(time.time())
+            else:
+                reporttime = time.localtime(msg["last_update"])
             # self.logger.debug(json.dumps(msg, indent=2))
             if not self._check_requirements(msg):
                 return
