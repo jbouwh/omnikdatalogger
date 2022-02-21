@@ -26,7 +26,7 @@ class Plugin(object, metaclass=BasePlugin):
     process_aggregates = False
     process_output = False
     name = "plugin_output"
-    description = "Parent class for autout plugins"
+    description = "Parent class for output plugins"
 
     cache = TTLCache(maxsize=1, ttl=300)
 
