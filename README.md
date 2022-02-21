@@ -215,7 +215,7 @@ omnik_datalogger:
     username: john.doe@example.com
     password: some_password
 
- # Influxdb output plugin configuration options
+  # Influxdb output plugin configuration options
   output.influxdb:
     # Common settings
     host: localhost
@@ -675,6 +675,7 @@ The following additional fields are available if DSMR data can be matched with t
 | `port`            | True     | integer | `8086`            | InfluxDB port to be used.                                                    |
 | `ssl`             | True     | bool    | `false`           | Use SSL. Set to `true` if the URL starts with `https://`                     |
 | `verify_ssl`      | True     | bool    | `true`            | By default a certificate is validated. Set to `false` to disable validation. |
+| `ssl_ca_cert`     | True     | string  | _(none)_          | Set an alternative CA cert. (InfluxDB 2.x client only)                       |
 | `org`             | True     | string  | _(none)_          | The InfluxDB2 organisation (InfluxDB 2.x only)                               |
 | `bucket`          | True     | string  | _(none)_          | The InfluxDB2 bucket to write to (InfluxDB 2.x only)                         |
 | `token`           | True     | string  | _(none)_          | The InfluxDB2 authentication token (InfluxDB 2.x only)                       |
