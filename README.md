@@ -67,6 +67,7 @@ system_packages: []
 python_packages:
   - cachetools
   - dsmr-parser
+  - influxdb-client
 init_commands: []
 log_level: info
 ```
