@@ -1,3 +1,6 @@
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.client.exceptions import InfluxDBError
 import requests
 from omnik.ha_logger import hybridlogger
 
@@ -8,10 +11,21 @@ import threading
 class influxdb(Plugin):
     def __init__(self):
         super().__init__()
+        self.auth = None
+        self.client = None
         self.name = "influxdb"
         self.description = "Write output to InfluxDB"
+        # common settings
         self.host = self.config.get("output.influxdb", "host", fallback="localhost")
         self.port = self.config.get("output.influxdb", "port", fallback="8086")
+        self.ssl = self.config.getboolean("output.influxdb", "ssl", fallback=False)
+        self.verify_ssl = self.config.getboolean(
+            "output.influxdb", "verify_ssl", fallback=True
+        )
+        self.ssl_ca_cert = self.config.get("output.influxdb", "ssl_ca_cert")
+        self.path = self.config.get("output.influxdb", "path")
+
+        # Influx version 1 settings
         self.database = self.config.get(
             "output.influxdb", "database", fallback="omnikdatalogger"
         )
@@ -19,7 +33,6 @@ class influxdb(Plugin):
         self.headers = {"Content-type": "application/x-www-form-urlencoded"}
         # Add JWT authentication token
         if self.config.has_option("output.influxdb", "jwt_token"):
-            self.auth = None
             self.headers[
                 "Authorization"
             ] = f"Bearer {self.config.get('output.influxdb', 'jwt_token')}"
@@ -30,8 +43,52 @@ class influxdb(Plugin):
                 self.config.get("output.influxdb", "username"),
                 self.config.get("output.influxdb", "password"),
             )
+        # Influx vs 2 settings
+        self.org = self.config.get("output.influxdb", "org")
+        self.bucket = self.config.get("output.influxdb", "bucket")
+        self.token = self.config.get("output.influxdb", "token")
+        self.auth_v2 = False
+        if self.org and self.bucket and self.token:
+            self.auth_v2 = True
+            # Log warning if that v1 auth will be ignored
+            if self.auth:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "WARNING",
+                    "Ignoring InfluxDB v1 settings database, username, password and jwt_token",
+                )
+            protocol = "https" if self.ssl else "http"
+            path = f"/{self.path}" if self.path else ""
+            url = f"{protocol}://{self.host}:{self.port}{path}"
+            self.client = InfluxDBClient(
+                url=url,
+                token=self.token,
+                org=self.org,
+                verify_ssl=self.verify_ssl,
+                ssl_ca_cert=self.ssl_ca_cert,
+            )
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "INFO",
+                "InfluxDB v2 client initialized",
+            )
         else:
-            self.auth = None
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "INFO",
+                "InfluxDB v1 client initialized",
+            )
+            if not self.auth:
+                hybridlogger.ha_log(
+                    self.logger,
+                    self.hass_api,
+                    "WARNING",
+                    "Authentication was set or incomplete!",
+                )
+
         self.timestamp_field = {}
         for field in self.config.data_field_config:
             if not self.config.data_field_config[field]["dev_cla"] == "timestamp":
@@ -109,7 +166,6 @@ class influxdb(Plugin):
             self.log_available_fields(msg)
 
             values = msg.copy()
-            # self._get_temperature(values)
 
             # Build structure
             encoded = ""
@@ -120,13 +176,31 @@ class influxdb(Plugin):
             # encoded = f'inverter,plant=p1 {",".join("{}={}".format(key, value)
             # for key, value in values.items())} {nanoepoch}'
 
-            # curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary
+            # (v1) curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary
             # 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
-            url = f"http://{self.host}:{self.port}/write?db={self.database}"
+            if self.auth_v2 and self.client:
+                with self.client.write_api(write_options=SYNCHRONOUS) as _client:
+                    _client.write(bucket=self.bucket, record=encoded)
+            else:
+                url = f"{'https' if self.ssl else 'http'}://{self.host}:{self.port}/write?db={self.database}"
 
-            r = requests.post(url, data=encoded, headers=self.headers, auth=self.auth)
+                r = requests.post(
+                    url,
+                    data=encoded,
+                    headers=self.headers,
+                    auth=self.auth,
+                    verify=self.verify_ssl,
+                )
 
-            r.raise_for_status()
+                r.raise_for_status()
+
+        except InfluxDBError as e:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "WARNING",
+                f"Got error from influxdb2: {e.args} (ignoring: if this happens a lot ... fix it)",
+            )
 
         except requests.exceptions.ConnectionError as e:
             hybridlogger.ha_log(

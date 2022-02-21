@@ -800,7 +800,9 @@ class DataLogger(object):
         if not data:
             return
         # Check for pvoutput sys_id override in config
-        sys_id = int(self.config.get(f"plant.{data['plant_id']}", "sys_id", "0"))
+        sys_id = int(
+            self.config.get(f"plant.{data.get('plant_id','0')}", "sys_id", "0")
+        )
         global_sys_id = int(self.config.get("output.pvoutput", "sys_id", "0"))
         if sys_id and (sys_id != global_sys_id):
             # Do no aggegate: add sys_id to data set
