@@ -215,15 +215,27 @@ omnik_datalogger:
     username: john.doe@example.com
     password: some_password
 
-  # Influxdb output plugin configuration options
+ # Influxdb output plugin configuration options
   output.influxdb:
+    # Common settings
     host: localhost
     port: 8086
+    ssl: false #  # Use SSL
+    verify_ssl: true # Verify SSL certificate for HTTPS request
+
+    use_temperature: true # If true logs the temperature of the openweathermap API
+
+    # InfluxDB v1 only
     database: omnikdatalogger
     username: omnikdatalogger
     password: mysecretpassword
     #jwt_token=
-    use_temperature: true
+
+    # InfluxDB v2 only
+    org: jbsoft
+    bucket: omnik
+    token: generatedtoken
+    ssl_ca_cert: path_to_custom_ca.crt # Only for InfluxDB 2!
 
   # csvoutput output plugin configuration options
   output.csvoutput:
@@ -661,13 +673,19 @@ The following additional fields are available if DSMR data can be matched with t
 | ----------------- | -------- | ------- | ----------------- | ---------------------------------------------------------------------------- |
 | `host`            | True     | string  | `localhost`       | Hostname or fqdn of the InfluxDB server for logging.                         |
 | `port`            | True     | integer | `8086`            | InfluxDB port to be used.                                                    |
-| `database`        | True     | string  | _omnikdatalogger_ | The InfluxDB database                                                        |
-| `username`        | True     | string  | _(none)_          | The InfluxDB username used for Basic authentication                          |
-| `password`        | True     | string  | _(none)_          | The InfluxDB password used for Basic authentication                          |
-| `jwt_token`       | True     | string  | _(none)_          | The InfluxDB webtoken for JSON Web Token authentication                      |
+| `ssl`             | True     | bool    | `false`           | Use SSL. Set to `true` if the URL starts with `https://`                     |
+| `verify_ssl`      | True     | bool    | `true`            | By default a certificate is validated. Set to `false` to disable validation. |
+| `org`             | True     | string  | _(none)_          | The InfluxDB2 organisation (InfluxDB 2.x only)                               |
+| `bucket`          | True     | string  | _(none)_          | The InfluxDB2 bucket to write to (InfluxDB 2.x only)                         |
+| `token`           | True     | string  | _(none)_          | The InfluxDB2 authentication token (InfluxDB 2.x only)                       |
 | `use_temperature` | True     | bool    | `false`           | When set to true the temperature is obtained from OpenWeatherMap and logged. |
+| `database`        | True     | string  | _omnikdatalogger_ | The InfluxDB database (InfluxDB 1.8x only)                                   |
+| `username`        | True     | string  | _(none)_          | The InfluxDB username used for Basic authentication (InfluxDB 1.8x only)     |
+| `password`        | True     | string  | _(none)_          | The InfluxDB password used for Basic authentication (InfluxDB 1.8x only)     |
+| `jwt_token`       | True     | string  | _(none)_          | The InfluxDB webtoken for JSON Web Token authentication (InfluxDB 1.8x only) |
 
 Logging to InfluxDB is supported with configuration settings from `data_fields.json` The file allows to customize measurement header and allows setting additional tags.
+When using InfluxDB2, authentication is mandantory. Configure `org`, `bucket` and `token` to enable the InfluxDB v2 client.
 
 #### OpenWeatherMap settings in the section `openweathermap` of `apps.yaml` or `config.yaml`
 
