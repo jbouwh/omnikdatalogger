@@ -1102,7 +1102,7 @@ class DataLogger(object):
                 self.logger,
                 self.hass_api,
                 "INFO",
-                f"No sunshine postponing till down next dawn {self.dl.next_dawn(time_now)}.",
+                f"No sunshine postponing inverter checks till down next dawn {self.dl.next_dawn(time_now)}.",
             )
             # Send 0 Watt update
             return self.dl.next_dawn + timedelta(minutes=10)
