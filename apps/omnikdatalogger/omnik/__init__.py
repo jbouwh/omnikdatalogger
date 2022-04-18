@@ -1,14 +1,17 @@
+"""Main module supporting repeated polling."""
+
 import os
 import sys
 import logging
-from omnik.ha_logger import hybridlogger
 
 from datetime import datetime, timedelta, timezone
 import threading
 
+from omnik.ha_logger import hybridlogger
+
 logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOGLEVEL", logging.INFO))
 
-__version__ = "1.11.1"
+__version__ = "1.11.2"
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +24,8 @@ LOGLEVEL = {
 
 
 class RepeatedJob(object):
+    """Add timer support."""
+
     def __init__(self, c, datalogger, hass_api, *args, **kwargs):
         if c.get("default", "debug", fallback=False):
             logger.setLevel(logging.DEBUG)
@@ -36,6 +41,7 @@ class RepeatedJob(object):
         # Initialize retry counter
         self.is_running = False
         self.last_update_time = None
+        self.new_report_expected_at = None
         self.use_timer = datalogger.client.use_timer
         if self.use_timer:
             self._timer = None
@@ -50,6 +56,7 @@ class RepeatedJob(object):
         self.start()
 
     def function_thread(self):
+        """Excecute the client code."""
         return self.function_thread
 
     # This handler function is fired when the timer has reached the interval
@@ -111,6 +118,7 @@ class RepeatedJob(object):
 
     # This function actual starts the timer
     def start(self):
+        """Start a new timer."""
         if self.use_timer:
             # starting actual timer
             if not self.is_running:
@@ -124,6 +132,7 @@ class RepeatedJob(object):
             self.listenthread.start()
 
     def stop(self):
+        """Cancel the timer."""
         if self.use_timer:
             self._timer.cancel()
         else:

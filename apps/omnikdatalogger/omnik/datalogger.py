@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 class DataLogger(object):
     def __init__(self, config, hass_api=None):
         # Defaults to UTC now() - every interval
+        self.dl = None
+        self.sundown = False
         self.plant_update = {}
         self.hass_api = hass_api
         self.logger = logger
@@ -1093,13 +1095,14 @@ class DataLogger(object):
                     return None
 
     def _sunshine_check(self):
-        self.sundown = not self.dl.sun_shine()
+        time_now = datetime.utcnow().astimezone(self.timezone)
+        self.sundown = not self.dl.sun_shine(time_now)
         if self.sundown:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "INFO",
-                f"No sunshine postponing till down next dawn {self.dl.next_dawn}.",
+                f"No sunshine postponing till down next dawn {self.dl.next_dawn(time_now)}.",
             )
             # Send 0 Watt update
             return self.dl.next_dawn + timedelta(minutes=10)
