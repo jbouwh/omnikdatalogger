@@ -65,14 +65,14 @@ class DataLogger(object):
         try:
             with open(self.data_config_file) as json_file_config:
                 self.config.data_field_config = json.load(json_file_config)
-        except Exception as e:
+        except Exception as error:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                f"Error reading configuration file (data_fields.json). Exiting!. Error: {e.args}",
+                f"Error reading configuration file (data_fields.json). Exiting!. Error: {error.args}",
             )
-            raise e
+            raise error
 
         # read attributes
         if not self._read_attributes():
@@ -267,14 +267,14 @@ class DataLogger(object):
                 self._init_attribute_set("mf", asset_class)
                 self._init_attribute_set("identifier", asset_class)
                 self._init_attribute_set("devicename", asset_class)
-        except Exception as e:
+        except Exception as error:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                f"Error reading attributes from config. Error: {e.args}",
+                f"Error reading attributes from config. Error: {error.args}",
             )
-            raise e
+            raise error
         return True
 
     def terminate(self):
@@ -1095,9 +1095,15 @@ class DataLogger(object):
                     return None
 
     def _sunshine_check(self):
-        time_now = datetime.utcnow().astimezone(self.timezone)
-        self.sundown = not self.dl.sun_shine(time_now)
+        time_now = self.dl.localtime()
+        self.sundown = self.dl.sun_down(time_now)
         if self.sundown:
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
+                "DEBUG",
+                f"{self.dl.sun(time_now)}.",
+            )
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
+import sys
 
 try:
     from astral import sun
@@ -99,10 +100,14 @@ class daylight(object):
         return (time < _sun["dawn"]) or (time > _sun["dusk"])
 
 
-def main():
+def main(argtime):
     dl = daylight("Amsterdam")
     nu = dl.localtime()
+    if argtime:
+        nu = datetime.strptime(argtime, "%Y-%m-%d %H:%M:%S.%f%z")
+
     print("Version: %s" % str(dl.version))
+    print("Local tm:%s" % str(dl.localtime()))
     print("Now:     %s" % str(nu))
     print("Dawn:    %s" % str(dl.dawn))
     print("nxtdawn: %s" % str(dl.next_dawn))
@@ -110,17 +115,18 @@ def main():
     print("Noon:    %s" % str(dl.noon))
     print("Sunset:  %s" % str(dl.sunset))
     print("Dusk:    %s" % str(dl.dusk))
-    print("dDawn:    %s" % str(dl.dawn - nu))
-    print("dSunrise: %s" % str(dl.sunrise - nu))
-    print("dNoon:    %s" % str(dl.noon - nu))
-    print("dSunset:  %s" % str(dl.sunset - nu))
-    print("dDusk:    %s" % str(dl.dusk - nu))
-    print("Sun rising :", dl.sun_rising())
-    print("Sun up     :", dl.sun_up())
-    print("Sun shine  :", dl.sun_shine())
-    print("Sun setting:", dl.sun_setting())
-    print("Sun down   :", dl.sun_down())
+    print("dDawn:   %s" % str(dl.dawn - nu))
+    print("dSunrise:%s" % str(dl.sunrise - nu))
+    print("dNoon:   %s" % str(dl.noon - nu))
+    print("dSunset: %s" % str(dl.sunset - nu))
+    print("dDusk:   %s" % str(dl.dusk - nu))
+    print("Sun rising :", dl.sun_rising(nu))
+    print("Sun up     :", dl.sun_up(nu))
+    print("Sun shine  :", dl.sun_shine(nu))
+    print("Sun setting:", dl.sun_setting(nu))
+    print("Sun down   :", dl.sun_down(nu))
+    print(dl.sun())
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else None)
