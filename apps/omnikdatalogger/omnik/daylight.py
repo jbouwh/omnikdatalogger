@@ -20,7 +20,7 @@ default_city_name = "Amsterdam"
 class daylight(object):
     def __init__(self, city_name=default_city_name):
         if VERSION == 2:
-            self._city = lookup("Amsterdam", database())
+            self._city = lookup(city_name, database())
         else:
             self._a = Astral()
             self._a.solar_depression = "civil"
