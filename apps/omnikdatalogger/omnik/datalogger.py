@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 class DataLogger(object):
     def __init__(self, config, hass_api=None):
         # Defaults to UTC now() - every interval
+        self.dl = None
+        self.sundown = False
         self.plant_update = {}
         self.hass_api = hass_api
         self.logger = logger
@@ -63,14 +65,14 @@ class DataLogger(object):
         try:
             with open(self.data_config_file) as json_file_config:
                 self.config.data_field_config = json.load(json_file_config)
-        except Exception as e:
+        except Exception as error:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                f"Error reading configuration file (data_fields.json). Exiting!. Error: {e.args}",
+                f"Error reading configuration file (data_fields.json). Exiting!. Error: {error.args}",
             )
-            raise e
+            raise error
 
         # read attributes
         if not self._read_attributes():
@@ -265,14 +267,14 @@ class DataLogger(object):
                 self._init_attribute_set("mf", asset_class)
                 self._init_attribute_set("identifier", asset_class)
                 self._init_attribute_set("devicename", asset_class)
-        except Exception as e:
+        except Exception as error:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
                 "ERROR",
-                f"Error reading attributes from config. Error: {e.args}",
+                f"Error reading attributes from config. Error: {error.args}",
             )
-            raise e
+            raise error
         return True
 
     def terminate(self):
@@ -1093,13 +1095,20 @@ class DataLogger(object):
                     return None
 
     def _sunshine_check(self):
-        self.sundown = not self.dl.sun_shine()
+        time_now = self.dl.localtime()
+        self.sundown = self.dl.sun_down(time_now)
         if self.sundown:
             hybridlogger.ha_log(
                 self.logger,
                 self.hass_api,
+                "DEBUG",
+                f"{self.dl.sun(time_now)}.",
+            )
+            hybridlogger.ha_log(
+                self.logger,
+                self.hass_api,
                 "INFO",
-                f"No sunshine postponing till down next dawn {self.dl.next_dawn}.",
+                f"No sunshine postponing inverter checks till down next dawn {self.dl.next_dawn}.",
             )
             # Send 0 Watt update
             return self.dl.next_dawn + timedelta(minutes=10)
