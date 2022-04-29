@@ -25,7 +25,8 @@ class daylight(object):
             self._a = Astral()
             self._a.solar_depression = "civil"
             self._city = self._a[city_name]
-            self._timezone = pytz.timezone(self._city.timezone)
+
+        self._timezone = pytz.timezone(self._city.timezone)
 
     def sun(self, t=None):
         if not t:
@@ -36,7 +37,7 @@ class daylight(object):
             return self._city.sun(t)
 
     def localtime(self):
-        return datetime.utcnow().astimezone(pytz.timezone(self._city.timezone))
+        return datetime.now(self._timezone)
 
     @property
     def version(self):
