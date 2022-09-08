@@ -410,7 +410,7 @@ class DataLogger(object):
                 self.logger,
                 self.hass_api,
                 "WARNING",
-                f"Could not match DSMR data. "
+                "Could not match DSMR data. "
                 "Did you configure your dsmr terminal correctly?",
             )
         return complete
@@ -787,12 +787,14 @@ class DataLogger(object):
 
     def _adapt_max_value(self, aggregated_data, data, field):
         if field in data:
-            if data[field] > aggregated_data[field]:
+            if data[field] > aggregated_data.get(field, Decimal("0.0")):
                 aggregated_data[field] = data[field]
 
     def _adapt_add_value(self, aggregated_data, data, field):
         if field in data:
-            aggregated_data[field] += data[field]
+            aggregated_data[field] = (
+                aggregated_data.get(field, Decimal("0.0")) + data[field]
+            )
 
     def _adapt_last_value(self, aggregated_data, data, field):
         if field in data:
