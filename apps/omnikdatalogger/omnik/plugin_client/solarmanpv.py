@@ -2,7 +2,7 @@ import hashlib
 from requests import Request, Session
 from omnik.ha_logger import hybridlogger
 from omnik.plugin_client import Client
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 
 DATAMAP = {
@@ -219,7 +219,11 @@ class OmnikPortalClient(Client):
         for entry in devicedata.get("dataList"):
             # Adjust power to Watt (not kW) and covert strings numbers to float or int
             if entry["key"] in DATAMAP:
-                data[DATAMAP[entry["key"]]] = Decimal(entry["value"])
+                try:
+                    data[DATAMAP[entry["key"]]] = Decimal(entry["value"])
+                except InvalidOperation:
+                    # Non decimal value
+                    data[DATAMAP[entry["key"]]] = entry["value"]
 
         # update cache
         self.last_update_cache[serial] = data["last_update"]

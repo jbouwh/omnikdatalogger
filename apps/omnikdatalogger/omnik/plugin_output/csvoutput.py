@@ -28,7 +28,7 @@ def _ensure_headers(csvfile, fields, separator, no_headers):
 
         # If no headers are used, we cannot check them, but we check the number fields, return None if there is no count match
         if no_headers:
-            return fields.copy() if len(headers) == len(fields) else None
+            return fields.copy() if len(headers or []) == len(fields) else None
         # return existing headers or None if an existing file does not comply the field and seperator settings
         if headers:
             return headers if len(fields) == len(set(fields) & set(headers)) else None
