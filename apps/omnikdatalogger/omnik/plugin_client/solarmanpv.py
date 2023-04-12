@@ -52,7 +52,7 @@ class OmnikPortalClient(Client):
         )
 
         self.base_url = self.config.get(
-            "client.solarmanpv", "base_url", fallback="https://api.solarmanpv.com"
+            "client.solarmanpv", "base_url", fallback="https://globalapi.solarmanpv.com"
         )
 
         self.username = self.config.get("client.solarmanpv", "username")
