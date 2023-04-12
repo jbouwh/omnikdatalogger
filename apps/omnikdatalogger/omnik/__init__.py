@@ -11,7 +11,7 @@ from omnik.ha_logger import hybridlogger
 
 logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOGLEVEL", logging.INFO))
 
-__version__ = "1.12.0"
+__version__ = "1.13.0"
 
 logger = logging.getLogger(__name__)
 
