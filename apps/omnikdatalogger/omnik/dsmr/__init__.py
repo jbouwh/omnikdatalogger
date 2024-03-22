@@ -247,11 +247,9 @@ class DSRM(object):
                 if hasattr(obis_references, "MBUS_METER_READING") and obis_references.MBUS_METER_READING in telegram:
                     G = telegram[obis_references.MBUS_METER_READING]
                 elif hasattr(obis_references, "HOURLY_GAS_METER_READING") and obis_references.HOURLY_GAS_METER_READING in telegram:
-                        G = telegram[obis_references.HOURLY_GAS_METER_READING]
+                    G = telegram[obis_references.HOURLY_GAS_METER_READING]
                 elif hasattr(obis_references, "BELGIUM_HOURLY_GAS_METER_READING") and self.tconfig[terminal]["dsmr_version"] == "5B":
                     G = telegram[obis_references.BELGIUM_HOURLY_GAS_METER_READING]
-                    msg_dsmr["gas_consumption_total"] = G.values[1]["value"]
-                    msg_dsmr["timestamp_gas"] = datetime.timestamp(G.values[0]["value"])
                 else:
                     return
                 if hasattr(obis_references, "MBUS_DEVICE_TYPE") and telegram[obis_references.MBUS_DEVICE_TYPE].value != 3:
