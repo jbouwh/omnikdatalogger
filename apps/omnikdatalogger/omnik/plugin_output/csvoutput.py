@@ -2,6 +2,7 @@ import csv
 import threading
 from time import strftime, localtime
 from os import path
+import time
 from omnik.ha_logger import hybridlogger
 
 from omnik.plugin_output import Plugin
@@ -127,7 +128,7 @@ class csvoutput(Plugin):
             else:
                 # Append the log
                 with open(csvfile, "a") as file_object:
-                    reporttime = localtime(msg["last_update"])
+                    reporttime = localtime(msg.get("last_update", time.time()))
                     self._get_temperature(msg, config_section)
                     msg.update(
                         {
