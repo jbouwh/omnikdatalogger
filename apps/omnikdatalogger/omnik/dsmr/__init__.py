@@ -244,13 +244,17 @@ class DSRM(object):
             return
         try:
             if self.tconfig[terminal]["dsmr_version"] in ["4", "5", "5B"]:
-                if obis_references.MBUS_METER_READING in telegram:
+                if hasattr(obis_references, "MBUS_METER_READING") and obis_references.MBUS_METER_READING in telegram:
                     G = telegram[obis_references.MBUS_METER_READING]
-                elif obis_references.HOURLY_GAS_METER_READING in telegram:
-                    G = telegram[obis_references.MBUS_METER_READING]
+                elif hasattr(obis_references, "HOURLY_GAS_METER_READING") and obis_references.HOURLY_GAS_METER_READING in telegram:
+                        G = telegram[obis_references.HOURLY_GAS_METER_READING]
+                elif hasattr(obis_references, "BELGIUM_HOURLY_GAS_METER_READING") and self.tconfig[terminal]["dsmr_version"] == "5B":
+                    G = telegram[obis_references.BELGIUM_HOURLY_GAS_METER_READING]
+                    msg_dsmr["gas_consumption_total"] = G.values[1]["value"]
+                    msg_dsmr["timestamp_gas"] = datetime.timestamp(G.values[0]["value"])
                 else:
                     return
-                if telegram[obis_references.MBUS_DEVICE_TYPE].value != 3:
+                if hasattr(obis_references, "MBUS_DEVICE_TYPE") and telegram[obis_references.MBUS_DEVICE_TYPE].value != 3:
                     # MBUS device is not a gas meter
                     return
                 msg_dsmr["gas_consumption_total"] = G.values[1]["value"]
@@ -259,11 +263,11 @@ class DSRM(object):
                 G = telegram[obis_references.GAS_METER_READING]
                 msg_dsmr["gas_consumption_total"] = G.values[6]["value"]
                 msg_dsmr["timestamp_gas"] = datetime.timestamp(G.values[0]["value"])
-            if obis_references.MBUS_EQUIPMENT_IDENTIFIER in telegram:
+            if hasattr(obis_references, "MBUS_EQUIPMENT_IDENTIFIER") and obis_references.MBUS_EQUIPMENT_IDENTIFIER in telegram:
                 msg_dsmr["EQUIPMENT_IDENTIFIER_GAS"] = telegram[
                     obis_references.MBUS_EQUIPMENT_IDENTIFIER
                 ].value
-            elif obis_references.EQUIPMENT_IDENTIFIER_GAS in telegram:
+            elif hasattr(obis_references, "EQUIPMENT_IDENTIFIER_GAS") and obis_references.EQUIPMENT_IDENTIFIER_GAS in telegram:
                 msg_dsmr["EQUIPMENT_IDENTIFIER_GAS"] = telegram[
                     obis_references.EQUIPMENT_IDENTIFIER_GAS
                 ].value
