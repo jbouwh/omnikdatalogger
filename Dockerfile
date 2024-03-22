@@ -1,9 +1,9 @@
-FROM python:3.9.1-alpine3.12 as base
+FROM python:3.12.2-alpine3.19 as base
 
 RUN apk add --update \
     tzdata
 
-FROM python:3.9.1-alpine3.12
+FROM python:3.12.2-alpine3.19
 
 WORKDIR /source
 
@@ -12,8 +12,8 @@ COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Amsterdam
 
 COPY requirements.txt setup.py README.md ./
-COPY scripts/systemd/. scripts/systemd/ 
-COPY apps/omnikdatalogger/. apps/omnikdatalogger/ 
+COPY scripts/systemd/. scripts/systemd/
+COPY apps/omnikdatalogger/. apps/omnikdatalogger/
 
 RUN pip3 install -r requirements.txt --upgrade && \
   python setup.py install && \
