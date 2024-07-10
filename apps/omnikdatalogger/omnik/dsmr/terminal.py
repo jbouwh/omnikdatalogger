@@ -139,7 +139,8 @@ class Terminal(object):
                             "INFO",
                             f"DSMR terminal {self.terminal_name} was interrupted and will be restarted.",
                         )
-                        time.sleep(5)
+                        self.sock.close()
+                        time.sleep(20)
                         break
                     elif data:
                         self._dsmr_data_received(data)
