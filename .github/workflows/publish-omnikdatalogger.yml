@@ -7,7 +7,7 @@ on:
   release:
     types: [published]
     branches:
-      - main
+      - dev
 
 jobs:
   docker:
