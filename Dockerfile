@@ -19,7 +19,7 @@ RUN pip3 install -r requirements.txt --upgrade && \
   python setup.py install && \
   adduser -u 1000 omnik && \
   mkdir /config && \
-  chown omnik.users -R /config &&
+  chown omnik.users -R /config
 
 WORKDIR /home/omnik
 USER omnik
