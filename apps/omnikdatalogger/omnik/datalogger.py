@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+from typing import Any
 import pytz
 
 from omnik import LOGLEVEL
@@ -45,6 +46,8 @@ class DataLogger(object):
         self.pasttime = time() + self.every
         tz = self.config.get("default", "timezone", fallback="Europe/Amsterdam")
         self.timezone = pytz.timezone(tz)
+        self.cached_data: dict[str, Any] = {}
+        self.aggegated_data: dict[str, Any] = {}
 
         self.dsmr_access = threading.Condition(threading.Lock())
 
@@ -1120,7 +1123,7 @@ class DataLogger(object):
 
     def _proces_pushed_net_event(self, plant_id, dsmr_message):
 
-        data = deepcopy(dsmr_message)
+        data: dict[str, Any] = deepcopy(dsmr_message)
         data["plant_id"] = plant_id
         self._validate_client_data(plant_id, data)
         dsmr_timestamp = data["timestamp"]
@@ -1128,36 +1131,36 @@ class DataLogger(object):
         if dsmr_timestamp > self.pasttime:
             # Process independent net data for aggregated clients with regards of rate limits
             # Get last data from cache
-            aggegated_data = {}
+            self.aggegated_data.clear()
             if plant_id == "0":
                 for plant in self.plant_update.keys():
                     if not self.total_energy(plant):
                         continue
-                    cached_data = {}
-                    cached_data["plant_id"] = plant
-                    cached_data["last_update"] = self.get_last_update(plant, 0.0)
-                    cached_data["total_energy"] = self.total_energy(plant)
-                    cached_data["today_energy"] = self.total_energy(
+                    self.cached_data.clear()
+                    self.cached_data["plant_id"] = plant
+                    self.cached_data["last_update"] = self.get_last_update(plant, 0.0)
+                    self.cached_data["total_energy"] = self.total_energy(plant)
+                    self.cached_data["today_energy"] = self.total_energy(
                         plant, lifetime=False
                     )
                     # Assume we have no solar power currently
-                    cached_data["current_power"] = Decimal("0.0")
-                    self._aggregate_data(aggegated_data, cached_data)
+                    self.cached_data["current_power"] = Decimal("0.0")
+                    self._aggregate_data(self.aggegated_data, self.cached_data)
                     cached_last_update = self.get_last_update(plant, 0.0)
                     if cached_last_update > last_solar_update:
                         last_solar_update = cached_last_update
-                aggegated_data.update(data)
+                self.aggegated_data.update(data)
             elif self.total_energy(plant_id):
-                cached_data = {}
-                cached_data["plant_id"] = plant_id
-                cached_data["last_update"] = self.get_last_update(plant_id, 0.0)
-                cached_data["total_energy"] = self.total_energy(plant_id)
-                cached_data["today_energy"] = self.total_energy(
+                self.cached_data.clear()
+                self.cached_data["plant_id"] = plant_id
+                self.cached_data["last_update"] = self.get_last_update(plant_id, 0.0)
+                self.cached_data["total_energy"] = self.total_energy(plant_id)
+                self.cached_data["today_energy"] = self.total_energy(
                     plant_id, lifetime=False
                 )
                 # Assume we have no solar power currently
-                cached_data["current_power"] = Decimal("0.0")
-                self._aggregate_data(aggegated_data, cached_data)
+                self.cached_data["current_power"] = Decimal("0.0")
+                self._aggregate_data(self.aggegated_data, self.cached_data)
                 cached_last_update = self.get_last_update(plant_id, 0.0)
                 if cached_last_update > last_solar_update:
                     last_solar_update = cached_last_update
@@ -1183,11 +1186,11 @@ class DataLogger(object):
                     self.plant_update[plant_id].last_update_time
                 )
             # we will send (net) updates when inverters do not retreive new updates
-            if (dsmr_timestamp - last_update) > self.every:
-                if aggegated_data:
-                    data.update(aggegated_data)
-                else:
-                    data.update(cached_data)
+            if (dsmr_timestamp - last_update) > self.every and self.cached_data:
+                if self.aggegated_data:
+                    data.update(self.aggegated_data)
+                elif self.cached_data:
+                    data.update(self.cached_data)
                 data["net_update"] = True
                 # calculate energy_use
                 self._calculate_consumption(data)
@@ -1222,7 +1225,7 @@ class DataLogger(object):
 
         # Process data reports for each plant
         if self.omnik_api_level == 2:
-            aggegated_data = {}
+            self.aggegated_data.clear()
             skip_aggregation = False
             for plant in self.plant_update:
                 # Try getting a new update or wait for logging event
@@ -1236,7 +1239,7 @@ class DataLogger(object):
                     # Get specific dsmr data
                     self._get_dsmr_data(plant, data)
                     # Assemble aggegated data
-                    self._aggregate_data(aggegated_data, data)
+                    self._aggregate_data(self.aggegated_data, data)
                     # export the data to the output plugins
                     self._output_update(plant, data)
                 else:
@@ -1249,19 +1252,19 @@ class DataLogger(object):
                         data["total_energy"] = self.total_energy(plant)
                         data["today_energy"] = self.total_energy(plant, lifetime=False)
                         # Assemble aggegated data
-                        self._aggregate_data(aggegated_data, data)
+                        self._aggregate_data(self.aggegated_data, data)
                     except:
                         # do not allow data aggregation unless we have valid data
                         skip_aggregation = True
 
             # Process aggregated data over all plants if no specific plants are configured with DSMR terminal
-            if aggegated_data and not skip_aggregation:
+            if self.aggegated_data and not skip_aggregation:
                 # Output aggregated data to influx/mqtt if we have multiple plants
                 if len(self.client.plant_id_list) > 1 or self._get_dsmr_data(
-                    "0", aggegated_data
+                    "0", self.aggegated_data
                 ):
-                    self._output_update("0", aggegated_data)
-                self._output_update_aggregated_data(plant, aggegated_data)
+                    self._output_update("0", self.aggegated_data)
+                self._output_update_aggregated_data(plant, self.aggegated_data)
                 hybridlogger.ha_log(
                     self.logger, self.hass_api, "DEBUG", "Aggregated data processed."
                 )
@@ -1312,26 +1315,26 @@ class DataLogger(object):
 
         # To aggregate over multiple inverters we need to trigger publishing when we an update for all our inverters
         # Unless the last data update of an inverter is longer then 2 timed cycles
-        aggegated_data = {}
+        self.aggegated_data.clear()
         for published_plant in self.plant_update:
             if self.plant_update[published_plant].pop_for_aggregate(self.cache):
                 # Assemble aggegated data
                 self._aggregate_data(
-                    aggegated_data, self.plant_update[published_plant].data
+                    self.aggegated_data, self.plant_update[published_plant].data
                 )
             else:
                 # Not ready yet to aggregate, erase cache
-                aggegated_data = {}
+                self.aggegated_data.clear()
                 break
         # only publish unpublished fresh data (<10 minutes old)
-        if aggegated_data:
+        if self.aggegated_data:
             # Get dsmr data for aggegated data
             # Output aggregated data to influx/mqtt if we have multiple plants
             if len(self.client.plant_id_list) > 1 or self._get_dsmr_data(
-                "0", aggegated_data
+                "0", self.aggegated_data
             ):
-                self._output_update("0", aggegated_data)
-            self._output_update_aggregated_data("0", aggegated_data)
+                self._output_update("0", self.aggegated_data)
+            self._output_update_aggregated_data("0", self.aggegated_data)
             #
             hybridlogger.ha_log(
                 self.logger, self.hass_api, "DEBUG", "Aggregated data processed"
