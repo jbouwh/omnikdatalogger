@@ -3,7 +3,7 @@ name: omnik-data-logger
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   build:
