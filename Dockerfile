@@ -17,13 +17,14 @@ COPY apps/omnikdatalogger/. apps/omnikdatalogger/
 
 RUN pip3 install -r requirements.txt --upgrade && \
   python setup.py install && \
-  adduser -D -u 1000 omnik && \
+  adduser -u 1000 omnik && \
   mkdir /config && \
-  chown omnik.users -R /config && \
-  cp /source/apps/omnikdatalogger/data_fields.json /home/omnik/data_fields.json
+  chown omnik.users -R /config &&
 
 WORKDIR /home/omnik
 USER omnik
+
+COPY apps/omnikdatalogger/data_fields.json /home/omnik/data_fields.json
 
 EXPOSE 10004
 
