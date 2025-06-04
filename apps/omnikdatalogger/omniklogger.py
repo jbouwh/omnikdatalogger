@@ -115,7 +115,7 @@ class ha_ConfigParser(configparser.ConfigParser):
 
 # Initialization class for AppDaemon (homeassistant)
 class HA_OmnikDataLogger(hass.Hass):
-    def initialize(self, *args, **kwargs):
+    def initialize(self):
         hybridlogger.ha_log(logger, self, "INFO", "Starting Omnik datalogger...")
         hybridlogger.ha_log(
             logger,
