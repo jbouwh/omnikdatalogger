@@ -52,7 +52,8 @@ class MQTTproxy(LocalProxyPlugin):
                 "Please specify MQTT username and password in the configuration",
             )
         # mqtt setup
-        self.mqtt_client = mqttclient.Client(client_id=self.mqtt_client_name)
+        self.mqtt_client = mqttclient.Client(
+            callback_api_version=mqttclient.CallbackAPIVersion.VERSION2,  client_id=self.mqtt_client_name)
         self.mqtt_client.on_connect = self._mqtt_on_connect  # bind call back function
         self.mqtt_client.on_disconnect = (
             self._mqtt_on_disconnect
@@ -100,7 +101,7 @@ class MQTTproxy(LocalProxyPlugin):
         if rc == 0:
             hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
 
-    def _mqtt_on_message(self, client, userdata, message):
+    def _mqtt_on_message(self, _mqttc: mqttclient.Client, _userdata: None, message: mqttclient.MQTTMessage):
         # Try to parse payload as json
         try:
             payload = json.loads(message.payload)
