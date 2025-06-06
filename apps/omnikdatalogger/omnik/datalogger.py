@@ -28,6 +28,8 @@ import importlib
 
 logger = logging.getLogger(__name__)
 
+data: dict[str, Any] | None = None
+
 
 class DataLogger(object):
     def __init__(self, config, hass_api=None):
@@ -808,7 +810,7 @@ class DataLogger(object):
             return
         # Check for pvoutput sys_id override in config
         sys_id = int(
-            self.config.get(f"plant.{data.get('plant_id','0')}", "sys_id", "0")
+            self.config.get(f"plant.{data.get('plant_id', '0')}", "sys_id", "0")
         )
         global_sys_id = int(self.config.get("output.pvoutput", "sys_id", "0"))
         if sys_id and (sys_id != global_sys_id):
@@ -1339,7 +1341,7 @@ class DataLogger(object):
             hybridlogger.ha_log(
                 self.logger, self.hass_api, "DEBUG", "Aggregated data processed"
             )
-        elif data.get("sys_id"):
+        elif data is not None and data.get("sys_id"):
             # Export plant specific data without aggreation
             self._output_update_aggregated_data(data.get("plant_id"), data)
             hybridlogger.ha_log(
