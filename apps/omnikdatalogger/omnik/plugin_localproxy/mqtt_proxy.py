@@ -70,8 +70,14 @@ class MQTTproxy(LocalProxyPlugin):
                 keyfile=self.client_key or None,
             )
 
-    def _mqtt_on_connect(self, client, userdata, flags, rc=0, properties=None):
-        if rc == 0:
+    def _mqtt_on_connect(self,
+                         _mqttc: mqttclient.Client,
+                         _userdata: None,
+                         _connect_flags: mqttclient.ConnectFlags,
+                         reason_code: mqttclient.ReasonCode,
+                         _properties: mqttclient.Properties | None = None,
+                         ):
+        if not reason_code.is_failure:
             hybridlogger.ha_log(
                 self.logger, self.hass_api, "INFO", "MQTTproxy client connected"
             )
@@ -97,9 +103,17 @@ class MQTTproxy(LocalProxyPlugin):
                         f"MQTTproxy failed to subsrcibed ontopic: {topic}. Error {e}",
                     )
 
-    def _mqtt_on_disconnect(self, client, userdata, flags, rc=0):
-        if rc == 0:
-            hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected")
+    def _mqtt_on_disconnect(self,
+                            _mqttc: mqttclient.Client,
+                            _userdata: None,
+                            _disconnect_flags: mqttclient.DisconnectFlags,
+                            reason_code: mqttclient.ReasonCode,
+                            properties: mqttclient.Properties | None = None,
+                            ):
+        if reason_code.is_failure:
+            hybridlogger.ha_log(self.logger, self.hass_api, "ERROR", f"MQTT disconnected: {reason_code.getName()}")
+            return
+        hybridlogger.ha_log(self.logger, self.hass_api, "INFO", "MQTT disconnected gracefully")
 
     def _mqtt_on_message(self, _mqttc: mqttclient.Client, _userdata: None, message: mqttclient.MQTTMessage):
         # Try to parse payload as json
