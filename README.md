@@ -82,24 +82,22 @@ See for more information and documentation about AppDaemon: https://appdaemon.re
 The configfile /config/appdaemon/appdaemon.yaml needs a minimal configuration. Further it is possible to define the location for your logfiles. And example configuration is:
 
 ```yaml
+---
 appdaemon:
-  latitude: 0.0
-  longitude: 0.0
-  elevation: 0.0
+  latitude: 52.379189
+  longitude: 4.899431
+  elevation: 2
   time_zone: Europe/Amsterdam
+  app_dir: /homeassistant/appdaemon/apps
   plugins:
     HASS:
       type: hass
+      token: !env_var SUPERVISOR_TOKEN
 http:
-  url: http://homeassistant:5050/
+  url: http://0.0.0.0:5050
 admin:
 api:
 hadashboard:
-logs:
-  main_log:
-    filename: /config/appdaemon/log/appdaemon.log
-  error_log:
-    filename: /config/appdaemon/log/appdaemon.err
 ```
 
 Make sure the url is accessible with the hostname you configure.
