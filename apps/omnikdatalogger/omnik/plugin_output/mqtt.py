@@ -66,7 +66,9 @@ class mqtt(Plugin):
             self.mqtt_password = self.config.get("output.mqtt", "password")
 
         # mqtt setup
-        self.mqtt_client = mqttclient.Client(client_id=self.mqtt_client_name)
+        self.mqtt_client = mqttclient.Client(
+            callback_api_version=mqttclient.CallbackAPIVersion.VERSION2,
+            client_id=self.mqtt_client_name)
         self.mqtt_client.on_connect = self._mqtt_on_connect  # bind call back function
         self.mqtt_client.on_disconnect = (
             self._mqtt_on_disconnect
