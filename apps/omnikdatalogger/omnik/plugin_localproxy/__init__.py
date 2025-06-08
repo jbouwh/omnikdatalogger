@@ -1,3 +1,6 @@
+PLUGIN_ALIASSES = {"hassapi": "hass_api"}
+
+
 class LocalProxyBasePlugin(type):
     def __init__(cls, name, bases, attrs):
         super(LocalProxyBasePlugin, cls).__init__(name)
