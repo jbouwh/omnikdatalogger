@@ -1,7 +1,7 @@
 from omnik.ha_logger import hybridlogger
 import omnik.InverterMsg
 from omnik.plugin_client import Client
-from omnik.plugin_localproxy import LocalProxyPlugin
+from omnik.plugin_localproxy import PLUGIN_ALIASSES, LocalProxyPlugin
 import time
 import threading
 import importlib
@@ -48,7 +48,7 @@ class LocalProxy(Client):
             LocalProxyPlugin.client = self
             for plugin in self.plugins:
                 # __import__(plugin)
-                spec = importlib.util.find_spec(plugin)
+                spec = importlib.util.find_spec(PLUGIN_ALIASSES.get(plugin, plugin))
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
         else:
